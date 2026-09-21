@@ -62,6 +62,14 @@ import ToolImageb64 from './components/ToolImageb64.vue'
 import ToolImagecompress from './components/ToolImagecompress.vue'
 import ToolImageconvert from './components/ToolImageconvert.vue'
 import ToolAes from './components/ToolAes.vue'
+import ToolUseragent from './components/ToolUseragent.vue'
+import ToolSemver from './components/ToolSemver.vue'
+import ToolBases from './components/ToolBases.vue'
+import ToolStats from './components/ToolStats.vue'
+import ToolNumtheory from './components/ToolNumtheory.vue'
+import ToolChincal from './components/ToolChincal.vue'
+import ToolSplitbill from './components/ToolSplitbill.vue'
+import ToolTaxcn from './components/ToolTaxcn.vue'
 
 export const CATEGORIES = [
   { key: 'all', name: '全部' },
@@ -406,6 +414,46 @@ export const TOOLS = [
     keywords: '复利 投资 定投 年化 收益 利息 存款 基金 理财 72法则 收益率 计算 终值',
   },
   {
+    id: 'stats',
+    name: '统计工坊',
+    glyph: '统',
+    tint: '#B5527A',
+    cat: 'calc',
+    desc: '均值 · 分位 · 方差 · 回归',
+    intro: '描述统计一站算完：加权平均、分位数、方差与标准差、线性回归与相关系数，口径全部写明。',
+    keywords: '统计 平均 加权 中位数 分位数 方差 标准差 线性回归 相关系数 最小二乘 拟合',
+  },
+  {
+    id: 'numtheory',
+    name: '数论工具箱',
+    glyph: '数',
+    tint: '#6B5B95',
+    cat: 'calc',
+    desc: '素数 · 分解 · GCD/LCM',
+    intro: '素性判定、质因数分解、约数、GCD/LCM、欧拉函数、素数表、完全数与亲和数，附罗马数字互转。',
+    keywords: '数论 素数 质数 质因数 分解 gcd lcm 欧拉函数 完全数 亲和数 罗马数字 约数 数字根',
+  },
+  {
+    id: 'splitbill',
+    name: '账单分摊',
+    glyph: '摊',
+    tint: '#2F8C7A',
+    cat: 'calc',
+    desc: 'AA 分摊 · 找零撮平',
+    intro: '多人账单按税、折扣、小费与抹零分摊，自动算出谁该给谁钱，可直接生成发群文本。',
+    keywords: 'aa 分账 分摊 账单 聚餐 拼单 小费 折扣 抹零 转账 找零 团建 多人',
+  },
+  {
+    id: 'taxcn',
+    name: '个税速算',
+    glyph: '税',
+    tint: '#A8642F',
+    cat: 'calc',
+    desc: '个税 · 社保 · 到手工资',
+    intro: '月薪到手、五险一金逐险种、年度综合所得与专项附加扣除、累计预扣逐月表，年终奖两种发法对比。',
+    keywords: '个税 个人所得税 社保 五险一金 公积金 到手工资 专项附加扣除 年终奖 累计预扣 起征点 工资',
+  },
+  {
     id: 'classic',
     name: '古典密码',
     glyph: '古',
@@ -546,6 +594,16 @@ export const TOOLS = [
     keywords: 'punycode 国际化域名 idn 中文域名 xn-- 域名 转码 钓鱼 同形异义 ace rfc3492',
   },
   {
+    id: 'bases',
+    name: '字母表编码',
+    glyph: 'B',
+    tint: '#4A6FA5',
+    cat: 'enc',
+    desc: 'Base32/58/62/64url 互转',
+    intro: 'Base32、base32hex、Base58、Base62 与 Base64url 五套字母表编码互转，讲清各自的使用场景与填充规则。',
+    keywords: 'base32 base32hex base58 base62 base64url base64 编码 字母表 bitcoin 比特币 编解码 url安全',
+  },
+  {
     id: 'uuidinfo',
     name: 'UUID 解析',
     glyph: 'U',
@@ -564,6 +622,16 @@ export const TOOLS = [
     desc: 'strftime/Java/moment/Go',
     intro: '四种日期格式记法互转，并给出每种语言的示例输出，解释大小写陷阱。',
     keywords: '日期格式 strftime java simpledateformat moment dayjs go time format 转换 占位符 格式串',
+  },
+  {
+    id: 'chincal',
+    name: '农历历书',
+    glyph: '历',
+    tint: '#8A6D3B',
+    cat: 'time',
+    desc: '农历 · 节气 · 干支 · 时辰',
+    intro: '公历农历双向换算，给出干支、生肖、二十四节气、十二时辰与历书摘要，生日和已过天数一并算。',
+    keywords: '农历 阴历 万年历 节气 干支 生肖 十二时辰 农历转公历 公历转农历 生日 老黄历',
   },
   {
     id: 'httpdump',
@@ -625,6 +693,26 @@ export const TOOLS = [
     intro: '纯 JS 手写 Rijndael 分组运算，口令或十六进制密钥、PKCS#7 填充、逐块过程可视，附带 NIST 公开向量当场自检。',
     keywords: 'aes 对称加密 解密 加密 rijndael cbc ecb pkcs7 iv 口令 密钥 分组 cipher 解密工具',
   },
+  {
+    id: 'useragent',
+    name: 'UA 解析',
+    glyph: '端',
+    tint: '#2F7A8C',
+    cat: 'dev',
+    desc: '解析 · 生成 · 爬虫识别',
+    intro: '拆解任意 User-Agent 的浏览器、内核、系统与设备，识别爬虫令牌，也能按真实版式生成一条 UA 并自检规则。',
+    keywords: 'useragent ua user-agent 浏览器 内核 解析 生成 爬虫 spider bot 请求头 兼容',
+  },
+  {
+    id: 'semver',
+    name: '语义化版本',
+    glyph: '版',
+    tint: '#5B6B8C',
+    cat: 'dev',
+    desc: 'SemVer 解析 · 比较 · 范围',
+    intro: '按 SemVer 2.0.0 解析版本号，比较与排序、递增一位，判定 npm 式范围表达式，还能从文本里抓出版本号。',
+    keywords: 'semver 语义化 版本 版本号 比较 排序 范围 npm 升级 release 递增',
+  },
 ]
 
 const COMPONENTS = {
@@ -683,6 +771,14 @@ const COMPONENTS = {
   imagecompress: ToolImagecompress,
   imageconvert: ToolImageconvert,
   aes: ToolAes,
+  useragent: ToolUseragent,
+  semver: ToolSemver,
+  bases: ToolBases,
+  stats: ToolStats,
+  numtheory: ToolNumtheory,
+  chincal: ToolChincal,
+  splitbill: ToolSplitbill,
+  taxcn: ToolTaxcn,
 }
 
 export const TOOL_COUNT = TOOLS.length
