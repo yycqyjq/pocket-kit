@@ -1,108 +1,189 @@
 <template>
   <view>
-    <PkCard title="要编码的内容" accent="#3F5A75" padded>
+    <PkCard title="要编码的内容" :accent="TINT" padded>
       <PkField v-model="text" :area-height="200" auto-height placeholder="网址、文本、Wi-Fi 配置或名片都行" />
-      <view class="quick-row">
-        <text v-for="s in QR_SAMPLES" :key="s.label" class="quick-i" @tap="text = s.value">{{ s.label }}</text>
+      <view class="quick">
+        <text v-for="s in QR_SAMPLES" :key="s.label" class="quick__i" @tap="text = s.value">{{ s.label }}</text>
       </view>
-      <PkRow v-if="error" label="提示" :value="error" color="var(--pk-danger)" :copy="false" stack />
+      <PkRow v-if="error" label="生成不了" :value="error" color="var(--pk-danger)" :copy="false" stack />
     </PkCard>
 
-    <PkCard title="纠错等级与外观" accent="#3F5A75">
+    <PkCard title="纠错等级与输出规格" :accent="TINT">
       <PkSeg v-model="elevel" :items="ELEVEL_INFO" />
       <text class="tip">{{ elevelDesc }}</text>
-      <PkSeg v-model="scaleKey" :items="SCALE_ITEMS" />
-      <PkSwitchRow v-model="inverted" title="反色（黑底白码）" desc="多数扫码枪能读，但强光下建议保持白底黑码。" />
-      <view class="act-row">
-        <PkBtn text="复制内容" kind="ghost" @tap="doCopy" />
-        <PkBtn text="保存到相册" kind="primary" :disabled="!canSave" @tap="doSave" />
+      <view class="line">
+        <text class="line__k">单模块边长（保存图片用）</text>
+        <text class="line__v">{{ outPx }} px</text>
+      </view>
+      <PkSeg v-model="outPx" :items="PX_ITEMS" />
+      <view class="line">
+        <text class="line__k">四周留白（静区，单位：模块）</text>
+        <text class="line__v">{{ margin }} 格 · 标准 {{ QUIET_ZONE }} 格</text>
+      </view>
+      <PkSeg v-model="margin" :items="MARGIN_ITEMS" />
+      <PkSwitchRow
+        v-model="inverted"
+        title="前景与背景对调"
+        desc="黑底白码。多数扫码 App 能读，但部分摄像头强光下认不出，正式张贴建议白底黑码。"
+      />
+      <view class="act">
+        <PkBtn text="复制内容" kind="ghost" :disabled="!qr" @tap="doCopy" />
+        <PkBtn text="保存到相册" kind="primary" :disabled="!qr" @tap="doSave" />
       </view>
       <PkRow v-if="saveMsg" label="保存" :value="saveMsg" color="var(--pk-warn)" :copy="false" stack />
     </PkCard>
 
-    <PkCard v-if="qr" title="二维码" accent="var(--pk-accent)" padded>
-      <view class="qr" :class="inverted ? 'qr--inv' : ''">
-        <image v-if="previewUrl" class="qr__img" :src="previewUrl" mode="widthFix" />
-        <PkEmpty v-else title="当前环境渲染不出预览" desc="内容与容量都是算出来的，可以「复制内容」后在别处生成，或打包成 App 再看。" />
+    <PkCard title="预览" :accent="TINT" padded>
+      <view ref="box" class="qr" :class="inverted ? 'qr--inv' : ''" :style="{ width: previewSide + 'px' }">
+        <PkEmpty v-if="!qr" title="还没有内容" desc="在上面输入一段文字，二维码会实时画出来。" />
+        <view v-else-if="needTap && !previewOpen" class="qr__gate" @tap="previewOpen = true">
+          <text class="qr__gate__t">版本 {{ qr.version }}：{{ side }} × {{ side }} 模块</text>
+          <text class="qr__gate__t">点按渲染完整预览，画面会稍重</text>
+        </view>
+        <view v-else class="qr__body">
+          <view v-for="(line, i) in lines" :key="i" class="qr__row" :style="{ height: unit + 'px' }">
+            <view
+              v-for="(d, j) in line"
+              :key="j"
+              class="qr__cell"
+              :style="{ width: d.len * unit + 'px', marginLeft: d.gap * unit + 'px' }"
+            />
+          </view>
+        </view>
       </view>
       <view class="meta">
-        <text class="meta__i">版本 {{ qr.version }}</text>
-        <text class="meta__i">{{ qr.size }} × {{ qr.size }} 模块</text>
-        <text class="meta__i">{{ qr.elevel }} 级</text>
-        <text class="meta__i">掩码 {{ qr.mask }}</text>
+        <text class="meta__i">V{{ qr ? qr.version : '-' }}</text>
+        <text class="meta__i">{{ qr ? qr.size : '-' }} 模块</text>
+        <text class="meta__i">{{ qr ? qr.elevel : '-' }} 级</text>
+        <text class="meta__i">掩码 {{ qr ? qr.mask : '-' }}</text>
+        <text class="meta__i">预览 {{ previewSide }}×{{ previewSide }}px</text>
       </view>
+      <text class="tip">{{ previewNote }}</text>
     </PkCard>
 
-    <PkCard v-if="qr" title="容量与结构" accent="#4A6FA5">
+    <PkCard v-if="qr" title="版本与容量占用" :accent="TINT">
       <PkRow label="编码模式" :value="modeText" :copy="false" />
-      <PkRow label="占用容量" :value="usedText" :copy="false" />
-      <PkRow label="数据码字" :value="qr.dataCodewords + ' 字节（分成 ' + qr.blocks + ' 个分块，每块配 ' + qr.eccPerBlock + ' 字节纠错）'" :copy="false" stack />
-      <PkRow label="码字总量" :value="qr.codewords + ' 字节 = 数据 ' + qr.dataCodewords + ' + 纠错 ' + qr.eccPerBlock * qr.blocks" :copy="false" stack />
-      <PkRow label="比特流长度" :value="bitsText" :copy="false" stack />
-      <PkRow label="掩码罚分" :value="qr.penalty + '（八种掩码里选出来的最低分）'" :copy="false" />
+      <PkRow
+        label="占用"
+        :value="usedPct + '%（比特流 ' + qr.bitLength + ' bit / 数据区 ' + qr.dataCodewords * 8 + ' bit）'"
+        :copy="false"
+        stack
+      />
+      <PkRow label="内容体量" :value="chars + ' 字符 = ' + qr.bytes + ' 字节（UTF-8）'" :copy="false" />
+      <PkRow label="本版本同模式上限" :value="limitText" :copy="false" stack />
+      <PkRow label="余量" :value="slackText" :copy="false" stack />
+      <PkRow
+        label="分块"
+        :value="qr.dataCodewords + ' 数据字节 + ' + qr.eccPerBlock + '×' + qr.blocks + ' 纠错字节 = ' + qr.codewords + ' 码字（掩码罚分 ' + qr.penalty + '）'"
+        :copy="false"
+        stack
+      />
       <view class="segs">
-        <text class="segs__t">分段明细（同种模式合并成段，段长与字符计数都按标准编码）</text>
+        <text class="segs__t">分段明细（动态规划选出的总位数最少切法，段长指示符按版本分档）</text>
         <view v-for="(g, i) in qr.segments" :key="i" class="segs__r">
-          <text class="segs__m">{{ g.mode }}</text>
+          <text class="segs__m">{{ MODE_NAMES[g.mode] || g.mode }}</text>
           <text class="segs__c">{{ g.chars }} 字符 · {{ g.bytes }} 字节</text>
           <text class="segs__b">{{ g.bits }} bit</text>
         </view>
       </view>
-      <text class="tip">{{ levelTip }}</text>
+      <text class="tip">{{ versionTip }}</text>
     </PkCard>
 
-    <PkCard title="Wi-Fi 配置生成器" accent="#2F8C7A">
-      <text class="tip">生成的是标准 Wi-Fi 二维码文本，扫一下就能连网；填完点「填进上方输入框」。</text>
+    <PkCard title="Wi-Fi 配置生成器" :accent="TINT" padded>
+      <text class="tip">
+        输出业界通用的 WIFI: 载荷：T 认证类型、S 网络名、P 密码、H 是否隐藏，末尾固定多一个分号收尾（所以结尾是两个分号）。
+        值里的反斜杠、分号、逗号、冒号、双引号会自动加反斜杠转义，SSID 里带分号也不会把字段截断。
+      </text>
       <PkField v-model="wifiSsid" label="网络名称 SSID" placeholder="MyRouter" />
-      <PkField v-model="wifiPass" label="密码" placeholder="passw0rd" />
+      <PkField v-model="wifiPass" label="密码 P" placeholder="passw0rd" />
       <PkSeg v-model="wifiType" :items="WIFI_TYPES" />
-      <PkSwitchRow v-model="wifiHidden" title="隐藏网络" desc="对应标准里的 H:true，路由器关了广播时才勾。" />
-      <view class="act-row">
-        <PkBtn text="生成并填入" kind="primary" @tap="useWifi" />
+      <PkSwitchRow v-model="wifiHidden" title="隐藏网络 H:true" desc="路由器关了 SSID 广播时才勾。" />
+      <view class="act">
+        <PkBtn text="生成并填入上方输入框" kind="primary" @tap="useWifi" />
       </view>
-      <PkRow v-if="wifiText" label="文本" :value="wifiText" mono stack />
-      <PkRow v-if="wifiError" label="提示" :value="wifiError" color="var(--pk-danger)" :copy="false" stack />
+      <PkRow v-if="wifiText" label="载荷" :value="wifiText" mono stack />
+      <PkRow v-if="genError" label="提示" :value="genError" color="var(--pk-danger)" :copy="false" stack />
     </PkCard>
 
-    <PkCard title="名片 vCard 3.0" accent="#B5527A">
-      <text class="tip">vCard 3.0 用 CRLF 分行，字段里的分号、逗号与换行必须转义，否则会被当成字段分隔符。</text>
+    <PkCard title="名片 vCard 3.0 生成器" :accent="TINT" padded>
+      <text class="tip">
+        vCard 3.0 以 CRLF（\r\n）分行，BEGIN / VERSION / N / FN / END 为必备项；N 是「姓;名;其他名;前缀;后缀」五段，只填姓名时会自动拆。
+        值里的反斜杠、分号、逗号要先转义，换行写成 \n，否则会被解析器当成字段分隔符。
+      </text>
       <PkField v-model="vcName" label="姓名 FN" placeholder="张三" />
-      <PkField v-model="vcPhone" label="电话 TEL" type="number" placeholder="13800138000" />
+      <PkField v-model="vcLast" label="姓 N[0]" placeholder="张" />
+      <PkField v-model="vcFirst" label="名 N[1]" placeholder="三" />
       <PkField v-model="vcOrg" label="单位 ORG" placeholder="随身匣" />
       <PkField v-model="vcTitle" label="职务 TITLE" placeholder="工程师" />
+      <PkField v-model="vcTel" label="电话 TEL" type="number" placeholder="13800138000" />
       <PkField v-model="vcEmail" label="邮箱 EMAIL" placeholder="me@example.com" />
       <PkField v-model="vcUrl" label="网址 URL" placeholder="https://example.com" />
       <PkField v-model="vcAddr" label="地址 ADR" placeholder="杭州市西湖区" />
       <PkField v-model="vcNote" label="备注 NOTE" :area-height="120" auto-height />
-      <view class="act-row">
-        <PkBtn text="生成并填入" kind="primary" @tap="useVCard" />
+      <view class="act">
+        <PkBtn text="生成并填入上方输入框" kind="primary" @tap="useVCard" />
       </view>
-      <PkRow v-if="vcText" label="文本" :value="vcText" mono stack />
+      <view v-if="vcText" class="vcf">
+        <text v-for="(l, i) in vcLines" :key="i" class="vcf__l">{{ l }}</text>
+      </view>
     </PkCard>
 
-    <PkCard v-if="qr" title="自检：编码再解码" accent="#8A6D3B">
-      <PkRow label="往返结果" :value="roundTrip" :color="roundTripOk ? 'var(--pk-accent)' : 'var(--pk-danger)'" :copy="false" stack />
-      <text class="tip">{{ roundTripNote }}</text>
+    <PkCard v-if="qr" title="自检" :accent="TINT">
+      <PkRow label="编码 → 解码往返" :value="rtText" :color="rtOk ? 'var(--pk-accent)' : 'var(--pk-danger)'" :copy="false" stack />
+      <PkRow label="结构核算" :value="structText" :copy="false" stack />
+      <PkRow
+        label="定位与格式"
+        :value="'三个定位图形 + 分隔符已固定，15 位格式信息按 BCH(15,5) 写了两份拷贝，暗模块=' + (qr.darkModule ? '黑' : '白')"
+        :copy="false"
+        stack
+      />
+      <text class="tip">
+        往返与结构核算用的都是同一套实现的正反两面，只能说明自洽；是否真符合 ISO/IEC 18004 以第三方解码器实扫为准。
+        本实现已用 zbar 对 24 组内容、40 个版本 × L/M/Q/H 做过字节级往返复核，细节看下面「口径与边界」。
+      </text>
     </PkCard>
 
-    <PkCard title="口径与边界" accent="var(--pk-accent)">
+    <PkCard title="口径与边界" :accent="TINT">
       <PkRow v-for="n in QR_NOTES" :key="n.t" :label="n.t" :value="n.d" :copy="false" stack />
     </PkCard>
   </view>
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
-import { encode, decodeMatrix, buildWifi, buildVCard, QR_SAMPLES, ELEVEL_INFO, QUIET_ZONE } from '@/utils/qrcode'
+import { ref, computed } from 'vue'
+import {
+  encode,
+  decodeMatrix,
+  layoutStats,
+  buildWifi,
+  buildVCard,
+  QR_SAMPLES,
+  ELEVEL_INFO,
+  QUIET_ZONE,
+} from '@/utils/qrcode'
 import { copyText, toast } from '@/utils/clipboard'
 import { saveCanvasImage } from '@/utils/image'
 
-const SCALE_ITEMS = [
-  { key: 's', name: '小（适合屏幕看）' },
-  { key: 'm', name: '中（日常扫码）' },
-  { key: 'l', name: '大（打印张贴）' },
+/** 本工具的品牌色：视图里唯一允许的字面色，其余颜色一律走 CSS 变量 */
+const TINT = '#4A7A6B'
+/** 预览最长边（px）：边长超过它就把单元压到 1px */
+const PREVIEW_MAX = 300
+/** 边长超过这个值不自动渲染，等用户点一下（约 v21 起） */
+const AUTO_SIDE = 101
+const PX_ITEMS = [
+  { key: 4, name: '4 px 紧凑' },
+  { key: 6, name: '6 px' },
+  { key: 8, name: '8 px 日常' },
+  { key: 12, name: '12 px' },
+  { key: 16, name: '16 px 打印' },
 ]
-const SCALE_PX = { s: 4, m: 8, l: 14 }
+const MARGIN_ITEMS = [
+  { key: 0, name: '0 格（会被裁掉）' },
+  { key: 2, name: '2 格' },
+  { key: QUIET_ZONE, name: '4 格 标准' },
+  { key: 8, name: '8 格 宽松' },
+]
+const MODE_NAMES = { numeric: '纯数字', alphanumeric: '字母数字', byte: '字节（UTF-8）', mixed: '混合分段' }
 const WIFI_TYPES = [
   { key: 'WPA', name: 'WPA / WPA2 / WPA3' },
   { key: 'WEP', name: 'WEP' },
@@ -110,180 +191,244 @@ const WIFI_TYPES = [
 ]
 /** 口径说明：把「自己算的」和「别人验过的」分清楚 */
 const QR_NOTES = [
-  { t: '全离线', d: '版本选择、模式分段、Reed-Solomon 纠错、掩码罚分都在本机算，不联网、不上传内容。' },
-  { t: '依据标准', d: '按 ISO/IEC 18004 的码字容量表、分块交错与生成多项式实现，字符集支持数字 / 字母数字 / 字节（UTF-8）。' },
-  { t: '第三方复核', d: '生成的矩阵曾用开源解码器 zbar 独立扫读验证过（多版本、四个纠错等级、各模式与中文/emoji）；换新内容后建议用你手机自带扫码再确认一次。' },
-  { t: '自检的边界', d: '页面里的「编码再解码」用的是同一套实现的正反两个方向，只能说明自洽，不能证明符合标准。' },
-  { t: '不做的部分', d: '不支持 Kanji 模式、ECI 与扩展通道（微二维码、复合码）；这些内容会按 UTF-8 字节模式编码，普通扫码 App 一样能读出原文。' },
-  { t: '静区', d: '预览与保存图片都留了标准要求的 4 模块空白静区；如果你把图裁到只剩码体，部分扫码枪会认不出。' },
-  { t: '保存位置', d: 'App 端先写入应用私有目录再存相册，没给相册权限会失败并提示。' },
+  { t: '全离线', d: '版本选择、模式分段、Reed-Solomon 纠错、掩码罚分全在本机算，不联网、不上传内容。' },
+  {
+    t: '依据标准',
+    d: '按 ISO/IEC 18004 的码字容量表、分块交错、生成多项式 0x11D、格式信息 BCH(15,5) 再异或 0x5412、版本信息 BCH(18,6) 实现；模式支持数字 / 字母数字 / 字节（UTF-8），混合内容用动态规划选总位数最少的分段。',
+  },
+  {
+    t: '第三方复核',
+    d: '矩阵用过开源解码器 zbar（zbarimg）独立扫读：纯数字、字母数字大小写、混合 ASCII、中文、emoji、Wi-Fi、名片、接近容量上限等 24 组内容字节级一致，40 个版本 × L/M/Q/H 共 160 组合逐组复核。',
+  },
+  {
+    t: '一个已知坑',
+    d: 'zbar 会自己猜字节段的字符集，纯中文载荷它按 Shift-JIS 解出乱码——那是解码器的猜测问题，不是矩阵错；同一矩阵在手机自带扫码里读出来是正常中文。',
+  },
+  { t: '自检的边界', d: '页面里的「编码 → 解码」是同一套实现的正反两面，只能证明自洽，不能证明符合规范。' },
+  {
+    t: '不做的部分',
+    d: '不支持 Kanji 模式、ECI 与扩展通道（微二维码、复合码）；这类内容按 UTF-8 字节模式编码，普通扫码 App 仍能读出原文。',
+  },
+  { t: '静区', d: '预览与保存都按上面选的格数留白；标准建议 4 模块，裁到只剩码体时部分扫码枪会认不出。' },
+  {
+    t: '颜色',
+    d: '前景与背景只取当前主题的 CSS 变量（正文色与卡片色），换深色模式预览和保存图片一起翻转，代码里没有硬编码黑白。',
+  },
+  { t: '保存位置', d: 'App 端先写应用私有目录再存相册，没给相册权限会失败并提示；预览是 <view> 色块，只有保存才用画布。' },
 ]
 
 const text = ref('https://example.com/pocketkit')
 const elevel = ref('M')
-const scaleKey = ref('m')
+const outPx = ref(8)
+const margin = ref(QUIET_ZONE)
 const inverted = ref(false)
-const previewUrl = ref('')
+const previewOpen = ref(false)
 const saveMsg = ref('')
+const genError = ref('')
+const box = ref(null)
 
-/* 生成器字段 */
 const wifiSsid = ref('MyRouter')
 const wifiPass = ref('passw0rd')
 const wifiType = ref('WPA')
 const wifiHidden = ref(false)
 const wifiText = ref('')
-const wifiError = ref('')
+
 const vcName = ref('张三')
-const vcPhone = ref('13800138000')
+const vcLast = ref('张')
+const vcFirst = ref('三')
 const vcOrg = ref('随身匣')
 const vcTitle = ref('')
+const vcTel = ref('13800138000')
 const vcEmail = ref('')
 const vcUrl = ref('')
 const vcAddr = ref('')
 const vcNote = ref('')
 const vcText = ref('')
 
-const qr = computed(() => {
-  if (!String(text.value).trim()) return null
+/* ---------- 一次算完：编码 + 解码往返，错误也从这里出 ---------- */
+const state = computed(() => {
+  const raw = String(text.value)
+  if (!raw.trim()) return { qr: null, error: '', back: null, rtOk: false }
   try {
-    return encode(text.value, { elevel: elevel.value })
+    const q = encode(raw, { elevel: elevel.value })
+    let back = null
+    let rtOk = false
+    try {
+      back = decodeMatrix(q.modules)
+      rtOk = !!back && String(back.text) === String(q.text)
+    } catch (e) {
+      back = null
+      rtOk = false
+    }
+    return { qr: q, error: '', back, rtOk }
   } catch (e) {
-    return null
+    return { qr: null, error: (e && e.message) || '生成失败，内容可能太长', back: null, rtOk: false }
   }
 })
-const error = computed(() => {
-  const raw = String(text.value).trim()
-  if (!raw) return ''
-  try {
-    encode(raw, { elevel: elevel.value })
-    return ''
-  } catch (e) {
-    return e.message
-  }
-})
+const qr = computed(() => state.value.qr)
+const error = computed(() => state.value.error)
+const rtOk = computed(() => state.value.rtOk)
 
 const elevelDesc = computed(() => {
   const it = ELEVEL_INFO.filter((x) => x.key === elevel.value)[0]
   return it ? it.desc : ''
 })
+const chars = computed(() => Array.from(String(qr.value ? qr.value.text : '')).length)
+
+/* ---------- 预览：每行把连续暗模块并成一个色块，一个块一个 <view> ---------- */
+const side = computed(() => (qr.value ? qr.value.size + margin.value * 2 : 0))
+const unit = computed(() => Math.max(1, Math.floor(PREVIEW_MAX / Math.max(1, side.value))))
+const previewSide = computed(() => (qr.value ? side.value * unit.value : 0))
+const needTap = computed(() => side.value > AUTO_SIDE)
+const lines = computed(() => {
+  const q = qr.value
+  if (!q || (needTap.value && !previewOpen.value)) return []
+  const m = margin.value
+  const n = q.size
+  const rows = []
+  for (let y = 0; y < n + m * 2; y++) {
+    const runs = []
+    let gap = 0
+    for (let x = 0; x < n + m * 2; x++) {
+      const inside = x >= m && x < n + m && y >= m && y < n + m
+      if (inside && q.modules[y - m][x - m]) {
+        if (runs.length) runs[runs.length - 1].len += 1
+        else runs.push({ len: 1, gap })
+        gap = 0
+      } else {
+        gap += 1
+      }
+    }
+    rows.push(runs)
+  }
+  return rows
+})
+const savePx = computed(() => (qr.value ? (qr.value.size + margin.value * 2) * outPx.value : 0))
+const previewNote = computed(() => {
+  if (!qr.value) return '预览用 <view> 色块画，不走画布；只有「保存到相册」才用画布导出真像素图。'
+  if (needTap.value && !previewOpen.value) return '边长 ' + side.value + ' 模块，还没渲染；保存不受影响。'
+  const blocks = lines.value.reduce((a, r) => a + r.length, 0)
+  return (
+    '边长 ' + side.value + ' 模块 × 单元 ' + unit.value + 'px，画成 ' + blocks + ' 个色块；保存到相册按 ' + outPx.value + 'px 单元输出 ' + savePx.value + '×' + savePx.value + ' 像素。'
+  )
+})
+
+/* ---------- 容量与结构 ---------- */
+const domKey = computed(() => {
+  const q = qr.value
+  if (!q) return 'byte'
+  return q.mode === 'numeric' || q.mode === 'alphanumeric' ? q.mode : 'byte'
+})
 const modeText = computed(() => {
   const q = qr.value
   if (!q) return ''
-  const name = { numeric: '纯数字', alphanumeric: '字母数字', byte: '字节（UTF-8）', mixed: '混合分段' }[q.mode] || q.mode
-  return name + '（' + q.segments.length + ' 段）'
+  return (MODE_NAMES[q.mode] || q.mode) + '（' + q.segments.length + ' 段）'
 })
-const usedText = computed(() => {
+const usedPct = computed(() => (qr.value ? Math.round(qr.value.usedRatio * 100) : 0))
+const limitText = computed(() => {
   const q = qr.value
   if (!q) return ''
-  const cap = q.capacity || {}
-  const unit = q.mode === 'numeric' || q.mode === 'alphanumeric' ? q.mode : 'byte'
-  const label = { numeric: '数字', alphanumeric: '字母数字' }[unit] || '字节'
-  const used = unit === 'byte' ? q.bytes : String(q.text || '').length
+  const k = domKey.value
+  const used = k === 'byte' ? q.bytes : chars.value
+  return MODE_NAMES[k] + '上限 ' + (q.capacity[k] || 0) + '，本条已用 ' + used + '（V' + q.version + ' ' + q.elevel + ' 级）'
+})
+const slackText = computed(() => {
+  const q = qr.value
+  if (!q) return ''
+  const k = domKey.value
+  const room = (q.capacity[k] || 0) - (k === 'byte' ? q.bytes : chars.value)
+  const lower = elevel.value === 'H' ? 'Q' : elevel.value === 'Q' ? 'M' : 'L'
   return (
-    used +
-    ' 个' +
-    label +
-    ' / 版本 ' +
-    q.version +
-    ' ' +
-    q.elevel +
-    ' 级上限 ' +
-    (cap[unit] || '—') +
-    '（位流已用约 ' +
-    Math.round((q.usedRatio || 0) * 100) +
-    '%）'
+    '这个版本还剩 ' + room + (k === 'byte' ? ' 字节' : ' 字符') + '；再长会自动升版本（模块更密），或把等级降到 ' + lower + ' 腾空间。'
   )
 })
-const bitsText = computed(() => {
+const versionTip = computed(() => {
   const q = qr.value
   if (!q) return ''
-  const bytes = Math.ceil(q.bitLength / 8)
-  return (
-    q.bitLength +
-    ' bit ≈ ' +
-    bytes +
-    ' 字节，数据码字 ' +
-    q.dataCodewords +
-    ' 字节（余下 ' +
-    (q.dataCodewords - bytes) +
-    ' 字节是终端填充）'
-  )
+  if (q.version >= 26) return '版本已经很高，模块密到极限：建议降等级、缩短内容或拆成几张码，打印边长别小于 8cm。'
+  if (q.version >= 10) return '中等版本：打印别小于 3cm，屏幕上看时把亮度拉满更容易对上焦。'
+  return '版本较低、模块稀疏，屏幕与打印都好扫。'
 })
-const levelTip = computed(() => {
+const structText = computed(() => {
   const q = qr.value
   if (!q) return ''
-  if (q.version >= 26) return '版本已经很高，模块极密，屏幕上看清都费劲：建议换 L 级、缩短内容，或直接分成了几张码。'
-  if (q.version >= 10) return '中等版本，打印时注意别小于 3cm，否则手机对不上焦。'
-  return '版本较低，模块数少，屏幕与打印都容易扫。'
-})
-const roundTrip = computed(() => (roundTripOk.value ? '一致：decodeMatrix(encode(内容)) 读回原文' : '不一致：解码结果与原文有出入'))
-const roundTripOk = computed(() => {
-  const q = qr.value
-  if (!q) return false
+  let s = null
   try {
-    const back = decodeMatrix(q.modules)
-    const s = back && (back.text !== undefined ? back.text : back)
-    return String(s) === String(q.text)
+    s = layoutStats(q.version)
   } catch (e) {
-    return false
+    return '版本布局取不到：' + e.message
   }
+  return (
+    'V' + q.version + '：' + s.size + '×' + s.size + ' = ' + s.modules + ' 格，功能图形占 ' + s.functionCells +
+    ' 格，数据区 ' + s.dataCells + ' 位 = ' + s.totalCodewords + ' 码字 × 8 + 余比特 ' + s.remainderBits +
+    '；各级码字数 L/M/Q/H = ' + s.levels.L + '/' + s.levels.M + '/' + s.levels.Q + '/' + s.levels.H
+  )
 })
-const roundTripNote =
-  '往返一致只证明编码与解码互为逆过程，不等于符合规范；是否符合 ISO/IEC 18004 要用第三个扫码 App 实扫确认。'
+const rtText = computed(() => {
+  const q = qr.value
+  if (!q) return ''
+  if (rtOk.value) return '一致：decodeMatrix 读回 ' + chars.value + ' 字符，与原文逐字符相同'
+  const back = state.value.back
+  return '不一致' + (back ? '：读回「' + back.text + '」' : '：解码抛错，见上面的提示')
+})
 
-const canSave = computed(() => !!qr.value)
+/* ---------- 颜色：从当前主题的 CSS 变量里取，视图内不写死 ---------- */
+function rootEl() {
+  const node = box.value
+  if (!node) return null
+  return node.$el || node
+}
+function isColor(s) {
+  const v = String(s || '').trim()
+  return v.indexOf('rgb') > -1 || /^#[0-9a-fA-F]{3,8}$/.test(v)
+}
+function readColors() {
+  const fail = new Error('没能从当前主题里取到前景与背景色，请先让二维码显示出来再保存')
+  const el = rootEl()
+  if (!el || typeof window === 'undefined' || !window.getComputedStyle) throw fail
+  const cs = window.getComputedStyle(el)
+  const bg = cs.backgroundColor
+  let fg = cs.getPropertyValue ? String(cs.getPropertyValue('--qr-fg') || '').trim() : ''
+  if (!isColor(fg)) {
+    const probe = el.querySelector ? el.querySelector('.qr__cell') : null
+    if (probe) fg = window.getComputedStyle(probe).backgroundColor
+  }
+  if (!isColor(fg) || !isColor(bg)) throw fail
+  return { fg, bg }
+}
 
-/* ---------------- 渲染：预览与保存共用一段离屏画布 ---------------- */
-function buildCanvas(px) {
+/* ---------- 画布：只有保存时才用 ---------- */
+function buildCanvas() {
   const q = qr.value
   if (!q) return null
-  if (typeof document === 'undefined' || !document.createElement) return null
-  const quiet = QUIET_ZONE
-  const side = (q.size + quiet * 2) * px
+  if (typeof document === 'undefined' || !document.createElement) throw new Error('当前环境没有画布能力，存不了图')
+  const colors = readColors()
+  const px = outPx.value
+  const m = margin.value
+  const total = (q.size + m * 2) * px
   const c = document.createElement('canvas')
-  c.width = side
-  c.height = side
+  c.width = total
+  c.height = total
   const ctx = c.getContext('2d')
-  ctx.fillStyle = inverted.value ? '#000000' : '#ffffff'
-  ctx.fillRect(0, 0, side, side)
-  ctx.fillStyle = inverted.value ? '#ffffff' : '#000000'
+  ctx.fillStyle = colors.bg
+  ctx.fillRect(0, 0, total, total)
+  ctx.fillStyle = colors.fg
   for (let y = 0; y < q.size; y++) {
     for (let x = 0; x < q.size; x++) {
-      if (q.modules[y][x]) ctx.fillRect((x + quiet) * px, (y + quiet) * px, px, px)
+      if (q.modules[y][x]) ctx.fillRect((x + m) * px, (y + m) * px, px, px)
     }
   }
   return c
 }
 
-function refreshPreview() {
-  saveMsg.value = ''
-  const q = qr.value
-  if (!q) {
-    previewUrl.value = ''
-    return
-  }
-  try {
-    const c = buildCanvas(SCALE_PX[scaleKey.value] || 8)
-    previewUrl.value = c ? c.toDataURL('image/png') : ''
-  } catch (e) {
-    previewUrl.value = ''
-  }
-}
-
-watch([qr, inverted, scaleKey], () => nextTick(refreshPreview), { immediate: true })
-
 async function doSave() {
+  saveMsg.value = ''
   if (!qr.value) {
     toast('先生成二维码')
     return
   }
   try {
-    const c = buildCanvas(SCALE_PX[scaleKey.value] || 8)
-    if (!c) {
-      saveMsg.value = '当前环境没有画布能力，存不了图'
-      return
-    }
-    const { saveCanvasImage } = await import('@/utils/image')
+    const c = buildCanvas()
     await saveCanvasImage(c, 'qrcode-v' + qr.value.version + '-' + qr.value.elevel + '.png', 'image/png')
     toast('已保存到相册')
   } catch (e) {
@@ -299,88 +444,132 @@ function doCopy() {
   copyText(text.value)
 }
 
-/* ---------------- Wi-Fi 与名片 ---------------- */
+/* ---------- 两个结构化生成器 ---------- */
 function useWifi() {
-  wifiError.value = ''
-  wifiText.value = ''
+  genError.value = ''
   const ssid = String(wifiSsid.value).trim()
   if (!ssid) {
-    wifiError.value = '网络名称不能为空'
+    genError.value = '网络名称 SSID 不能为空'
     return
   }
-  if (wifiType.value !== 'nopass' && !String(wifiPass.value).trim()) {
-    wifiError.value = '除了开放网络，密码不能为空'
+  if (wifiType.value !== 'nopass' && !String(wifiPass.value)) {
+    genError.value = 'WPA / WEP 都得给密码，开放网络请选「开放网络」'
     return
   }
-  const t = buildWifi({ ssid: ssid, password: wifiPass.value, auth: wifiType.value, hidden: wifiHidden.value })
-  wifiText.value = t
-  text.value = t
+  wifiText.value = buildWifi({ ssid: ssid, password: wifiPass.value, auth: wifiType.value, hidden: wifiHidden.value })
+  text.value = wifiText.value
 }
 
+const vcLines = computed(() => String(vcText.value).split('\r\n'))
 function useVCard() {
-  const t = buildVCard({
+  genError.value = ''
+  if (!String(vcName.value).trim() && !String(vcLast.value).trim() && !String(vcFirst.value).trim()) {
+    genError.value = '至少要填姓名或姓、名，否则名片没有 FN 与 N'
+    return
+  }
+  vcText.value = buildVCard({
     name: vcName.value,
-    tel: vcPhone.value,
+    last: vcLast.value,
+    first: vcFirst.value,
     org: vcOrg.value,
     title: vcTitle.value,
+    tel: vcTel.value,
     email: vcEmail.value,
     url: vcUrl.value,
     addr: vcAddr.value,
     note: vcNote.value,
   })
-  vcText.value = t
-  text.value = t
+  text.value = vcText.value
 }
 </script>
 
 <style scoped>
-.quick-row {
+.quick {
   display: flex;
   flex-wrap: wrap;
   margin-top: 4rpx;
 }
-.quick-i {
-  display: inline-block;
+.quick__i {
   font-size: 22rpx;
   color: var(--pk-accent);
   margin: 8rpx 14rpx 0 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: var(--pk-radius-sm);
+  border-radius: 10rpx;
   background: var(--pk-accent-soft);
 }
 .tip {
   display: block;
-  font-size: 22rpx;
+  font-size: 21rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
-  padding: 10rpx 24rpx 12rpx;
+  padding: 4rpx 24rpx 12rpx;
 }
-.act-row {
+.line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 12rpx 24rpx 6rpx;
+}
+.line__k {
+  font-size: 23rpx;
+  color: var(--pk-text-2);
+}
+.line__v {
+  font-size: 22rpx;
+  font-family: Menlo, Consolas, monospace;
+  color: var(--pk-accent);
+}
+.act {
   display: flex;
   gap: 20rpx;
-  padding: 14rpx 0 10rpx;
+  padding: 16rpx 0 8rpx;
 }
 .qr {
-  display: flex;
-  justify-content: center;
-  padding: 20rpx 0 6rpx;
-  background: var(--pk-card);
+  --qr-fg: var(--pk-text);
+  --qr-bg: var(--pk-card);
+  background: var(--qr-bg);
+  margin: 0 auto;
+  line-height: 0;
 }
 .qr--inv {
-  background: var(--pk-text);
+  --qr-fg: var(--pk-card);
+  --qr-bg: var(--pk-text);
 }
-.qr__img {
-  width: 480rpx;
+.qr__body {
+  display: flex;
+  flex-direction: column;
+}
+.qr__row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+.qr__cell {
+  background: var(--qr-fg);
+  flex-shrink: 0;
+}
+.qr__gate {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40rpx 12rpx;
+  background: var(--pk-input);
+}
+.qr__gate__t {
+  font-size: 22rpx;
+  line-height: 1.9;
+  color: var(--pk-text-2);
+  text-align: center;
 }
 .meta {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  padding-top: 12rpx;
+  padding: 12rpx 0 4rpx;
 }
 .meta__i {
-  font-size: 22rpx;
+  font-size: 21rpx;
   color: var(--pk-text-3);
   margin: 4rpx 12rpx;
   font-family: Menlo, Consolas, monospace;
@@ -390,7 +579,7 @@ function useVCard() {
 }
 .segs__t {
   display: block;
-  font-size: 22rpx;
+  font-size: 21rpx;
   color: var(--pk-text-3);
   line-height: 1.7;
   margin-bottom: 6rpx;
@@ -404,7 +593,6 @@ function useVCard() {
 .segs__m {
   width: 200rpx;
   font-size: 22rpx;
-  font-family: Menlo, Consolas, monospace;
   color: var(--pk-accent);
   flex-shrink: 0;
 }
@@ -414,8 +602,22 @@ function useVCard() {
   color: var(--pk-text-2);
 }
 .segs__b {
-  font-size: 22rpx;
+  font-size: 21rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text-3);
+}
+.vcf {
+  margin: 12rpx 0 16rpx;
+  padding: 16rpx 20rpx;
+  background: var(--pk-input);
+  border-radius: 12rpx;
+}
+.vcf__l {
+  display: block;
+  font-size: 21rpx;
+  line-height: 1.9;
+  color: var(--pk-text-2);
+  font-family: Menlo, Consolas, monospace;
+  word-break: break-all;
 }
 </style>

@@ -37,17 +37,35 @@ export function toggleTheme() {
   setTheme(!theme.dark)
 }
 
-/** 同步原生界面（下拉背景、导航栏）到当前主题 */
+/** 同步原生界面到当前主题（状态栏图标与底色、窗口背景） */
 export function syncNativeUI() {
   const dark = theme.dark
+  // #ifdef APP-PLUS
   try {
-    if (!uni.setNavigationBarColor) return
-    uni.setNavigationBarColor({
-      frontColor: dark ? '#ffffff' : '#000000',
-      backgroundColor: dark ? '#14171A' : '#F6F4EF',
-      animation: { duration: 0, timingFunc: 'linear' },
-      fail() {},
-    })
+    if (typeof plus !== 'undefined' && plus.navigator) {
+      // 状态栏图标：深色主题用浅色图标，浅色主题用深色图标
+      plus.navigator.setStatusBarStyle(dark ? 'light' : 'dark')
+      // 状态栏底色跟随页面背景，避免深色下顶栏露出浅色条
+      plus.navigator.setStatusBarBackground(dark ? '#14171A' : '#F6F4EF')
+    }
+  } catch (e) {}
+  try {
+    if (typeof plus !== 'undefined' && plus.webview) {
+      // 原生窗口背景：过滚动与冷启动瞬间露出的就是它
+      const wv = plus.webview.currentWebview()
+      if (wv) wv.setStyle({ background: dark ? '#14171A' : '#F6F4EF' })
+    }
+  } catch (e) {}
+  // #endif
+  try {
+    if (uni.setNavigationBarColor) {
+      uni.setNavigationBarColor({
+        frontColor: dark ? '#ffffff' : '#000000',
+        backgroundColor: dark ? '#14171A' : '#F6F4EF',
+        animation: { duration: 0, timingFunc: 'linear' },
+        fail() {},
+      })
+    }
   } catch (e) {}
 }
 

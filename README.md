@@ -38,7 +38,35 @@ H5 只作为开发期的浏览器预览手段（小程序/快应用目标已移�
 | --- | --- | --- |
 | ![JSON 转 TS](docs/screenshots/16-JSON转TS.png) | ![古典密码](docs/screenshots/17-古典密码.png) | |
 
-> 截图取自真实浏览器渲染（390×844 手机视口），非设计稿。
+| AES 加解密 | UA 解析 | 语义化版本 |
+| --- | --- | --- |
+| ![AES 加解密](docs/screenshots/18-AES加解密.png) | ![UA 解析](docs/screenshots/19-UA解析.png) | ![语义化版本](docs/screenshots/20-语义化版本.png) |
+
+| 字母表编码 | 统计工坊 | 数论工具箱 |
+| --- | --- | --- |
+| ![字母表编码](docs/screenshots/21-字母表编码.png) | ![统计工坊](docs/screenshots/22-统计工坊.png) | ![数论工具箱](docs/screenshots/23-数论工具箱.png) |
+
+| 农历历书 | 账单分摊 | 个税速算 |
+| --- | --- | --- |
+| ![农历历书](docs/screenshots/24-农历历书.png) | ![账单分摊](docs/screenshots/25-账单分摊.png) | ![个税速算](docs/screenshots/26-个税速算.png) |
+
+| CRC 校验和 | X509 证书 | 位运算 |
+| --- | --- | --- |
+| ![CRC 校验和](docs/screenshots/27-CRC校验和.png) | ![X509 证书](docs/screenshots/28-X509证书.png) | ![位运算](docs/screenshots/29-位运算.png) |
+
+| Markdown 互转 | EXIF 元数据 | 图片取色 |
+| --- | --- | --- |
+| ![Markdown 互转](docs/screenshots/30-Markdown互转.png) | ![EXIF 元数据](docs/screenshots/31-EXIF元数据.png) | ![图片取色](docs/screenshots/32-图片取色.png) |
+
+| 尺码换算 | 二维码 | 世界时钟 |
+| --- | --- | --- |
+| ![尺码换算](docs/screenshots/33-尺码换算.png) | ![二维码](docs/screenshots/34-二维码.png) | ![世界时钟](docs/screenshots/35-世界时钟.png) |
+
+| 设备信息 | 搞机页签 | 搞机页签（深色） |
+| --- | --- | --- |
+| ![设备信息](docs/screenshots/36-设备信息.png) | ![搞机页签](docs/screenshots/37-搞机页签.png) | ![搞机页签（深色）](docs/screenshots/37-搞机页签-深色.png) |
+
+> 截图取自真实浏览器渲染（390×844 手机视口），非设计稿；重跑 `npm run build:h5` 后执行 `node scripts/screenshot.mjs` 可整批更新。App 端独有的读数（如设备信息的传感器清单）在浏览器里以「—」如实留空。
 > 全套页面的样式体检与逐项修正记录见 [`docs/样式修正记录.md`](docs/样式修正记录.md)。
 
 ---

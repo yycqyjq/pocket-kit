@@ -236,7 +236,7 @@
       <PkRow v-if="pcOut" label="精确还是近似" :value="pcOut.note" :color="pcOut.exact ? '' : 'var(--pk-warn)'" :copy="false" stack />
       <PkField v-model="nthK" type="number" label="第几个素数" placeholder="100" />
       <text class="tip">
-        nthPrime 名义上支持到第 {{ NTH_MAX }} 个，但它要先按估算区间筛素数，而筛子上限是 {{ SIEVE_TXT }}，
+        nthPrime 名义上支持到第 {{ MAX_NTH_PRIME }} 个，但它要先按估算区间筛素数，而筛子上限是 {{ SIEVE_TXT }}，
         所以实测最大只到第 {{ NTH_USABLE_TXT }} 个（即 {{ SIEVE_TXT }} 以内的素数个数），再大就会被 util 拒绝。
       </text>
       <view class="act-row">
@@ -581,8 +581,8 @@ function runNth() {
     nthMsg.value = '序号要是 1 以上的整数'
     return
   }
-  if (k > NTH_MAX) {
-    nthMsg.value = '序号超过 ' + thou(NTH_MAX) + '，util 直接拒绝'
+  if (k > MAX_NTH_PRIME) {
+    nthMsg.value = '序号超过 ' + thou(MAX_NTH_PRIME) + '，util 直接拒绝'
     return
   }
   if (k > NTH_USABLE) {
@@ -644,9 +644,9 @@ const limitRows = computed(() => [
   { t: 'DIVISOR_LIST_LIMIT = ' + DIVISOR_LIST_LIMIT, d: '约数列表最多列这么多；再多只给个数与和（约数个数由分解式直接相乘得到，不用枚举）。' },
   { t: 'SIEVE_LIMIT = ' + thou(SIEVE_LIMIT), d: '埃氏筛的上限，超过就截断；π(x) 超出这个范围时改用 x/ln x 近似并标注不精确。' },
   {
-    t: '第 n 个素数：名义 ' + thou(NTH_MAX) + '，实际 ' + NTH_USABLE_TXT,
+    t: '第 n 个素数：名义 ' + thou(MAX_NTH_PRIME) + '，实际 ' + NTH_USABLE_TXT,
     d:
-      'nthPrime 声明支持到第 ' + thou(NTH_MAX) + ' 个，但它按估算区间调 sievePrimes，而后者被 SIEVE_LIMIT（' + SIEVE_TXT + '）截断，' +
+      'nthPrime 声明支持到第 ' + thou(MAX_NTH_PRIME) + ' 个，但它按估算区间调 sievePrimes，而后者被 SIEVE_LIMIT（' + SIEVE_TXT + '）截断，' +
       '超过第 ' + NTH_USABLE_TXT + ' 个会抛「估算区间不足」，界面上先替它拦下并说明原因。',
   },
   { t: '亲和数枚举上限 ' + thou(AMI_MAX), d: 'amicablePairsUpTo 内部还限最多记 200 对，超出会标注。' },
