@@ -1,7 +1,7 @@
 {
     "name" : "随身匣",
     "appid" : "__UNI__0540540",
-    "description" : "离线可用的日常工具箱：文本编码、数值计算、时间日期、生成与校验，共 50 件小工具。",
+    "description" : "离线可用的日常工具箱：文本编码、数值计算、时间日期、生成与校验，共 55 件小工具。",
     "versionName" : "1.0.0",
     "versionCode" : "100",
     "transformPx" : false,

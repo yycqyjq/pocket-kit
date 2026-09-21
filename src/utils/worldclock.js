@@ -813,6 +813,31 @@ export function stampLinks(input) {
 /* ============================================================ 两两对照 */
 
 /**
+ * 双方工作时段（默认 9:00~18:00）的真实重叠比例。
+ * 以 A 地该瞬间所在的日历日为基准，从当天零点逐小时推进 24 格，
+ * 每格用同一瞬间读两地钟点，双方都落在工作时段才计数；
+ * 逐小时推进天然跟着夏令时走。异常时退回「时差越大重叠越少」的代理值。
+ */
+function workOverlap(aKey, a, bKey, absMinutes) {
+  const WORK_START = 9
+  const WORK_END = 18
+  try {
+    const start = instantFromWall(aKey, { year: a.year, month: a.month, day: a.day, hour: 0, minute: 0 })
+    let cursor = start.ms
+    let both = 0
+    for (let i = 0; i < 24; i++) {
+      const ra = zoneRow(cursor, aKey)
+      const rb = zoneRow(cursor, bKey, { baseDay: ra.dayEpoch })
+      if (ra.hour >= WORK_START && ra.hour < WORK_END && rb.hour >= WORK_START && rb.hour < WORK_END) both++
+      cursor += HOUR_MS
+    }
+    return Math.round((both / (WORK_END - WORK_START)) * 100) / 100
+  } catch (e) {
+    return Math.max(0, Math.round((1 - absMinutes / 1440) * 100) / 100)
+  }
+}
+
+/**
  * 两个城市的时差与「那边几点」。
  * @param {object} input { a, b, at } 或 { a, b, aWall:{year,month,day,hour,minute} }
  */
@@ -847,8 +872,8 @@ export function pairCompare(input) {
     dayOffset: b.dayOffset,
     crossDayMark: b.crossDayMark,
     weekendThere: b.isWeekend,
-    // 24 小时里双方都醒着的粗略重叠度，只用于排序展示，不是承诺
-    overlapRatio: Math.round((1 - abs / 24) * 100) / 100,
+    // 双方工作时段（9:00~18:00）的真实重叠比例，见 workOverlap()；只用于排序展示，不是承诺
+    overlapRatio: workOverlap(aKey, a, bKey, abs),
     dstState: dst.state,
     dstNote: dst.note,
     approx: a.approx || b.approx,
