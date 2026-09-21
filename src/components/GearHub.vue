@@ -31,6 +31,8 @@
       <PkRow label="电池温度" :value="batteryText.temperature" :copy="false" />
       <PkRow label="电压" :value="batteryText.voltage" :copy="false" />
       <PkRow v-if="battery.tech" label="电池技术" :value="battery.tech" :copy="false" />
+      <PkRow v-if="batteryText.watts" label="实时功率" :value="batteryText.watts" :copy="false" />
+      <PkRow v-if="batteryText.charge" label="剩余容量" :value="batteryText.charge" :copy="false" />
       <text class="tip">想看充电变化，插上电再点上面「重新读取」就是最新值</text>
     </PkCard>
 
@@ -70,6 +72,7 @@
       <PkRow label="内存占用" :value="memText.ramPct" :copy="false" />
       <PkRow label="应用堆上限" :value="memText.heap" :copy="false" />
       <PkRow label="用户存储" :value="memText.storage" mono />
+      <PkRow v-if="memText.swap" label="Swap / ZRAM" :value="memText.swap" mono :copy="false" />
     </PkCard>
 
     <!-- 传感器 -->
@@ -79,6 +82,36 @@
         <view v-for="s in sensorList" :key="s.key" class="sensor-row">
           <text class="sensor-row__n">{{ s.name }}</text>
           <text class="sensor-row__v">{{ s.meta || '—' }}</text>
+        </view>
+      </view>
+    </PkCard>
+
+    <!-- 系统与安全 -->
+    <PkCard title="系统与安全" accent="#5B7A3E">
+      <PkRow label="Project Treble" :value="secText.treble" :copy="false" />
+      <PkRow label="动态分区" :value="secText.dynamic" :copy="false" />
+      <PkRow label="无缝更新" :value="secText.seamless" :copy="false" />
+      <PkRow label="验证启动" :value="secText.verifiedBoot" :copy="false" />
+      <PkRow label="加密" :value="secText.crypto" :copy="false" />
+      <text class="tip">刷 GSI 前先看这里：Treble 与动态分区决定能用哪种系统镜像；验证启动是橙色即引导已解锁</text>
+    </PkCard>
+
+    <!-- 图形与生态 -->
+    <PkCard title="图形与生态" accent="#3F5A75">
+      <PkRow label="GPU 版本" :value="ecoText.gles" :copy="false" />
+      <PkRow label="Vulkan" :value="ecoText.vulkan" :copy="false" />
+      <PkRow v-if="ecoText.vulkanCompute" label="Vulkan 计算" :value="ecoText.vulkanCompute" :copy="false" />
+      <PkRow v-if="ecoText.webView" label="WebView" :value="ecoText.webView" mono />
+      <PkRow v-if="ecoText.gms" label="Play 服务" :value="ecoText.gms" mono />
+    </PkCard>
+
+    <!-- 摄像头 -->
+    <PkCard v-if="cameraList.length" title="摄像头" accent="#4F6B8C">
+      <PkRow label="数量" :value="cameraList.length + ' 颗'" :copy="false" />
+      <view class="sensor-list">
+        <view v-for="c in cameraList" :key="c.key" class="sensor-row">
+          <text class="sensor-row__n">{{ c.name }}</text>
+          <text class="sensor-row__v">{{ c.meta || '—' }}</text>
         </view>
       </view>
     </PkCard>
@@ -106,6 +139,13 @@ import {
   readSensors,
   readUptime,
   screenDiagonalIn,
+  readSecurityInfo,
+  readGraphicsEco,
+  readDrmInfo,
+  readCameras,
+  readBatteryPower,
+  readSwap,
+  fmtWatts,
 } from '@/utils/device'
 
 const loading = ref(false)
@@ -117,6 +157,12 @@ const screen = ref({})
 const cpu = ref({ perCore: [] })
 const mem = ref({})
 const sensorList = ref([])
+const security = ref(null)
+const graphics = ref(null)
+const drm = ref(null)
+const cameraList = ref([])
+const power = ref({ currentUa: 0 })
+const swap = ref({})
 
 function nowText() {
   try {
@@ -141,6 +187,12 @@ async function loadAll() {
     cpu.value = readCpu()
     mem.value = readMemoryStorage()
     sensorList.value = readSensors().list || []
+    security.value = readSecurityInfo()
+    graphics.value = readGraphicsEco()
+    drm.value = readDrmInfo()
+    cameraList.value = readCameras().list || []
+    power.value = readBatteryPower()
+    swap.value = readSwap()
     if (app) {
       battery.value = readBattery()
     } else {
@@ -201,6 +253,8 @@ const batteryText = computed(() => {
     health: b.health || '',
     temperature: b.temperature || '',
     voltage: b.voltage || '',
+    watts: fmtWatts(b.voltageUv, power.value.currentUa),
+    charge: b.chargeUah || power.value.chargeUah ? Math.round((Number(b.chargeUah) || power.value.chargeUah) / 1000) + ' mAh' : '',
   }
 })
 
@@ -250,6 +304,7 @@ const memText = computed(() => {
     ramPct: ramPct,
     heap: m.heapMB ? m.heapMB + ' MB' : '',
     storage: m.storageTotal > 0 ? fmtGbSafe(m.storageTotal - (m.storageAvail || 0)) + ' 已用 / ' + fmtGbSafe(m.storageTotal) : '',
+    swap: [m.swapFree, m.swapTotal].filter(Boolean).length === 2 ? m.swapFree + ' 可用 / ' + m.swapTotal : '',
   }
 })
 
@@ -258,6 +313,17 @@ function fmtGbSafe(bytes) {
   if (!isFinite(g) || g <= 0) return ''
   return (g >= 10 ? g.toFixed(1) : g.toFixed(2)).replace(/\.?0+$/, '') + ' GB'
 }
+
+/* ---------- 系统与安全 / 图形生态 / 摄像头 ---------- */
+const secText = computed(() => {
+  const s = security.value || {}
+  return { treble: s.treble || '', dynamic: s.dynamicPartitions || '', seamless: s.seamlessUpdates || '', verifiedBoot: s.verifiedBoot || '', crypto: s.cryptoType || '' }
+})
+
+const ecoText = computed(() => {
+  const g = graphics.value || {}
+  return { gles: g.gles || '', vulkan: g.vulkan || '', vulkanCompute: g.vulkanCompute || '', webView: g.webView || '', gms: g.gms || '' }
+})
 
 /* ---------- 完整档案 ---------- */
 function profileText() {
@@ -296,6 +362,14 @@ function profileText() {
   push('运行内存', memText.value.ram)
   push('应用堆上限', memText.value.heap)
   push('用户存储', memText.value.storage)
+  if (memText.value.swap) push('Swap', memText.value.swap)
+  if (batteryText.value.watts) push('充电功率', batteryText.value.watts)
+  push('Project Treble', secText.value.treble)
+  push('验证启动', secText.value.verifiedBoot)
+  push('加密', secText.value.crypto)
+  push('GPU', ecoText.value.gles)
+  push('WebView', ecoText.value.webView)
+  if (cameraList.value.length) push('摄像头', cameraList.value.length + ' 颗')
   if (sensorList.value.length) {
     push('传感器', sensorList.value.length + ' 个')
     sensorList.value.forEach((s) => L.push('  · ' + s.name + (s.meta ? '（' + s.meta + '）' : '')))

@@ -244,6 +244,7 @@ export function readBattery() {
       health: healthMap[g('health', -1)] || '',
       temperature: fmtTemp(g('temperature', -1000)),
       voltage: fmtVoltage(g('voltage', -1)),
+      voltageUv: g('voltage', -1),
       tech: tech,
     }
   } catch (e) {
@@ -430,6 +431,207 @@ export function readSensors() {
       out.list.push({ key: i + '-' + name, name: name, meta: [vendor, power].filter(Boolean).join(' · ') })
     }
     out.count = n
+  } catch (e) {}
+  // #endif
+  return out
+}
+
+
+/* ============================================================
+ * 搞机扩展：身份与安全 / 图形与生态 / 摄像头 / 充电功率 / Swap
+ * 全部走系统 API 与 world-readable 路径，不申请任何新权限
+ * ============================================================ */
+
+/** 多行读取（/proc/meminfo 用），最多 max 行 */
+function execHeadLines(path, max) {
+  try {
+    // #ifdef APP-PLUS
+    const RT = plus.android.importClass('java.lang.Runtime')
+    const proc = RT.getRuntime().exec('cat ' + path)
+    const ISR = plus.android.importClass('java.io.InputStreamReader')
+    const BR = plus.android.importClass('java.io.BufferedReader')
+    const reader = new BR(new ISR(proc.getInputStream()))
+    const out = []
+    let line
+    while ((line = reader.readLine()) != null && out.length < max) out.push(String(line))
+    reader.close()
+    proc.destroy()
+    return out
+    // #endif
+    // #ifndef APP-PLUS
+    return []
+    // #endif
+  } catch (e) {
+    return []
+  }
+}
+
+/** 系统属性 → 中文文本的小映射 */
+function mapProp(raw, table) {
+  const v = String(raw || '').trim()
+  return table[v] || ''
+}
+
+/**
+ * 身份与安全：Project Treble / 动态分区 / 无缝更新 / 验证启动（引导锁）/ 加密。
+ * 刷机人群的判定项全部来自只读系统属性（Treble Info 的判定口径）。
+ */
+export function readSecurityInfo() {
+  const out = { treble: '', dynamicPartitions: '', seamlessUpdates: '', verifiedBoot: '', cryptoType: '' }
+  // #ifdef APP-PLUS
+  try {
+    if (!isAndroidApp()) return out
+    const treble = sysProp('ro.treble.enabled')
+    out.treble = treble === 'true' ? '支持' : treble === 'false' ? '不支持' : ''
+    const dp = sysProp('ro.boot.dynamic_partitions') || sysProp('ro.dynamic_partitions')
+    out.dynamicPartitions = dp === 'true' ? '支持（动态分区）' : dp === 'false' ? '不支持' : ''
+    const ab = sysProp('ro.boot.virtual_ab.enabled') || sysProp('ro.virtual_ab.enabled')
+    out.seamlessUpdates = ab === 'true' ? '支持（虚拟 AB，OTA 不停机）' : ab === 'false' ? '不支持（A/B 之外的传统分区）' : ''
+    const vb = mapProp(sysProp('ro.boot.verifiedbootstate'), {
+      green: '已锁定（绿色，官方系统）',
+      orange: '已解锁（橙色，可刷第三方系统）',
+      yellow: '自签证书（黄色）',
+      red: '已损坏（红色）',
+    })
+    out.verifiedBoot = vb
+    const ct = mapProp(sysProp('ro.crypto.type'), { file: '文件级加密', block: '全盘加密' })
+    out.cryptoType = ct
+  } catch (e) {}
+  // #endif
+  return out
+}
+
+/** 图形与生态：GLES 版本 / Vulkan 支持 / WebView 与 Play 服务版本 */
+export function readGraphicsEco() {
+  const out = { gles: '', vulkan: '', vulkanCompute: '', webView: '', gms: '' }
+  // #ifdef APP-PLUS
+  try {
+    if (!isAndroidApp()) return out
+    const activity = androidActivity()
+    if (!activity) return out
+    const am = activity.getSystemService('activity')
+    const ci = am.getDeviceConfigurationInfo()
+    const v = Number(ci.reqGlEsVersion) || 0
+    if (v) out.gles = 'GLES ' + (v >> 16) + '.' + (v & 0xffff)
+    const pm = activity.getPackageManager()
+    out.vulkan = pm.hasSystemFeature('android.hardware.vulkan.version') ? '支持' : ''
+    out.vulkanCompute = pm.hasSystemFeature('android.hardware.vulkan.compute') ? '支持硬件计算' : ''
+    const ver = (pkg) => {
+      try {
+        const pi = pm.getPackageInfo(pkg, 0)
+        return String(pi.versionName || '')
+      } catch (e) {
+        return ''
+      }
+    }
+    out.webView = ver('com.google.android.webview')
+    out.gms = ver('com.google.android.gms')
+  } catch (e) {}
+  // #endif
+  return out
+}
+
+/** Widevine DRM 安全级别：L1 才能流媒体高清，L3 只能软解标清（DRM Info 的核心判定） */
+export function readDrmInfo() {
+  const out = { widevine: '', note: '' }
+  // #ifdef APP-PLUS
+  try {
+    if (!isAndroidApp()) return out
+    const MediaDrm = plus.android.importClass('android.media.MediaDrm')
+    const UUID = plus.android.importClass('java.util.UUID')
+    const uuid = UUID.fromString('edef8ba9-79d6-4ace-a3c8-27dcd51d21ed')
+    const drm = new MediaDrm(uuid)
+    const sec = String(drm.getPropertyString('securityLevel') || '')
+    out.widevine = sec.toUpperCase().indexOf('L1') > -1 ? 'L1（硬件级，可流媒体高清）' : sec ? sec + '（软解，流媒体高清受限）' : ''
+    try { drm.release() } catch (e) {}
+  } catch (e) {
+    out.note = '这台设备读不出 Widevine 信息'
+  }
+  // #endif
+  return out
+}
+
+/** 摄像头清单（Camera2）：前后置、传感器分辨率、硬件级别、闪光灯 */
+export function readCameras() {
+  const out = { list: [], count: 0 }
+  // #ifdef APP-PLUS
+  try {
+    if (!isAndroidApp()) return out
+    const activity = androidActivity()
+    if (!activity) return out
+    const CM = plus.android.importClass('android.hardware.camera2.CameraCharacteristics')
+    const mgr = activity.getSystemService('camera')
+    const ids = mgr.getCameraIdList()
+    const facingMap = { 0: '前置', 1: '后置', 2: '外接' }
+    const levelMap = { 3: 'LEGACY（最基础）', 1: 'LIMITED（基础）', 2: 'FULL（完整）', 4: 'EXTERNAL（外接）' }
+    const n = ids && ids.length !== undefined ? ids.length : 0
+    for (let i = 0; i < n; i++) {
+      try {
+        const ch = mgr.getCameraCharacteristics(String(ids[i]))
+        const facing = Number(ch.get(CM.LENS_FACING))
+        const size = ch.get(CM.SENSOR_INFO_PIXEL_ARRAY_SIZE)
+        const lvl = Number(ch.get(CM.INFO_SUPPORTED_HARDWARE_LEVEL))
+        let flash = ''
+        try {
+          flash = ch.get(CM.FLASH_INFO_AVAILABLE) ? ' · 闪光灯' : ''
+        } catch (e) {}
+        const w = size ? Number(size.getWidth()) : 0
+        const h = size ? Number(size.getHeight()) : 0
+        out.list.push({
+          key: 'cam' + i,
+          name: (facingMap[facing] || '摄像头 ' + i) + (w ? '（' + w + ' × ' + h + '）' : ''),
+          meta: [levelMap[lvl] || '', flash].filter(Boolean).join(' · '),
+        })
+      } catch (e) {}
+    }
+    out.count = out.list.length
+  } catch (e) {}
+  // #endif
+  return out
+}
+
+/** 电池加算：实时电流（µA）与剩余电量（µAh），配合电压算充电功率 */
+export function readBatteryPower() {
+  const out = { currentUa: 0, chargeUah: 0 }
+  // #ifdef APP-PLUS
+  try {
+    if (!isAndroidApp()) return out
+    const activity = androidActivity()
+    if (!activity) return out
+    const bm = activity.getSystemService('batterymanager')
+    const BM = plus.android.importClass('android.os.BatteryManager')
+    out.currentUa = Number(bm.getLongProperty(BM.BATTERY_PROPERTY_CURRENT_NOW)) || 0
+    out.chargeUah = Number(bm.getLongProperty(BM.BATTERY_PROPERTY_CHARGE_COUNTER)) || 0
+  } catch (e) {}
+  // #endif
+  return out
+}
+
+/** 充电功率：电压(µV) × 电流(µA) → 瓦（电流符号因机型而异，取绝对值） */
+export function fmtWatts(voltageUv, currentUa) {
+  const v = Number(voltageUv) / 1e6
+  const a = Math.abs(Number(currentUa)) / 1e6
+  if (!isFinite(v) || !isFinite(a) || v <= 0 || a <= 0) return ''
+  const w = v * a
+  if (w < 0.5) return ''
+  return (w >= 10 ? w.toFixed(0) : w.toFixed(1)) + ' W'
+}
+
+/** Swap / ZRAM：从 /proc/meminfo 提取 */
+export function readSwap() {
+  const out = { swapTotal: '', swapFree: '' }
+  // #ifdef APP-PLUS
+  try {
+    if (!isAndroidApp()) return out
+    const lines = execHeadLines('/proc/meminfo', 60)
+    const pick = (key) => {
+      const l = lines.find((x) => x.indexOf(key) === 0)
+      if (!l) return ''
+      const kb = Number(l.replace(/[^0-9]/g, ''))
+      return kb ? fmtGB(kb * 1024) : ''
+    }
+    out.swapTotal = pick('SwapTotal')
+    out.swapFree = pick('SwapFree')
   } catch (e) {}
   // #endif
   return out
