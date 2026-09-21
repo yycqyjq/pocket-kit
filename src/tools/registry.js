@@ -70,6 +70,14 @@ import ToolNumtheory from './components/ToolNumtheory.vue'
 import ToolChincal from './components/ToolChincal.vue'
 import ToolSplitbill from './components/ToolSplitbill.vue'
 import ToolTaxcn from './components/ToolTaxcn.vue'
+import ToolChecksum from './components/ToolChecksum.vue'
+import ToolX509 from './components/ToolX509.vue'
+import ToolBitwise from './components/ToolBitwise.vue'
+import ToolMarkdown from './components/ToolMarkdown.vue'
+import ToolExif from './components/ToolExif.vue'
+import ToolPickcolor from './components/ToolPickcolor.vue'
+import ToolBodysize from './components/ToolBodysize.vue'
+import ToolDevice from './components/ToolDevice.vue'
 
 export const CATEGORIES = [
   { key: 'all', name: '全部' },
@@ -686,7 +694,7 @@ export const TOOLS = [
   {
     id: 'aes',
     name: 'AES 加解密',
-    glyph: '密',
+    glyph: '盾',
     tint: '#3F5A75',
     cat: 'dev',
     desc: 'AES-128/192/256 · CBC / ECB',
@@ -712,6 +720,86 @@ export const TOOLS = [
     desc: 'SemVer 解析 · 比较 · 范围',
     intro: '按 SemVer 2.0.0 解析版本号，比较与排序、递增一位，判定 npm 式范围表达式，还能从文本里抓出版本号。',
     keywords: 'semver 语义化 版本 版本号 比较 排序 范围 npm 升级 release 递增',
+  },
+  {
+    id: 'checksum',
+    name: 'CRC 校验和',
+    glyph: '检',
+    tint: '#A8642F',
+    cat: 'dev',
+    desc: 'CRC8/16/32 · Adler · FNV',
+    intro: '一次算出 CRC8、九种 CRC16、CRC32、Adler-32 与 FNV-1a 32/64，支持文本、十六进制、十进制三种字节输入，并用公开已知值当场自检。',
+    keywords: 'crc crc8 crc16 crc32 modbus xmodem ccitt adler32 fnv fnv1a 校验和 校验值 多项式 初值 反转 check 字节 固件 通讯',
+  },
+  {
+    id: 'x509',
+    name: 'X509 证书',
+    glyph: '证',
+    tint: '#6B5B95',
+    cat: 'dev',
+    desc: 'PEM/DER 拆解 · SAN · 指纹',
+    intro: '手写 ASN.1 DER 读取器拆开证书：主体与颁发者 DN、有效期、公钥、SAN、全部扩展项，以及和 openssl 一致的 SHA-1/SHA-256 指纹，附吊销列表与私钥头部识别。',
+    keywords: 'x509 证书 ssl pem der asn1 解析 指纹 san 备用名称 有效期 颁发者 主体 crl 吊销 ca 公钥 openssl',
+  },
+  {
+    id: 'bitwise',
+    name: '位运算',
+    glyph: '位',
+    tint: '#4F6B8C',
+    cat: 'calc',
+    desc: '与或非 · 移位 · 位段抽取',
+    intro: '8~64 位宽的与、或、异或、非、移位与循环移位，逐位网格点一下就翻转，还能看原码反码补码、抽位段、查常用位模式，超过 32 位走 BigInt 不丢精度。',
+    keywords: '位运算 与 或 非 异或 xor and or not 移位 左移 右移 循环移位 掩码 mask 位段 bit 补码 反码 原码 寄存器 标志位',
+  },
+  {
+    id: 'markdown',
+    name: 'Markdown 互转',
+    glyph: 'M',
+    tint: '#4A6FA5',
+    cat: 'text',
+    desc: 'MD → HTML · HTML → MD',
+    intro: '纯手写解析器把 Markdown 渲染成 HTML（标题、表格、代码块、列表、引用全覆盖，原始 HTML 一律转义防注入），反向也能把任意 HTML 转回 Markdown，并给出大纲与统计。',
+    keywords: 'markdown md html 转换 渲染 预览 大纲 目录 表格 代码块 readme 转义 xss',
+  },
+  {
+    id: 'exif',
+    name: 'EXIF 元数据',
+    glyph: '元',
+    tint: '#7A6BA8',
+    cat: 'image',
+    desc: '拍摄信息 · GPS · 一键清除',
+    intro: '读本地图片的 EXIF、GPS、相机参数、内嵌缩略图与 PNG 文本块，按分组逐条列出并标注隐私风险，也能一键清除后另存。全程只读本地文件。',
+    keywords: 'exif 元数据 图片 信息 gps 位置 相机 光圈 快门 iso 拍摄时间 缩略图 png 文本块 清除 隐私 去水印',
+  },
+  {
+    id: 'pickcolor',
+    name: '图片取色',
+    glyph: '采',
+    tint: '#8C5B3E',
+    cat: 'image',
+    desc: '点哪儿取哪儿 · 取色板',
+    intro: '选一张图，放大镜对准像素点一下就取色，输出 HEX/RGB/HSL 等多种写法，支持手动定位、取色历史与整图取色板建议。',
+    keywords: '取色 颜色 吸管 图片 配色 色板 palette hex rgb hsl 放大镜 像素 提取颜色',
+  },
+  {
+    id: 'bodysize',
+    name: '尺码换算',
+    glyph: '尺',
+    tint: '#3F7A6E',
+    cat: 'calc',
+    desc: '鞋码 · 戒指 · 号型 · 文胸',
+    intro: '按公制公式与国标号型系列换算鞋码（含童码与放余量）、戒指圈号、服装 XS~XXXXL 与 175/96A 式号型、文胸中/日/欧/英/美对照，并给出偏码与越界提醒。',
+    keywords: '尺码 鞋码 脚长 厘米 欧码 美码 英码 日码 童码 戒指 圈号 港号 服装 号型 xs s m l xl 文胸 罩杯 底围 胸围 腰围 换算 对照表',
+  },
+  {
+    id: 'device',
+    name: '设备信息',
+    glyph: '机',
+    tint: '#4F6B8C',
+    cat: 'dev',
+    desc: '机型 · 屏幕 · CPU · 电池',
+    intro: '在 App 真机上读机型与系统补丁号、物理分辨率与刷新率档位、逐核实时频率、内存与存储占用、电池温度电压与健康度，以及传感器清单；读不到的字段如实显示，不猜。',
+    keywords: '设备 信息 机型 型号 厂商 soc 处理器 核心 频率 governor 内存 存储 电量 电池 温度 电压 健康度 屏幕 分辨率 密度 刷新率 高刷 传感器 开机时长 android build',
   },
 ]
 
@@ -779,6 +867,14 @@ const COMPONENTS = {
   chincal: ToolChincal,
   splitbill: ToolSplitbill,
   taxcn: ToolTaxcn,
+  checksum: ToolChecksum,
+  x509: ToolX509,
+  bitwise: ToolBitwise,
+  markdown: ToolMarkdown,
+  exif: ToolExif,
+  pickcolor: ToolPickcolor,
+  bodysize: ToolBodysize,
+  device: ToolDevice,
 }
 
 export const TOOL_COUNT = TOOLS.length

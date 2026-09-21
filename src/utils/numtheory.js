@@ -50,6 +50,8 @@ export const STEP_LIMIT = 120
 export const DIVISOR_LIST_LIMIT = 2000
 /** 素数筛的最大上限（内存保护） */
 export const SIEVE_LIMIT = 5000000
+/** nthPrime 能精确算到的最大序号，就是 π(SIEVE_LIMIT)；再大要换分段筛 */
+export const MAX_NTH_PRIME = 348513
 
 const DIGITS = '0123456789abcdefghijklmnopqrstuvwxyz'
 
@@ -369,6 +371,7 @@ export function factorize(value) {
     return {
       n: a.str,
       factors: [],
+      display: a.str,
       steps: [isZero ? '0 没有质因数分解（任何素数的 0 次幂乘积都不等于 0）' : '1 是单位，不是素数也没有质因数'],
       expression: a.str,
       divisorCount: isZero ? '∞' : '1',
@@ -689,7 +692,7 @@ export function primeNeighbors(value) {
 export function nthPrime(n) {
   const k = Math.round(Number(n))
   if (!(k >= 1)) throw new Error('请输入不小于 1 的序号')
-  if (k > 400000) throw new Error('序号过大（最多支持第 40 万个素数）')
+  if (k > MAX_NTH_PRIME) throw new Error('序号过大：受筛数上限 ' + SIEVE_LIMIT + ' 限制，最多支持第 ' + MAX_NTH_PRIME + ' 个素数')
   if (k < 6) return [2, 3, 5, 7, 11][k - 1]
   const estimate = k * (Math.log(k) + Math.log(Math.log(k))) + 6
   const primes = sievePrimes(Math.min(SIEVE_LIMIT, Math.ceil(estimate)))

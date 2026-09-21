@@ -374,6 +374,7 @@ import {
   fromRoman,
   placeValue,
   powerCheck,
+  MAX_NTH_PRIME,
 } from '@/utils/numtheory'
 import { toast } from '@/utils/clipboard'
 
@@ -384,12 +385,8 @@ const FACTOR_DIGITS = 15
 const SIEVE_VIEW = 100
 const AMI_VIEW = 30
 const AMI_MAX = 200000
-const NTH_MAX = 400000
-/**
- * nthPrime 名义上限是 40 万，但它内部要靠 sievePrimes 筛到 p_n 的估算区间，
- * 而 sievePrimes 会被 SIEVE_LIMIT 截断，所以真正能算出来的最大序号是 π(SIEVE_LIMIT)。
- */
-const NTH_USABLE = 348513
+/** nthPrime 能算到的最大序号就是 π(SIEVE_LIMIT)，util 里以 MAX_NTH_PRIME 收口 */
+const NTH_USABLE = MAX_NTH_PRIME
 const SIEVE_TXT = thou(SIEVE_LIMIT)
 const NTH_USABLE_TXT = thou(NTH_USABLE)
 

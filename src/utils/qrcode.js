@@ -2,7 +2,7 @@
  * 二维码（QR Code）编码 + 配套最小解码 —— 按 ISO/IEC 18004 从零实现
  * ------------------------------------------------------------
  * 覆盖范围：
- *   · 模式：数字 / 字母数字 / 字节（UTF-8），整体自动选最短模式，混合内容按段拆分优化；
+ *   · 模式：数字 / 字母数字 / 字节（UTF-8），混合内容用 DP 选总位数最少的分段；
  *   · 版本 1–40、纠错等级 L/M/Q/H；
  *   · GF(256) Reed–Solomon 纠错（本原多项式 0x11D，生成元 α=2）；
  *   · 8 种掩码 + 四罚分规则选优；
@@ -235,7 +235,7 @@ export function capacityOf(version, elevel) {
   const numAvail = bits - 4 - cciBits('numeric', v)
   const alnAvail = bits - 4 - cciBits('alphanumeric', v)
   const bytAvail = bits - 4 - cciBits('byte', v)
-  const numeric = numAvail < 0 ? 0 : Math.floor(numAvail / 10) * 3 + (numAvail % 10 >= 7 ? 3 : numAvail % 10 >= 4 ? 2 : 0)
+  const numeric = numAvail < 0 ? 0 : Math.floor(numAvail / 10) * 3 + (numAvail % 10 >= 7 ? 2 : numAvail % 10 >= 4 ? 1 : 0)
   const alphanumeric = alnAvail < 0 ? 0 : Math.floor(alnAvail / 11) * 2 + (alnAvail % 11 >= 6 ? 1 : 0)
   const byte = bytAvail < 0 ? 0 : Math.floor(bytAvail / 8)
   return {
@@ -266,40 +266,106 @@ function charClass(ch) {
   return 'byte'
 }
 
-/**
- * 把内容切成尽量短的段：
- *   · 全数字 → 1 个数字段；全字母数字 → 1 个字母数字段；
- *   · 含字节字符（中文、小写、emoji…）时，数字段并入相邻字节段（数字段单独成段省不了几位，
- *     却要多付一次段头），字母数字段保持独立，因为它比字节段省 2.5 bit/字符。
- */
-function splitSegments(text) {
-  const runs = []
-  const push = (mode, str) => {
-    if (!str) return
-    const last = runs[runs.length - 1]
-    if (last && last.mode === mode) last.text += str
-    else runs.push({ mode, text: str })
-  }
-  for (const ch of String(text)) push(charClass(ch), ch)
+/** 类别强度：字节段能表示一切，所以一个段里只要混进字节字符，整段就只能降级成字节模式 */
+const CLASS_RANK = { numeric: 0, alphanumeric: 1, byte: 2 }
+const RANK_MODE = ['numeric', 'alphanumeric', 'byte']
 
-  const hasByte = runs.some((r) => r.mode === 'byte')
-  if (!hasByte) {
-    const allNum = runs.every((r) => r.mode === 'numeric')
-    return [{ mode: allNum ? 'numeric' : 'alphanumeric', text }]
+/** 按字符类别切成最大连续段（emoji / 生僻字按完整码点走，不会被劈成两半） */
+function classRuns(text) {
+  const runs = []
+  for (const ch of String(text)) {
+    const mode = charClass(ch)
+    const last = runs[runs.length - 1]
+    if (last && last.mode === mode) last.text += ch
+    else runs.push({ mode, text: ch })
   }
-  const out = []
-  runs.forEach((r) => {
-    const mode = r.mode === 'numeric' ? 'byte' : r.mode
-    const last = out[out.length - 1]
-    if (last && last.mode === mode) last.text += r.text
-    else out.push({ mode, text: r.text })
-  })
-  return out
+  return runs
 }
 
-/** 整体最短模式（供「模式」字段与容量提示用） */
-function overallMode(text) {
-  const segs = splitSegments(text)
+/** 段内的编码长度：字节模式数的是 UTF-8 字节数，另两种数的是字符数 */
+function segCharLen(seg) {
+  return seg.mode === 'byte' ? utf8Bytes(seg.text).length : seg.text.length
+}
+
+/** 一套分段的总位数 */
+function planBits(segs, version) {
+  let acc = 0
+  for (const s of segs) acc += segmentBits(s.mode, segCharLen(s), version)
+  return acc
+}
+
+/** 连续段多到这个量级，O(n²) 的 DP 不划算，直接用整体字节段兜底 */
+const MAX_RUNS_FOR_DP = 300
+
+/**
+ * 分段最优化（DP）：切点只能落在连续段之间，所以「最后一段从哪个连续段起」就是全部状态。
+ *   f[i] = 前 i 个连续段的最少位数；f[i] = min over j ( f[j] + 段头 + 段体 )，
+ *   j..i-1 这几段合成一段，模式取其中最强的一种。
+ * 这样小写/中文混进 URL 时，零碎的大写小段会被邻居吞掉，省掉一次次 4+CCI 位的段头；
+ * 反过来足够长的字母数字段（比字节段省 2.5 bit/字符）会被保留独立成段。
+ * @returns {{mode:string, text:string}[]}
+ */
+function planSegments(runs, version) {
+  const n = runs.length
+  if (n <= 1) return runs.map((r) => ({ mode: r.mode, text: r.text }))
+  const whole = [{ mode: 'byte', text: runs.map((r) => r.text).join('') }]
+  if (n > MAX_RUNS_FOR_DP) return whole
+  const lens = runs.map((r) => r.text.length)
+  // 数字 / 字母数字都是 ASCII，字节数与字符数相同
+  const blens = runs.map((r) => (r.mode === 'byte' ? utf8Bytes(r.text).length : r.text.length))
+  const f = new Array(n + 1).fill(Infinity)
+  const from = new Array(n + 1).fill(0)
+  const modeAt = new Array(n + 1).fill('byte')
+  f[0] = 0
+  for (let i = 0; i < n; i++) {
+    if (f[i] === Infinity) continue
+    let rank = -1
+    let chars = 0
+    let bytes = 0
+    for (let j = i; j < n; j++) {
+      const rk = CLASS_RANK[runs[j].mode]
+      if (rk > rank) rank = rk
+      chars += lens[j]
+      bytes += blens[j]
+      const mode = RANK_MODE[rank]
+      const cost = f[i] + segmentBits(mode, mode === 'byte' ? bytes : chars, version)
+      if (cost < f[j + 1]) {
+        f[j + 1] = cost
+        from[j + 1] = i
+        modeAt[j + 1] = mode
+      }
+    }
+  }
+  const segs = []
+  for (let e = n; e > 0; e = from[e]) {
+    segs.unshift({ mode: modeAt[e], text: runs.slice(from[e], e).map((r) => r.text).join('') })
+  }
+  return segs
+}
+
+/** 版本按字符计数指示符分三档，同档内位数与版本无关 */
+const VERSION_TIERS = [[1, 9], [10, 26], [27, 40]]
+
+/**
+ * 自动选版本：先按档位做一次 DP 分段，再在该档里取第一个装得下的版本。
+ * @returns {{segments:Array, version:number}} version 为 0 表示 40 级也装不下
+ */
+function autoPickVersion(text, elevel) {
+  const runs = classRuns(text)
+  for (let t = 0; t < VERSION_TIERS.length; t++) {
+    const lo = VERSION_TIERS[t][0]
+    const hi = VERSION_TIERS[t][1]
+    const segs = planSegments(runs, lo)
+    const bits = planBits(segs, lo)
+    for (let v = lo; v <= hi; v++) {
+      if (bits <= blockInfo(v, elevel).dataCodewords * 8) return { segments: segs, version: v }
+    }
+  }
+  return { segments: planSegments(runs, 40), version: 0 }
+}
+
+/** 选段结果的整体模式（视图与容量提示用） */
+function overallMode(segs) {
   if (segs.length === 1) return segs[0].mode
   const kinds = {}
   segs.forEach((s) => (kinds[s.mode] = 1))
@@ -335,9 +401,8 @@ function encodeByte(list, str) {
 function buildBits(segments, version) {
   const bits = []
   segments.forEach((seg) => {
-    const len = seg.mode === 'byte' ? utf8Bytes(seg.text).length : seg.text.length
     pushBits(bits, MODE_BITS[seg.mode], 4)
-    pushBits(bits, len, cciBits(seg.mode, version))
+    pushBits(bits, segCharLen(seg), cciBits(seg.mode, version))
     if (seg.mode === 'numeric') encodeNumeric(bits, seg.text)
     else if (seg.mode === 'alphanumeric') encodeAlphanumeric(bits, seg.text)
     else encodeByte(bits, seg.text)
@@ -365,19 +430,6 @@ function toDataCodewords(bits, capacityBits) {
     cw[i] = acc
   }
   return cw
-}
-
-/** 选版本：给定分段与等级，返回能装下的最小版本（0 表示装不下） */
-function chooseVersion(segments, elevel, startVersion) {
-  const e = normElevel(elevel)
-  for (let v = Math.max(1, startVersion); v <= 40; v++) {
-    const cap = blockInfo(v, e).dataCodewords * 8
-    let fits = true
-    const probe = buildBits(segments, v)
-    if (probe.length > cap) fits = false
-    if (fits) return v
-  }
-  return 0
 }
 
 /** 交错：数据码字按块轮流输出，纠错码字再按块轮流输出 */
@@ -408,7 +460,7 @@ function interleave(dataCw, info) {
 
 /* ============================ 矩阵 ============================ */
 
-/** format info 第一份拷贝的 15 个位置（[行,列]，下标即 bit 序号，bit0 是最低位） */
+/** format info 第一份拷贝的 15 个位置（[行,列]；下标 i 那格放 format 值的第 14-i 位） */
 const FMT_POS_A = [
   [8, 0], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 7], [8, 8],
   [7, 8], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [0, 8],
@@ -575,7 +627,8 @@ function placeFormatAndVersion(grid, size, version, elevel, mask) {
   const fb = fmtPosB(size)
   const fmt = formatInfoBits(elevel, mask)
   for (let i = 0; i < 15; i++) {
-    const bit = (fmt >>> i) & 1
+    // 位置表的第 i 格放 format 值的第 (14-i) 位（bit14 落在 (8,0)，与真实二维码一致）
+    const bit = (fmt >>> (14 - i)) & 1
     const a = FMT_POS_A[i]
     grid[a[0] * size + a[1]] = bit
     grid[fb[i][0] * size + fb[i][1]] = bit
@@ -667,8 +720,9 @@ function toBoolMatrix(grid, size) {
  * @param {string} text 内容（支持中文 / emoji，按 UTF-8 走字节模式）
  * @param {{elevel?:string, version?:number, mask?:number}} [opts] mask 传 0–7 可指定掩码，默认罚分选优
  * @returns {{modules:boolean[][], size:number, version:number, elevel:string, mask:number,
- *   mode:string, segments:Array, bitLength:number, dataCodewords:number, codewords:number,
- *   blocks:number, eccPerBlock:number, capacity:Object, text:string, darkModule:boolean}}
+ *   penalty:number, mode:string, segments:Array, bitLength:number, usedRatio:number,
+ *   dataCodewords:number, codewords:number, blocks:number, eccPerBlock:number,
+ *   capacity:Object, text:string, darkModule:boolean}}
  */
 export function encode(text, opts) {
   const o = opts || {}
@@ -677,10 +731,12 @@ export function encode(text, opts) {
   const elevel = normElevel(o.elevel || 'M')
   const forced = normVersion(o.version)
 
-  const segments = splitSegments(str)
+  let segments
   let version = forced
   if (!version) {
-    version = chooseVersion(segments, elevel, 1)
+    const picked = autoPickVersion(str, elevel)
+    segments = picked.segments
+    version = picked.version
     if (!version) {
       const cap40 = capacityOf(40, elevel)
       throw new Error(
@@ -688,9 +744,10 @@ export function encode(text, opts) {
       )
     }
   } else {
-    const bits = buildBits(segments, version)
+    segments = planSegments(classRuns(str), version)
+    const bitsHere = buildBits(segments, version)
     const cap = blockInfo(version, elevel).dataCodewords * 8
-    if (bits.length > cap) {
+    if (bitsHere.length > cap) {
       const capHere = capacityOf(version, elevel)
       throw new Error(
         '版本 ' + version + '-' + elevel + ' 装不下：字节模式上限 ' + capHere.byte + ' 字节，当前 ' + utf8Bytes(str).length + ' 字节。换低纠错等级或缩短内容，或把版本改回自动'
@@ -730,6 +787,7 @@ export function encode(text, opts) {
     }
   }
   const grid = best.grid
+  const capacityBits = info.dataCodewords * 8
 
   return {
     modules: toBoolMatrix(grid, base.size),
@@ -738,13 +796,16 @@ export function encode(text, opts) {
     elevel,
     mask: best.mask,
     penalty: best.score,
-    mode: overallMode(str),
+    mode: overallMode(segments),
     segments: segments.map((s) => ({
       mode: s.mode,
-      chars: s.text.length,
+      chars: Array.from(s.text).length,
       bytes: s.mode === 'byte' ? utf8Bytes(s.text).length : s.text.length,
+      bits: segmentBits(s.mode, s.mode === 'byte' ? utf8Bytes(s.text).length : s.text.length, version),
     })),
     bitLength: bits.length,
+    /** 数据区占用比（0–1），视图里换算成百分比进度条 */
+    usedRatio: capacityBits ? bits.length / capacityBits : 0,
     dataCodewords: info.dataCodewords,
     codewords: info.totalCodewords,
     dataBytes: Array.from(dataCw),
@@ -753,8 +814,34 @@ export function encode(text, opts) {
     blocks: info.blocks,
     eccPerBlock: info.eccPerBlock,
     capacity: capacityOf(version, elevel),
+    bytes: utf8Bytes(str).length,
     text: str,
     darkModule: grid[(base.size - 8) * base.size + 8] === 1,
+  }
+}
+
+/**
+ * 某版本的功能图形占用（结构自校验用）：
+ * 数据格子数应当等于「总码字数 × 8 + 该版本的余比特」。
+ * @param {number} version
+ */
+export function layoutStats(version) {
+  const v = Number(version)
+  if (!v || v < 1 || v > 40) throw new Error('版本号要落在 1–40')
+  const { res, size } = buildFunctionMap(v)
+  let dataCells = 0
+  for (let i = 0; i < res.length; i++) if (!res[i]) dataCells++
+  const levels = {}
+  for (const e of ELEVEL_ORDER) levels[e] = blockInfo(v, e).totalCodewords
+  return {
+    version: v,
+    size,
+    modules: size * size,
+    functionCells: size * size - dataCells,
+    dataCells,
+    totalCodewords: Math.floor(dataCells / 8),
+    remainderBits: dataCells % 8,
+    levels,
   }
 }
 
@@ -782,7 +869,7 @@ export function decodeMatrix(modules) {
   const fb = fmtPosB(size)
   const read15 = (pos) => {
     let acc = 0
-    for (let i = 0; i < 15; i++) acc |= (flat[pos[i][0] * size + pos[i][1]] & 1) << i
+    for (let i = 0; i < 15; i++) acc |= (flat[pos[i][0] * size + pos[i][1]] & 1) << (14 - i)
     return acc
   }
   const bchOk = (fifteen) => {
@@ -853,7 +940,7 @@ export function decodeMatrix(modules) {
     const syn = rsSyndromes(full, eccPerBlock)
     if (syn.some((s) => s !== 0)) syndromesOk = false
   }
-  if (!syndromesOk) throw new Error('DBG ' + JSON.stringify({ elevel: fmt.elevel, mask: fmt.mask, cw: Array.from(cw), total }))
+  if (!syndromesOk) throw new Error('RS 伴随式非零，码字与纠错位不自洽')
 
   const data = new Uint8Array(info.dataCodewords)
   let q = 0
@@ -968,7 +1055,7 @@ export function buildWifi(payload) {
 }
 
 /**
- * 名片 vCard 3.4：BEGIN:VCARD / VERSION:3.0 … END:VCARD
+ * 名片 vCard 3.0：BEGIN:VCARD / VERSION:3.0 … END:VCARD
  * 换行用 \r\n；值里的 ; , \ 要先转义，换行转成 \\n（vCard 3.0 的写法）
  */
 export function buildVCard(payload) {
