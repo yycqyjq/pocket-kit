@@ -77,6 +77,8 @@ import ToolMarkdown from './components/ToolMarkdown.vue'
 import ToolExif from './components/ToolExif.vue'
 import ToolPickcolor from './components/ToolPickcolor.vue'
 import ToolBodysize from './components/ToolBodysize.vue'
+import ToolQrcode from './components/ToolQrcode.vue'
+import ToolWorldclock from './components/ToolWorldclock.vue'
 import ToolDevice from './components/ToolDevice.vue'
 
 export const CATEGORIES = [
@@ -512,6 +514,16 @@ export const TOOLS = [
     keywords: '占位 假文 lorem ipsum 填充 文案 占位符 排版 测试文本 mock 示例文字',
   },
   {
+    id: 'qrcode',
+    name: '二维码',
+    glyph: 'QR',
+    tint: '#3F5A75',
+    cat: 'make',
+    desc: '文本 / Wi-Fi / 名片 → 码',
+    intro: '纯本地把文本、链接、Wi-Fi 配置与名片 vCard 编码成二维码，纠错等级、缩放与反色可调，并给出版本、容量与分块结构，可保存到相册。',
+    keywords: '二维码 qrcode qr 条码 生成 wifi 无线 名片 vcard 联系人 扫码 纠错 ecc 掩码 版本 容量',
+  },
+  {
     id: 'garbled',
     name: '乱码恢复',
     glyph: '乱',
@@ -622,6 +634,26 @@ export const TOOLS = [
     keywords: 'uuid guid 解析 版本 v1 v4 v7 时间戳 变体 随机 nil 标识 对比 选型',
   },
   {
+    id: 'worldclock',
+    name: '世界时钟',
+    glyph: '钟',
+    tint: '#5B6B8C',
+    cat: 'time',
+    desc: '多城对照 · 时差 · 会议档',
+    intro: '收录上百座城市的 IANA 时区，按基准城市并列当地时间与跨日标记，算两城时差、找共同上班时段、生成会议邀请文本，夏令时切换日期单独列出。',
+    keywords: '时区 世界时钟 当地时间 时差 夏令时 dst utc gmt iana 会议 约时间 出差 跨时区 对照表 换算',
+  },
+  {
+    id: 'qrcode',
+    name: '二维码',
+    glyph: 'QR',
+    tint: '#2F8C7A',
+    cat: 'image',
+    desc: 'ISO 18004 · 容量 · Wi-Fi',
+    intro: '手写实现 ISO/IEC 18004 全链路：模式分段、Reed-Solomon 纠错、八种掩码择优，可选 L/M/Q/H 四级并直接存相册；附带 Wi-Fi 与 vCard 生成器和编码回解自检。',
+    keywords: '二维码 qr code 生成 条码 wifi 名片 vcard 纠错 容量 版本 掩码 reed-solomon 扫码 离线 生成器',
+  },
+  {
     id: 'datefmt',
     name: '日期格式互转',
     glyph: '格',
@@ -640,6 +672,16 @@ export const TOOLS = [
     desc: '农历 · 节气 · 干支 · 时辰',
     intro: '公历农历双向换算，给出干支、生肖、二十四节气、十二时辰与历书摘要，生日和已过天数一并算。',
     keywords: '农历 阴历 万年历 节气 干支 生肖 十二时辰 农历转公历 公历转农历 生日 老黄历',
+  },
+  {
+    id: 'worldclock',
+    name: '世界时钟',
+    glyph: '球',
+    tint: '#2F7A8C',
+    cat: 'time',
+    desc: '多城时刻 · 两城对照 · 会议时段',
+    intro: '多城市当前时刻一览，时间戳换算成各地读数，两城时差与工作时段重叠度，找出共同会议时段，逐小时对照表可直接发群。',
+    keywords: '世界时钟 时区 时差 多城市 会议 排期 夏令时 时间戳 utc 对照表 北京 纽约 伦敦 东京',
   },
   {
     id: 'httpdump',
@@ -875,6 +917,8 @@ const COMPONENTS = {
   pickcolor: ToolPickcolor,
   bodysize: ToolBodysize,
   device: ToolDevice,
+  qrcode: ToolQrcode,
+  worldclock: ToolWorldclock,
 }
 
 export const TOOL_COUNT = TOOLS.length

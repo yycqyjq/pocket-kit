@@ -4,7 +4,7 @@
       <PkRow label="引擎" :value="engineText" :copy="false" />
       <PkRow label="本机 UTC 偏移" :value="deviceText" :copy="false" />
       <PkRow label="收录城市" :value="ZONES.length + ' 座，分 ' + (ZONE_GROUPS.length - 1) + ' 组'" :copy="false" />
-      <PkRow v-if="!HAS_TZ" label="注意" value="当前环境取不到 IANA 时区数据，下面所有带 ± 的结果都按标准偏移给出，有夏令时的城市可能差 1 小时" color="var(--pk-warn)" :copy="false" stack />
+      <PkRow v-if="!HAS_TZ" label="精度提示" :value="degradeText" color="var(--pk-danger)" :copy="false" stack />
       <text class="prose">{{ ENGINE_NOTE }}</text>
     </PkCard>
 
@@ -24,6 +24,7 @@
         <view class="city__main">
           <text class="city__cn">{{ cnOf(k) }}</text>
           <text class="city__sub">{{ offsetOf(k) }} · {{ cnOffsetOf(k) }}{{ dstMarkOf(k) }}</text>
+          <text class="city__dst" :class="{ 'city__dst--on': dstBadgeOf(k).active }">{{ dstBadgeOf(k).text }}</text>
         </view>
         <text class="city__act" :class="{ 'city__act--on': k === baseKey }" @tap="setBase(k)">{{ k === baseKey ? '基准' : '设为基准' }}</text>
         <text class="city__act" @tap="removeCity(k)">移出</text>
@@ -41,6 +42,22 @@
       </view>
       <text v-if="found.length > SHOW_LIMIT" class="cap">只列前 {{ SHOW_LIMIT }} 条，再具体些（试试「洛杉矶」「+5:45」「Kolkata」）</text>
       <PkEmpty v-if="!found.length" title="没有匹配的城市" desc="换个写法试试：中文城市名、英文名、IANA 名或 UTC 偏移都能搜" />
+
+      <text class="cap" @tap="browse = !browse">按分组浏览全部 {{ ZONES.length }} 座（{{ browse ? '点击收起' : '点击展开' }}）</text>
+      <template v-if="browse">
+        <view v-for="g in grouped" :key="g.name" class="grp">
+          <text class="grp__h">{{ g.name }} · {{ g.items.length }} 座</text>
+          <view class="chip-row chip-row--in">
+            <text
+              v-for="z in g.items"
+              :key="z.key"
+              class="chip chip--sm"
+              :class="{ 'chip--on': isPicked(z.key) }"
+              @tap="toggleCity(z.key)"
+            >{{ z.cn }} {{ offsetLabel(z.std) }}</text>
+          </view>
+        </view>
+      </template>
     </PkCard>
 
     <!-- ======================= 现在几点 ======================= -->
@@ -179,6 +196,15 @@
           :copy="false"
           stack
         />
+        <PkRow
+          v-if="atWall.candidates.length > 1"
+          label="这一刻的两个候选"
+          :value="candidateText"
+          color="var(--pk-warn)"
+          :copy="false"
+          stack
+        />
+        <PkRow v-if="!atWall.candidates.length" label="这一刻" value="当地钟表上不存在，上面按拨快后的第一个瞬间给出" color="var(--pk-warn)" :copy="false" stack />
         <view v-for="r in atWall.rows" :key="r.key" class="zone">
           <view class="zone__l">
             <text class="zone__cn">{{ r.cn }}</text>
@@ -194,7 +220,33 @@
           </view>
         </view>
       </template>
+      <template v-if="invite">
+        <text class="cap">下面这段可直接粘进日历邀请（由 inviteText 生成，含 UTC 与时间戳）</text>
+        <PkOutput :value="invite" mono />
+        <view class="act-row">
+          <PkBtn text="复制邀请文案" kind="primary" block @tap="copyText(invite)" />
+        </view>
+      </template>
       <PkRow v-if="atWallError" label="提示" :value="atWallError" color="var(--pk-danger)" :copy="false" stack />
+    </PkCard>
+
+    <!-- ======================= 时间戳 / UTC / 设备 / 城市 四对齐 ======================= -->
+    <PkCard title="同一瞬间的四种写法" accent="var(--pk-accent)">
+      <template #extra>
+        <text class="mini-act" @tap="copyStamp">复制四行</text>
+      </template>
+      <template v-if="stamp">
+        <PkRow label="秒级时间戳" :value="stamp.stampSec" mono />
+        <PkRow label="毫秒级时间戳" :value="stamp.stampMs" mono />
+        <PkRow label="UTC" :value="stamp.utc + '（' + stamp.utcDate + ' ' + stamp.utcWeekday + '）'" mono />
+        <PkRow label="ISO 8601" :value="stamp.iso" mono />
+        <PkRow label="本机" :value="stamp.deviceDate + ' ' + stamp.deviceTime + ' ' + stamp.deviceWeekday + '（' + stamp.deviceOffsetText + '）'" :copy="false" />
+        <PkRow label="输入口径" :value="stamp.from" :copy="false" />
+        <PkRow label="北京（固定参考）" :value="stamp.beijing.date + ' ' + stamp.beijing.hm + ' ' + stamp.beijing.weekday + ' ' + stamp.beijing.offsetText + (stamp.beijing.crossDayMark ? '（' + stamp.beijing.crossDayMark + '）' : '')" :copy="false" />
+        <PkRow v-if="stamp.dstState !== 'ok'" label="切换日" :value="stamp.dstNote" color="var(--pk-warn)" :copy="false" stack />
+        <PkRow label="说明" :value="stamp.note" :copy="false" stack />
+      </template>
+      <PkRow v-if="stampError" label="提示" :value="stampError" color="var(--pk-danger)" :copy="false" stack />
     </PkCard>
 
     <!-- ======================= 会议窗口 ======================= -->
@@ -267,6 +319,7 @@ import { ref, computed, onUnmounted } from 'vue'
 import {
   ENGINE,
   ENGINE_NOTE,
+  HAS_INTL,
   HAS_TZ,
   CLOCK_NOTES,
   ZONES,
@@ -276,15 +329,19 @@ import {
   hasZone,
   zoneHasDst,
   searchZones,
+  zonesByGroup,
   aliasesOf,
   offsetLabel,
   offsetCn,
+  offsetAt,
+  isDstActive,
   humanGap,
   deviceOffsetMinutes,
   nowRows,
   zoneDetail,
   pairCompare,
   atWallInZone,
+  stampLinks,
   meetingSlots,
   dayGrid,
   worldSummaryText,
@@ -342,11 +399,33 @@ const query = ref('')
 
 const found = computed(() => searchZones(query.value, grp.value).slice(0, SHOW_LIMIT))
 
+/** 分组浏览：zonesByGroup() 给的是 [{name, items:[城市元数据]}] */
+const browse = ref(false)
+const grouped = computed(() => zonesByGroup())
+
 const isPicked = (k) => picked.value.indexOf(k) >= 0
 const cnOf = (k) => (hasZone(k) ? zone(k).cn : k)
 const offsetOf = (k) => (hasZone(k) ? offsetLabel(zone(k).std) : '')
 const cnOffsetOf = (k) => (hasZone(k) ? offsetCn(zone(k).std) : '')
 const dstMarkOf = (k) => (hasZone(k) && zoneHasDst(k) ? ' · 实行夏令时' : '')
+
+/** 某城市此刻的偏移与是否在夏令时里：先查会不会换表，再查这一刻换没换 */
+function dstBadgeOf(k) {
+  if (!hasZone(k)) return { active: false, text: '' }
+  const ms = tick.value
+  const o = offsetAt(k, ms)
+  const d = isDstActive(k, ms)
+  if (!zoneHasDst(k)) {
+    return { active: false, text: '不换表，全年 ' + offsetLabel(d.stdMinutes) + (o.approx ? '（降级固定值）' : '') }
+  }
+  return {
+    active: d.active,
+    text:
+      (d.active ? '正在夏令时 ' : '当前走标准偏移 ') + offsetLabel(o.minutes) +
+      '，标准 ' + offsetLabel(d.stdMinutes) + '，差 ' + humanGap(o.minutes - d.stdMinutes) +
+      (o.approx ? ' · 降级模式只按标准偏移，可能差 1 小时' : ''),
+  }
+}
 
 function toggleCity(k) {
   if (isPicked(k)) {
@@ -389,7 +468,16 @@ const listRun = computed(() => attempt(() => nowRows(picked.value, baseKey.value
 const list = computed(() => (listRun.value.data && listRun.value.data.rows.length ? listRun.value.data : null))
 const listRows = computed(() => (list.value ? list.value.rows : []))
 
-const engineText = computed(() => (HAS_TZ ? ENGINE + '（Intl，含夏令时与半小时区）' : ENGINE + '（固定标准偏移，未计夏令时）'))
+const engineText = computed(() =>
+  HAS_TZ
+    ? ENGINE + '（Intl 时区库，含夏令时与半小时区）'
+    : ENGINE + '（固定标准偏移，未计夏令时）' + (HAS_INTL ? '：有 Intl 但拿不到目标时区数据' : '：连 Intl.DateTimeFormat 都没有')
+)
+const degradeText = computed(() =>
+  '这台设备没有可用的 IANA 时区数据库（HAS_TZ = false），下面所有城市的偏移都退回表里的标准值：' +
+  '有夏令时的城市一年里有几个月会差 1 小时，切换日的「不存在 / 出现两次」也判不出来。' +
+  '结果不做假装精确的处理——带偏移的行都会标 ±1h，请直接以对方当地时钟为准复核。'
+)
 const deviceText = computed(() => {
   const m = deviceOffsetMinutes(tick.value)
   return offsetLabel(m) + ' · ' + offsetCn(m)
