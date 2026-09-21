@@ -1,0 +1,40 @@
+{
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^Pk(.*)": "@/components/Pk$1.vue"
+		}
+	},
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "随身匣",
+				"backgroundColorTop": "#F6F4EF",
+				"backgroundColorBottom": "#F6F4EF",
+				"disableScroll": false
+			}
+		},
+		{
+			"path": "pages/tool/tool",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "工具",
+				"backgroundColorTop": "#F6F4EF",
+				"backgroundColorBottom": "#F6F4EF"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "随身匣",
+		"navigationBarBackgroundColor": "#F6F4EF",
+		"backgroundColor": "#F6F4EF",
+		"backgroundColorTop": "#F6F4EF",
+		"backgroundColorBottom": "#F6F4EF",
+		"app-plus": {
+			"background": "#F6F4EF"
+		}
+	}
+}

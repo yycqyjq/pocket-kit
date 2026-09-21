@@ -1,0 +1,21 @@
+== openssl 判官 ==
+  FIPS-197 §5.2
+    mine 3925841d02dc09fbdc118597196a0b32
+    ossl 3925841d02dc09fbdc118597196a0b32
+    spec 3925841d02dc09fbdc118597196a0b32
+  SP800-38A F.1.1 b1
+    mine 3ad77bb40d7a3660a89ecaf32466ef97
+    ossl 3ad77bb40d7a3660a89ecaf32466ef97
+    spec 3ad77bb40d7a3660a89ecdf346ef7e22
+  FIPS-197 C.1
+    mine 69c4e0d86a7b0430d8cdb78070b4c55a
+    ossl 69c4e0d86a7b0430d8cdb78070b4c55a
+    spec 69c4e0d86a7b0430d8cdb78070b4c55a
+== 内置 selfTest: 56/57 ==
+
+aes.js FAIL 5/95
+  openssl ECB · SP800-38A F.1.1 b1  → 3ad77bb40d7a3660a89ecaf32466ef97 / 3ad77bb40d7a3660a89ecaf32466ef97 / 3ad77bb40d7a3660a89ecdf346ef7e22
+  selfTest · 迭代轮数改变密钥  → 期望 不同，实际 不同
+  十六进制含非法字符  → 报错文案不符：十六进制第 9 位「z」不是合法字符（只允许 0-9 与 a-f）
+  CBC 解密漏 IV  → 报错文案不符：末尾填充字节是 95，合法范围 1~16 —— 十有八九是密钥错了，或者密文被截断/改动过
+  错 IV → 填充校验失败  → 没有抛错
