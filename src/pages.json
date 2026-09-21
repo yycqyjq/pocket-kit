@@ -11,6 +11,7 @@
 			"style": {
 				"navigationStyle": "custom",
 				"navigationBarTitleText": "随身匣",
+				"enablePullDownRefresh": true,
 				"backgroundColorTop": "#F6F4EF",
 				"backgroundColorBottom": "#F6F4EF",
 				"disableScroll": false

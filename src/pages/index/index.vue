@@ -63,6 +63,7 @@
             hover-class="card--hover"
             :hover-stay-time="60"
             @tap="open(t)"
+            @longpress="quickFav(t)"
           >
             <PkGlyph :char="t.glyph" :tint="t.tint" :size="76" />
             <text class="card__n">{{ t.name }}</text>
@@ -91,6 +92,7 @@
             hover-class="card--hover"
             :hover-stay-time="60"
             @tap="open(t)"
+            @longpress="quickFav(t)"
           >
             <PkGlyph :char="t.glyph" :tint="t.tint" :size="76" />
             <text class="card__n">{{ t.name }}</text>
@@ -185,6 +187,11 @@
       </template>
     </view>
 
+    <!-- 回到顶部 -->
+    <view v-if="showTop" class="back-top" hover-class="back-top--hover" @tap="backTop">
+      <text class="back-top__t">顶部</text>
+    </view>
+
     <!-- 底部导航 -->
     <view class="tabbar" :style="{ paddingBottom: safeBottom + 'px' }">
       <view
@@ -204,7 +211,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { onShow } from '@dcloudio/uni-app'
+import { onShow, onPageScroll, onPullDownRefresh } from '@dcloudio/uni-app'
 import { statusBarHeight, safeBottom } from '@/utils/sys'
 import { theme, setTheme, themeColors } from '@/utils/theme'
 import { relativeTime } from '@/utils/date'
@@ -224,6 +231,7 @@ import {
   readSettings,
   writeSetting,
   clearRecent,
+  toggleFavorite,
   store,
   STORAGE_KEYS,
 } from '@/utils/storage'
@@ -370,6 +378,31 @@ onMounted(() => {
 })
 // 从工具页返回时刷新收藏与使用记录
 onShow(reload)
+
+// 首页滚过一屏后出现「回到顶部」，只在跨越阈值时改状态，避免滚动逐帧触发渲染
+const showTop = ref(false)
+onPageScroll((e) => {
+  const show = tab.value === 'home' && (e.scrollTop || 0) > 700
+  if (show !== showTop.value) showTop.value = show
+})
+
+function backTop() {
+  uni.pageScrollTo({ scrollTop: 0, duration: 140 })
+}
+
+/** 长按卡片：不进工具页，直接切换收藏 */
+function quickFav(t) {
+  if (!t) return
+  haptic()
+  const on = toggleFavorite(t.id)
+  reload()
+  toast((on ? '已收藏「' : '已取消收藏「') + t.name + '」')
+}
+
+onPullDownRefresh(() => {
+  reload()
+  uni.stopPullDownRefresh()
+})
 </script>
 
 <style scoped>
@@ -711,5 +744,28 @@ onShow(reload)
 }
 .tab__l--on {
   color: var(--pk-accent);
+}
+
+/* 回到顶部悬浮球：滚过一屏才出现 */
+.back-top {
+  position: fixed;
+  right: 28rpx;
+  bottom: 88px;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 999rpx;
+  background: var(--pk-card);
+  border: var(--pk-line-w) solid var(--pk-line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 70;
+}
+.back-top--hover {
+  opacity: 0.7;
+}
+.back-top__t {
+  font-size: 22rpx;
+  color: var(--pk-text-2);
 }
 </style>

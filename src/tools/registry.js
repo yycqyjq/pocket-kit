@@ -79,6 +79,7 @@ import ToolPickcolor from './components/ToolPickcolor.vue'
 import ToolBodysize from './components/ToolBodysize.vue'
 import ToolQrcode from './components/ToolQrcode.vue'
 import ToolWorldclock from './components/ToolWorldclock.vue'
+import { initials } from '@/utils/text'
 import ToolDevice from './components/ToolDevice.vue'
 
 export const CATEGORIES = [
@@ -916,7 +917,9 @@ export function toolsByCategory(cat) {
   return TOOLS.filter((t) => t.cat === cat)
 }
 
-/** 关键词搜索：命中名称、描述、关键词、分类名 */
+/** 关键词搜索：命中名称、描述、关键词、分类名，另支持名称拼音首字母（如 sl → 数论工具箱） */
+const PYI = {}
+
 export function searchTools(kw) {
   const q = String(kw || '').trim().toLowerCase()
   if (!q) return []
@@ -926,6 +929,8 @@ export function searchTools(kw) {
     const hay = [t.name, t.desc, t.intro, t.keywords, catName[t.cat] || '', t.glyph]
       .join(' ')
       .toLowerCase()
-    return hay.indexOf(q) > -1
+    if (hay.indexOf(q) > -1) return true
+    if (!PYI[t.id]) PYI[t.id] = String(initials(t.name) || '').toLowerCase()
+    return PYI[t.id].indexOf(q) > -1
   })
 }
