@@ -74,11 +74,11 @@ const SYM_SPEC = {
   code39: {
     name: 'Code 39',
     quiet: 10,
-    /** 数据字符数 → 模块数：13 × (n+2) + (n+1) 个窄间隔 */
+    /** 数据字符数 → 模块数：15 × (n+2) + (n+1) 个窄间隔 */
     build(payload) {
       const masks = [CODE39_DELIM]
       for (const ch of payload) masks.push(C39[ch])
-      masks.push(C39_DELIM)
+      masks.push(CODE39_DELIM)
       const structure = []
       masks.forEach((mask, i) => {
         const bits = code39Bits(mask)
@@ -98,7 +98,8 @@ const SYM_SPEC = {
     quiet: 11,
     digits: 13,
     build(payload) {
-      return eanBuild(payload, 6, 6, EAN_PAR[Number(payload[0])])
+      // 首位只体现在左半的 L/G 排列里，自己不占模块
+      return eanBuild(payload[0], payload.slice(1), 6, EAN_PAR[Number(payload[0])])
     },
   },
   ean8: {
@@ -106,7 +107,7 @@ const SYM_SPEC = {
     quiet: 7,
     digits: 8,
     build(payload) {
-      return eanBuild(payload, 4, 4, 'LLLL')
+      return eanBuild('', payload, 4, 'LLLL')
     },
   },
   upca: {
@@ -115,7 +116,7 @@ const SYM_SPEC = {
     digits: 12,
     build(payload) {
       // UPC-A 就是补了前导 0 的 EAN-13：首位 0 的奇偶行全是 L
-      return eanBuild('0' + payload, 6, 6, EAN_PAR[0])
+      return eanBuild('0', payload, 6, EAN_PAR[0])
     },
   },
 }
@@ -139,20 +140,25 @@ function code39Bits(mask) {
   return s
 }
 
-/** payload 已含校验位；left/right 为两半各自的位数（EAN-13 是 6/6，EAN-8 是 4/4） */
-function eanBuild(payload, left, right, par) {
+/**
+ * EAN 家族骨架：守卫 + 左半 + 中缝 + 右半 + 守卫。
+ * leading 是只靠奇偶表达、不占模块的首位（EAN-13 / UPC-A 有，EAN-8 没有）；
+ * body 为剩下的数字，前 leftCount 位走 L/G，其余走 R。
+ */
+function eanBuild(leading, body, leftCount, par) {
   const structure = [{ kind: 'guard', text: '', bits: GUARD_SIDE }]
-  for (let i = 0; i < left; i++) {
-    const d = Number(payload[i])
-    structure.push({ kind: par[i] === 'L' ? 'data' : 'dataG', text: payload[i], bits: par[i] === 'L' ? EAN_L[d] : EAN_G[d] })
+  for (let i = 0; i < leftCount; i++) {
+    const d = Number(body[i])
+    const useL = par[i] === 'L'
+    structure.push({ kind: useL ? 'data' : 'dataG', text: body[i], bits: useL ? EAN_L[d] : EAN_G[d] })
   }
   structure.push({ kind: 'guard', text: '', bits: GUARD_MID })
-  for (let i = left; i < left + right; i++) {
-    const d = Number(payload[i])
-    structure.push({ kind: 'data', text: payload[i], bits: EAN_R[d] })
+  for (let i = leftCount; i < body.length; i++) {
+    const d = Number(body[i])
+    structure.push({ kind: 'data', text: body[i], bits: EAN_R[d] })
   }
   structure.push({ kind: 'guard', text: '', bits: GUARD_SIDE })
-  return { bits: structure.map((s) => s.bits).join(''), structure }
+  return { bits: structure.map((s) => s.bits).join(''), structure, leading }
 }
 
 /* ------------------------------------------------------------------ *
@@ -192,8 +198,8 @@ export function normalize(text, sym) {
     throw new Error(spec.name + ' 需要 ' + (need - 1) + ' 位数字（校验位自动补），现在 ' + digits.length + ' 位')
   }
   const upper = raw.toUpperCase()
+  if (!upper) throw new Error('先输入要编码的内容')
   const bad = [...new Set([...upper].filter((c) => CODE39_CHARS.indexOf(c) < 0))]
-  if (!upper.trim()) throw new Error('先输入要编码的内容')
   if (bad.length) {
     const hasLower = [...raw].some((c) => c >= 'a' && c <= 'z')
     throw new Error(
@@ -270,11 +276,14 @@ export function readBack(modules, sym) {
   const spec = SYM_SPEC[sym]
   if (!spec) throw new Error('不认识这种条码：' + sym)
   if (sym === 'code39') {
-    const groups = modules.split('0')
+    // 每个字符 9 元素 = 3×3 + 6×1 = 15 模块，字符之间夹 1 模块白
+    const groups = []
+    for (let at = 0; at < modules.length; at += 16) groups.push(modules.slice(at, at + 15))
+    if (modules.length !== groups.length * 15 + (groups.length - 1)) throw new Error('回读：模块总数对不上 15/字符 + 1/间隔')
     const out = []
     for (let i = 0; i < groups.length; i++) {
       const g = groups[i]
-      if (g.length !== 13 || g[0] !== '1') throw new Error('回读：第 ' + (i + 1) + ' 段不是 13 模块的 Code 39 字符')
+      if (g.length !== 15 || g[0] !== '1') throw new Error('回读：第 ' + (i + 1) + ' 段不是 15 模块的 Code 39 字符')
       let mask = 0
       let at = 0
       for (let e = 0; e < 9; e++) {
@@ -285,7 +294,7 @@ export function readBack(modules, sym) {
         else if (len !== 1) throw new Error('回读：元素宽度既不是 1 模块也不是 3 模块')
         at += len
       }
-      if (at !== 13) throw new Error('回读：元素数不足 9 个')
+      if (at !== 15) throw new Error('回读：元素数不足 9 个')
       if (mask === CODE39_DELIM) {
         if (i !== 0 && i !== groups.length - 1) throw new Error('回读：分隔符出现在了中间')
         continue

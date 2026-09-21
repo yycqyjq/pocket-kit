@@ -43,6 +43,16 @@ export const store = {
 
 /* ---------------- 主题 ---------------- */
 
+/** 用户是否主动存过主题（没有存过 = 首次启动，可跟随系统） */
+export function hasStoredTheme() {
+  try {
+    const v = uni.getStorageSync(KEY.theme)
+    return v !== '' && v !== null && v !== undefined
+  } catch (e) {
+    return false
+  }
+}
+
 export function readTheme() {
   return safeGet(KEY.theme, 'light') === 'dark' ? 'dark' : 'light'
 }
@@ -90,6 +100,11 @@ export function pushRecent(id) {
   const list = readRecent().filter((x) => x.id !== id)
   list.unshift({ id, at: Date.now() })
   safeSet(KEY.recent, list.slice(0, RECENT_MAX))
+}
+
+/** 删除单条使用记录 */
+export function removeRecent(id) {
+  safeSet(KEY.recent, readRecent().filter((x) => x && x.id !== id))
 }
 
 export function clearRecent() {

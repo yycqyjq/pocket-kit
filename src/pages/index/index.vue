@@ -125,6 +125,9 @@
                 <text class="rec__d">{{ r.tool.desc }}</text>
               </view>
               <text class="rec__t">{{ r.time }}</text>
+              <view class="rec__del" hover-class="rec__del--hover" @tap.stop="removeRec(r.id)">
+                <text class="rec__del-t">删除</text>
+              </view>
             </view>
           </PkCard>
         </template>
@@ -231,6 +234,7 @@ import {
   readSettings,
   writeSetting,
   clearRecent,
+  removeRecent,
   toggleFavorite,
   store,
   STORAGE_KEYS,
@@ -403,6 +407,13 @@ onPullDownRefresh(() => {
   reload()
   uni.stopPullDownRefresh()
 })
+
+/** 删除单条使用记录（记录页行尾的「删除」） */
+function removeRec(id) {
+  removeRecent(id)
+  reload()
+  toast('已删除该条记录')
+}
 </script>
 
 <style scoped>
@@ -657,6 +668,18 @@ onPullDownRefresh(() => {
   font-size: 22rpx;
   color: var(--pk-text-3);
   flex-shrink: 0;
+}
+.rec__del {
+  margin-left: 16rpx;
+  padding: 14rpx 10rpx;
+  flex-shrink: 0;
+}
+.rec__del--hover {
+  opacity: 0.5;
+}
+.rec__del-t {
+  font-size: 22rpx;
+  color: var(--pk-text-3);
 }
 
 /* 设置单元格 */

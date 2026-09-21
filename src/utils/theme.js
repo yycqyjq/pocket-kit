@@ -4,7 +4,7 @@
  *      页面根节点 :class="{ 'theme-dark': theme.dark }"
  */
 import { reactive, computed } from 'vue'
-import { readTheme, writeTheme } from './storage'
+import { readTheme, writeTheme, hasStoredTheme } from './storage'
 
 export const theme = reactive({
   dark: false,
@@ -23,7 +23,19 @@ const SEMANTIC_DARK = { accent: '#6BB3A3', danger: '#D98070', warn: '#D0A05A' }
 export const themeColors = computed(() => (theme.dark ? SEMANTIC_DARK : SEMANTIC_LIGHT))
 
 export function initTheme() {
-  theme.dark = readTheme() === 'dark'
+  if (hasStoredTheme()) {
+    // 用户手动切过：以存档为准
+    theme.dark = readTheme() === 'dark'
+  } else {
+    // 首次启动：跟随系统深浅色，并把这份选择存档
+    let sysDark = false
+    try {
+      const sys = uni.getSystemInfoSync()
+      sysDark = sys.theme === 'dark'
+    } catch (e) {}
+    theme.dark = sysDark
+    writeTheme(theme.dark ? 'dark' : 'light')
+  }
   theme.ready = true
 }
 

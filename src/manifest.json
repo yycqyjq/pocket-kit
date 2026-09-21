@@ -9,6 +9,7 @@
     "app-plus" : {
         "usingComponents" : true,
         "nvueStyleCompiler" : "uni-app",
+        "darkmode" : true,
         "compilerVersion" : 3,
         "splashscreen" : {
             "alwaysShowBeforeRender" : true,
