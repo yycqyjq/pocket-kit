@@ -19,3 +19,6 @@ dist
 *.njsproj
 *.sln
 *.sw?
+# 自测脚手架运行时生成的模块副本（跑测试时自动重建）
+scripts/selftest/life/*.mjs
+!scripts/selftest/life/*.test.mjs

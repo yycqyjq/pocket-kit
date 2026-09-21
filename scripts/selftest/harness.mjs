@@ -9,7 +9,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-const UTILS = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'src', 'utils')
+const UTILS = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..', 'src', 'utils')
 const cache = new Map()
 
 function toDataUrl(src) {

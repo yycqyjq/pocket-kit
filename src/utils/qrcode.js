@@ -88,6 +88,9 @@ const ALIGN_CENTERS = [
 /** 字母数字模式字符表（下标即字符值） */
 const ALNUM_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'
 
+/** 静区（quiet zone）：标准要求四周各留至少 4 个模块的空白 */
+export const QUIET_ZONE = 4
+
 const MODE_BITS = { numeric: 1, alphanumeric: 2, byte: 4 }
 const ELEVEL_ORDER = 'LMQH'
 /** format info 里 2 bit 的等级编码（注意 M 是 00，L 才是 01） */
@@ -410,11 +413,11 @@ const FMT_POS_A = [
   [8, 0], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 7], [8, 8],
   [7, 8], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [0, 8],
 ]
-/** format info 第二份拷贝相对 size 的偏移 */
+/** format info 第二份拷贝：竖排 7 格（列 8，行 size-1…size-7），横排 8 格（行 8，列 size-8…size-1） */
 function fmtPosB(size) {
   const p = []
-  for (let i = 0; i <= 7; i++) p.push([size - 1 - i, 8])
-  for (let i = 8; i <= 14; i++) p.push([8, size - 15 + i])
+  for (let i = 0; i <= 6; i++) p.push([size - 1 - i, 8])
+  for (let i = 7; i <= 14; i++) p.push([8, size - 15 + i])
   return p
 }
 
@@ -458,7 +461,7 @@ function maskFlip(mask, row, col) {
  * grid: -1 未定（数据区）、0 白、1 黑； res: 1 表示功能图形，不能写字数据。
  */
 function buildFunctionMap(version) {
-  const size = version * 4 + 21
+  const size = version * 4 + 17
   const grid = new Int8Array(size * size).fill(-1)
   const res = new Uint8Array(size * size)
   const put = (r, c, dark) => {
@@ -593,12 +596,13 @@ function placeFormatAndVersion(grid, size, version, elevel, mask) {
  * 罚分（ISO/IEC 18004 四条评价条件）：
  *   规则一 行/列里长度 ≥5 的同色游程，各计 3 +（游程长 - 5）；
  *   规则二 每个同色 2×2 块计 3；
- *   规则三 出现与定位图形相似的 1:1:3:1:1 且单侧带 4 个白模块
- *          （等价于 11 模块窗口命中 10111010000 或 00001011101），每处计 40；
+ *   规则三 出现与定位图形同比例的 1:1:3:1:1（1011101）且单侧带 4 个白模块，
+ *          每处计 40。符号外的静区按白处理，所以定位图形自身的中行/中列也会被计入；
  *   规则四 黑模块占比偏离 50% 每满 5 个百分点计 10。
  */
 const FINDER_LIKE_A = [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0]
 const FINDER_LIKE_B = [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1]
+const PEN_PAD = QUIET_ZONE
 function penaltyScore(grid, size) {
   let score = 0
   const get = (r, c) => grid[r * size + c]
@@ -613,11 +617,14 @@ function penaltyScore(grid, size) {
       if (runLen >= 5) score += 3 + (runLen - 5)
       runLen = 1
     }
-    for (let i = 0; i + 11 <= count; i++) {
+    // 规则三：左右各补 4 个白模块，命中 10111010000 / 00001011101 记 40
+    const pad = new Array(count + PEN_PAD * 2).fill(0)
+    for (let i = 0; i < count; i++) pad[PEN_PAD + i] = read(i) ? 1 : 0
+    for (let i = 0; i + 11 <= pad.length; i++) {
       let a = true
       let b = true
       for (let j = 0; j < 11; j++) {
-        const v = read(i + j)
+        const v = pad[i + j]
         if (v !== FINDER_LIKE_A[j]) a = false
         if (v !== FINDER_LIKE_B[j]) b = false
         if (!a && !b) break
@@ -764,7 +771,7 @@ export function encode(text, opts) {
 export function decodeMatrix(modules) {
   const size = modules.length
   if (!size || size % 4 !== 1 || size < 21 || size > 177) throw new Error('矩阵尺寸不像二维码（应为 21–177 且 mod 4 = 1）')
-  const version = (size - 1) / 4
+  const version = (size - 17) / 4
   const flat = new Int8Array(size * size)
   for (let r = 0; r < size; r++) {
     if (!modules[r] || modules[r].length !== size) throw new Error('矩阵不是正方形')
@@ -788,7 +795,7 @@ export function decodeMatrix(modules) {
   const ELEVEL_BY_FMT = { 0b01: 'L', 0b00: 'M', 0b11: 'Q', 0b10: 'H' }
   const decode15 = (fifteen) => {
     const raw = fifteen ^ 0x5412
-    return { elevel: ELEVEL_BY_FMT[(raw >>> 14) & 3], mask: (raw >>> 12) & 7 }
+    return { elevel: ELEVEL_BY_FMT[(raw >>> 13) & 3], mask: (raw >>> 10) & 7 }
   }
   let fmt = null
   const cand = [read15(FMT_POS_A), read15(fb)]
@@ -846,7 +853,7 @@ export function decodeMatrix(modules) {
     const syn = rsSyndromes(full, eccPerBlock)
     if (syn.some((s) => s !== 0)) syndromesOk = false
   }
-  if (!syndromesOk) throw new Error('RS 伴随式非零，码字与纠错位不自洽')
+  if (!syndromesOk) throw new Error('DBG ' + JSON.stringify({ elevel: fmt.elevel, mask: fmt.mask, cw: Array.from(cw), total }))
 
   const data = new Uint8Array(info.dataCodewords)
   let q = 0
@@ -1003,6 +1010,3 @@ export const ELEVEL_INFO = [
   { key: 'Q', name: 'Q 约 25%', desc: '恢复约 25%，适合会被折一下、有磨损的场景' },
   { key: 'H', name: 'H 约 30%', desc: '恢复约 30%，最高冗余，常用于带 logo 的码' },
 ]
-
-/** 静区（quiet zone）：标准要求四周各留至少 4 个模块的空白 */
-export const QUIET_ZONE = 4
