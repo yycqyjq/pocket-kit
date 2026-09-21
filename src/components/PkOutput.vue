@@ -25,7 +25,7 @@ defineProps({
 .pk-out {
   margin: 8rpx 24rpx 18rpx;
   padding: 18rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
   overflow: hidden;

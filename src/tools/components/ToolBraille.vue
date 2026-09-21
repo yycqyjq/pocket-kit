@@ -157,7 +157,7 @@ run()
 .dots__p {
   display: flex;
   gap: 14rpx;
-  font-size: 19rpx;
+  font-size: 20rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
   line-height: 1.2;
@@ -182,14 +182,14 @@ run()
 }
 .cell__d {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
   font-family: Menlo, Consolas, monospace;
 }
 .cell__note {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 4rpx;
 }

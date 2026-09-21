@@ -523,7 +523,7 @@ function copyAll() {
   margin: 8rpx 14rpx 0 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .quick-i--on {
@@ -532,7 +532,7 @@ function copyAll() {
 }
 .tip {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
   padding: 10rpx 24rpx 12rpx;
@@ -546,7 +546,7 @@ function copyAll() {
 }
 .pct__t {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   line-height: 1.7;
   margin-bottom: 8rpx;
@@ -624,25 +624,25 @@ function copyAll() {
 }
 .out__v {
   min-width: 130rpx;
-  font-size: 25rpx;
+  font-size: 26rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text);
 }
 .out__s {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-2);
   margin-right: 16rpx;
 }
 .out__d {
   flex: 1;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
 }
 .out__d--x {
   color: var(--pk-danger);
 }
 .out__x {
-  font-size: 21rpx;
+  font-size: 22rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text-3);
 }
@@ -669,12 +669,12 @@ function copyAll() {
   padding-bottom: 6rpx;
 }
 .tb__c {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   font-family: Menlo, Consolas, monospace;
 }
 .tb__h .tb__c {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
 }
 .tb__c--1 {
@@ -741,7 +741,7 @@ function copyAll() {
   border-radius: 6rpx 6rpx 0 0;
 }
 .col__lb {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
   margin-top: 8rpx;
@@ -778,7 +778,7 @@ function copyAll() {
 }
 .note__t {
   display: block;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-weight: 600;
   margin-bottom: 8rpx;

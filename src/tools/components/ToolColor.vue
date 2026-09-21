@@ -202,12 +202,12 @@ watch(hex, (v) => {
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
 }
 .preview {
   height: 140rpx;
-  border-radius: 16rpx;
+  border-radius: var(--pk-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,7 +227,7 @@ watch(hex, (v) => {
 .swatch {
   width: 72rpx;
   height: 72rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   border: var(--pk-line-w) solid var(--pk-line);
 }
 .swatch--hover {
@@ -251,7 +251,7 @@ watch(hex, (v) => {
 .ch__v {
   width: 70rpx;
   text-align: right;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text-3);
 }
 .contrast {
@@ -262,7 +262,7 @@ watch(hex, (v) => {
 .contrast__box {
   flex: 1;
   height: 130rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -281,7 +281,7 @@ watch(hex, (v) => {
   padding: 12rpx 24rpx 20rpx;
 }
 .scheme__t {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
   display: block;
   margin-bottom: 12rpx;
@@ -293,7 +293,7 @@ watch(hex, (v) => {
 .scheme__cell {
   flex: 1;
   height: 96rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -316,7 +316,7 @@ watch(hex, (v) => {
   justify-content: center;
 }
 .ramp__cell:first-child {
-  border-radius: 12rpx 0 0 12rpx;
+  border-radius: var(--pk-radius-sm) 0 0 12rpx;
 }
 .ramp__cell:last-child {
   border-radius: 0 12rpx 12rpx 0;

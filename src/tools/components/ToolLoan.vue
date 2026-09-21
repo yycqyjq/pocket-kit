@@ -219,17 +219,17 @@ const visiblePlan = computed(() => {
   padding-top: 4rpx;
 }
 .quick__t {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
 }
 .quick__i {
   display: inline-block;
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   margin: 8rpx 0 0 16rpx;
   padding: 12rpx 18rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .cmp {
@@ -240,7 +240,7 @@ const visiblePlan = computed(() => {
 .cmp__col {
   flex: 1;
   padding: 20rpx 18rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-seg-bg);
   border: var(--pk-line-w) solid var(--pk-line);
   display: flex;
@@ -272,7 +272,7 @@ const visiblePlan = computed(() => {
 }
 .plan-head__c {
   /* 表头原来只有 21rpx（约 10.9px），手机上几乎看不清 */
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
 }
 .plan-head__c--1,

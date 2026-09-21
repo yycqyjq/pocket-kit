@@ -160,7 +160,7 @@ const error = computed(() => parsed.value.error)
 .warn {
   margin: 10rpx 24rpx 14rpx;
   padding: 16rpx 18rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: rgba(180, 85, 62, 0.1);
 }
 .warn__t {
@@ -188,7 +188,7 @@ const error = computed(() => parsed.value.error)
   align-items: baseline;
 }
 .common__o {
-  font-size: 27rpx;
+  font-size: 28rpx;
   font-weight: 600;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text);

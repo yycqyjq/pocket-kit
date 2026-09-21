@@ -141,7 +141,7 @@ function paste() {
 .dump {
   margin: 8rpx 24rpx 18rpx;
   padding: 18rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
   overflow: hidden;
@@ -161,18 +161,18 @@ function paste() {
   border-bottom: none;
 }
 .note__h {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   font-family: Menlo, Consolas, monospace;
 }
 .note__n {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text);
   margin-left: 16rpx;
 }
 .note__t {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
   line-height: 1.6;

@@ -105,14 +105,14 @@ const nearestName = computed(() => {
   align-items: center;
   justify-content: center;
   height: 96rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-accent-soft);
 }
 .pick--hover {
   opacity: 0.7;
 }
 .pick__t {
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-accent);
   font-weight: 600;
 }
@@ -122,7 +122,7 @@ const nearestName = computed(() => {
   justify-content: center;
   align-items: center;
   height: 360rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   overflow: hidden;
 }

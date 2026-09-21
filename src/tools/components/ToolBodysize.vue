@@ -601,19 +601,19 @@ function useRingSample(s) {
 <style scoped>
 .prose {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.75;
   color: var(--pk-text-3);
   padding: 10rpx 24rpx 18rpx;
 }
 .mini-act {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-accent);
   margin-left: 18rpx;
 }
 .cap {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.7;
   color: var(--pk-text-3);
   margin: 6rpx 0 12rpx;
@@ -629,7 +629,7 @@ function useRingSample(s) {
   margin: 8rpx 12rpx 0 0;
   padding: 12rpx 18rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
 }
@@ -705,7 +705,7 @@ function useRingSample(s) {
 }
 .tbl__c {
   flex: 1;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   text-align: right;
 }

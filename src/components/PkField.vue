@@ -91,7 +91,7 @@ function onInput(e) {
   color: var(--pk-text);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   padding: 0 22rpx;
   line-height: 1.5;
 }

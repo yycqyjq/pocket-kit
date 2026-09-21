@@ -107,7 +107,7 @@ function paste() {
 
 <style scoped>
 .mini-act {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-accent);
   margin-left: 18rpx;
 }
@@ -147,7 +147,7 @@ function paste() {
 }
 .hdr__note {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
   line-height: 1.6;
@@ -155,13 +155,13 @@ function paste() {
 .body {
   margin: 8rpx 24rpx 18rpx;
   padding: 18rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
   overflow: hidden;
 }
 .body__t {
-  font-size: 21rpx;
+  font-size: 22rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text-2);
   line-height: 1.8;
@@ -171,7 +171,7 @@ function paste() {
 .warn {
   margin: 10rpx 24rpx 16rpx;
   padding: 14rpx 18rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: rgba(180, 85, 62, 0.1);
 }
 .warn__t {

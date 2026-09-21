@@ -235,7 +235,7 @@ const rollSummary = computed(() => {
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
 }
 .act-row {
@@ -251,7 +251,7 @@ const rollSummary = computed(() => {
 .chip {
   padding: 14rpx 24rpx;
   margin: 8rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-seg-bg);
   border: var(--pk-line-w) solid var(--pk-line);
 }
@@ -288,7 +288,7 @@ const rollSummary = computed(() => {
   width: 76rpx;
   height: 76rpx;
   margin: 8rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-seg-bg);
   border: var(--pk-line-w) solid var(--pk-line);
   display: flex;
@@ -308,7 +308,7 @@ const rollSummary = computed(() => {
   border-bottom: var(--pk-line-w) solid var(--pk-line);
 }
 .group__t {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   display: block;
   margin-bottom: 8rpx;

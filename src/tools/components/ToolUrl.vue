@@ -151,11 +151,11 @@ function paste() {
 .warn {
   margin: 8rpx 24rpx 14rpx;
   padding: 14rpx 18rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: rgba(180, 85, 62, 0.1);
 }
 .warn__t {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-danger);
   line-height: 1.6;
 }

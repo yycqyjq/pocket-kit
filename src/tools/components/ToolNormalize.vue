@@ -143,7 +143,7 @@ function paste() {
   flex: 1;
 }
 .form__len {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-right: 14rpx;
 }
@@ -169,7 +169,7 @@ function paste() {
 }
 .form__note {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
   line-height: 1.6;
@@ -196,7 +196,7 @@ function paste() {
   min-width: 60rpx;
 }
 .ch__hex {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   font-family: Menlo, Consolas, monospace;
   min-width: 110rpx;
@@ -211,14 +211,14 @@ function paste() {
 }
 .ch__nfkc {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-warn);
   margin-top: 6rpx;
   font-family: Menlo, Consolas, monospace;
 }
 .ch__note {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
   line-height: 1.6;

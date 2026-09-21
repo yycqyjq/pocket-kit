@@ -488,14 +488,14 @@ function copyGroup() {
 <style scoped>
 .tip {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
   padding: 10rpx 0 4rpx;
 }
 .sub {
   display: block;
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   padding: 8rpx 0 10rpx;
 }
@@ -514,7 +514,7 @@ function copyGroup() {
   margin: 0 12rpx 10rpx 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .chips__i--on {
@@ -543,18 +543,18 @@ function copyGroup() {
 }
 .chain__e {
   flex: 1;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
 }
 .chain__v {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-family: Menlo, Consolas, monospace;
   margin-left: 12rpx;
 }
 .chain__d {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-accent);
   width: 140rpx;
   text-align: right;
@@ -616,14 +616,14 @@ function copyGroup() {
   border-bottom: var(--pk-line-w) solid var(--pk-line);
 }
 .list__n {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   flex: 1;
   min-width: 0;
   word-break: break-all;
 }
 .list__m {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-family: Menlo, Consolas, monospace;
   margin-left: 12rpx;
@@ -635,7 +635,7 @@ function copyGroup() {
   color: var(--pk-accent);
 }
 .list__p {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   width: 96rpx;
   text-align: right;
@@ -657,7 +657,7 @@ function copyGroup() {
 }
 .tr__f,
 .tr__t {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
 }
 .tr__f {
@@ -667,14 +667,14 @@ function copyGroup() {
   width: 160rpx;
 }
 .tr__a {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text-3);
   margin: 0 12rpx;
 }
 .tr__v {
   flex: 1;
   text-align: right;
-  font-size: 27rpx;
+  font-size: 28rpx;
   font-weight: 600;
   color: var(--pk-accent);
   font-family: Menlo, Consolas, monospace;
@@ -686,7 +686,7 @@ function copyGroup() {
   border-bottom: var(--pk-line-w) solid var(--pk-line);
 }
 .cmp__n {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text-2);
   width: 190rpx;
 }
@@ -696,19 +696,19 @@ function copyGroup() {
   color: var(--pk-text-3);
 }
 .cmp__v {
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-text);
   font-family: Menlo, Consolas, monospace;
 }
 .out {
   margin: 6rpx 0 16rpx;
   padding: 20rpx 22rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
 }
 .out__t {
-  font-size: 23rpx;
+  font-size: 24rpx;
   line-height: 1.9;
   color: var(--pk-text-2);
   white-space: pre-wrap;

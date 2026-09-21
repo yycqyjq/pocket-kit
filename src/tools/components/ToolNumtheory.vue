@@ -674,7 +674,7 @@ const limitRows = computed(() => [
   margin: 8rpx 14rpx 0 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .act-row {
@@ -684,7 +684,7 @@ const limitRows = computed(() => [
 }
 .tip {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
   padding: 10rpx 24rpx 12rpx;
@@ -709,7 +709,7 @@ const limitRows = computed(() => [
   color: var(--pk-warn);
 }
 .hero__s {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 4rpx;
   line-height: 1.7;
@@ -730,13 +730,13 @@ const limitRows = computed(() => [
   border-bottom: var(--pk-line-w) solid var(--pk-line);
 }
 .tb__c {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   font-family: Menlo, Consolas, monospace;
   word-break: break-all;
 }
 .tb__h .tb__c {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
 }
 .tb__c--1 {
@@ -755,7 +755,7 @@ const limitRows = computed(() => [
 }
 .steps__h {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   line-height: 1.7;
   margin-bottom: 6rpx;
@@ -770,7 +770,7 @@ const limitRows = computed(() => [
 }
 .steps__m {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   padding-top: 8rpx;
 }
@@ -803,7 +803,7 @@ const limitRows = computed(() => [
 }
 .bases__t {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-bottom: 8rpx;
 }
@@ -822,7 +822,7 @@ const limitRows = computed(() => [
 }
 .bases__n {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-2);
 }
@@ -832,7 +832,7 @@ const limitRows = computed(() => [
 }
 .pv__h {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   line-height: 1.7;
 }
@@ -848,7 +848,7 @@ const limitRows = computed(() => [
   min-width: 92rpx;
   margin: 6rpx 10rpx 6rpx 0;
   padding: 10rpx 6rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-bg-soft);
 }
 .pv__d {
@@ -858,12 +858,12 @@ const limitRows = computed(() => [
   color: var(--pk-text);
 }
 .pv__u {
-  font-size: 19rpx;
+  font-size: 20rpx;
   color: var(--pk-text-3);
   margin-top: 2rpx;
 }
 .pv__e {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
 }
 .krow {
@@ -874,19 +874,19 @@ const limitRows = computed(() => [
 }
 .krow__i {
   width: 56rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   flex-shrink: 0;
 }
 .krow__v {
   flex: 1;
-  font-size: 25rpx;
+  font-size: 26rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text);
   word-break: break-all;
 }
 .krow__p {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-left: 14rpx;
   flex-shrink: 0;
@@ -900,7 +900,7 @@ const limitRows = computed(() => [
 }
 .note__t {
   display: block;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-weight: 600;
   margin-bottom: 8rpx;

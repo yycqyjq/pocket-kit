@@ -649,19 +649,19 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
 <style scoped>
 .prose {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.75;
   color: var(--pk-text-3);
   padding: 10rpx 24rpx 18rpx;
 }
 .mini-act {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-accent);
   margin-left: 18rpx;
 }
 .cap {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.7;
   color: var(--pk-text-3);
   margin: 8rpx 0;
@@ -713,7 +713,7 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
   margin: 8rpx 12rpx 0 0;
   padding: 12rpx 18rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
 }
@@ -750,7 +750,7 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
 }
 .city__dst {
   display: block;
-  font-size: 19rpx;
+  font-size: 20rpx;
   line-height: 1.6;
   color: var(--pk-text-3);
 }
@@ -762,7 +762,7 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
 }
 .grp__h {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   font-weight: 600;
   color: var(--pk-text-2);
   margin-bottom: 4rpx;
@@ -775,11 +775,11 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
   padding: 9rpx 12rpx;
 }
 .city__act {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-2);
   margin-left: 16rpx;
   padding: 10rpx 14rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   border: var(--pk-line-w) solid var(--pk-line-strong);
   flex-shrink: 0;
 }
@@ -802,7 +802,7 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
 }
 .zone__cn {
   display: block;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
 }
 .zone__c {
@@ -816,7 +816,7 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
 }
 .zone__cross {
   display: block;
-  font-size: 19rpx;
+  font-size: 20rpx;
   color: var(--pk-warn);
 }
 .zone__r {
@@ -825,13 +825,13 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
 }
 .zone__off {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text-2);
 }
 .zone__meta {
   display: block;
-  font-size: 19rpx;
+  font-size: 20rpx;
   color: var(--pk-text-3);
 }
 .pair {
@@ -861,7 +861,7 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
 }
 .picker {
   height: 76rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
   display: flex;
@@ -870,7 +870,7 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
   padding: 0 20rpx;
 }
 .picker__t {
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-text);
 }
 .picker__chev {
@@ -902,7 +902,7 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
 }
 .slot__head {
   display: block;
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
 }
 .slot__line {
@@ -932,7 +932,7 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
 }
 .tbl__c {
   flex: 1;
-  font-size: 21rpx;
+  font-size: 22rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text-3);
   text-align: right;
@@ -945,7 +945,7 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
   text-align: left;
 }
 .tbl__flag {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: var(--pk-warn);
   margin-left: 6rpx;
 }

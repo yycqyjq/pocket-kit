@@ -109,7 +109,7 @@ const asciiOut = computed(() => {
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   margin-left: 24rpx;
 }
@@ -117,7 +117,7 @@ const asciiOut = computed(() => {
   margin-top: 16rpx;
 }
 .from-label {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
   display: block;
   margin-bottom: 12rpx;

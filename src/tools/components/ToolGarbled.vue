@@ -120,13 +120,13 @@ function paste() {
   align-items: center;
 }
 .cand__rank {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
   margin-right: 14rpx;
 }
 .cand__label {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   flex: 1;
 }
@@ -154,7 +154,7 @@ function paste() {
 }
 .tip {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   padding: 8rpx 24rpx 16rpx;
 }

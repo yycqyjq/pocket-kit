@@ -145,7 +145,7 @@ function doMerge() {
   margin: 8rpx 14rpx 0 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .hero {
@@ -179,26 +179,26 @@ function doMerge() {
   border-bottom: var(--pk-line-w) solid var(--pk-line);
 }
 .subnet__cidr {
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-accent);
   min-width: 220rpx;
 }
 .subnet__range {
   flex: 1;
-  font-size: 21rpx;
+  font-size: 22rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text-3);
   word-break: break-all;
 }
 .subnet__hosts {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-left: 12rpx;
 }
 .subnet__more {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   padding-top: 14rpx;
 }

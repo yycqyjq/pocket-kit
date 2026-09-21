@@ -393,7 +393,7 @@ onShow(reload)
 .brand__mark {
   width: 68rpx;
   height: 68rpx;
-  border-radius: 20rpx;
+  border-radius: var(--pk-radius-lg);
   background: var(--pk-accent-soft);
   border: 1px solid var(--pk-accent);
   display: flex;
@@ -443,7 +443,7 @@ onShow(reload)
   align-items: center;
   height: 76rpx;
   padding: 0 22rpx;
-  border-radius: 16rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-card);
   border: 1px solid var(--pk-line);
   margin-bottom: 8rpx;
@@ -470,12 +470,12 @@ onShow(reload)
 }
 .search__input {
   flex: 1;
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-text);
   height: 76rpx;
 }
 .search__clear {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   padding-left: 16rpx;
   flex-shrink: 0;
@@ -536,12 +536,12 @@ onShow(reload)
   padding: 26rpx 0 16rpx;
 }
 .section__t {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
   letter-spacing: 1rpx;
 }
 .section__a {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
 }
 
@@ -555,7 +555,7 @@ onShow(reload)
   width: calc(50% - 20rpx);
   margin: 10rpx;
   padding: 26rpx 24rpx 28rpx;
-  border-radius: 20rpx;
+  border-radius: var(--pk-radius-lg);
   background: var(--pk-card);
   border: 1px solid var(--pk-line);
   position: relative;
@@ -566,7 +566,7 @@ onShow(reload)
   opacity: 0.72;
 }
 .card__n {
-  font-size: 29rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: var(--pk-text);
   margin-top: 22rpx;
@@ -645,7 +645,7 @@ onShow(reload)
   color: var(--pk-text);
 }
 .cell__v {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
 }
 .foot {

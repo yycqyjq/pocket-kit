@@ -162,7 +162,7 @@ function paste() {
 }
 .ver__n {
   display: block;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-weight: 600;
 }

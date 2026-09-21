@@ -57,9 +57,9 @@ function goBack() {
   padding: 0 12px;
 }
 .pk-nav__back {
-  width: 40px;
-  height: 40px;
-  margin-left: -8px;
+  width: 44px;
+  height: 44px;
+  margin-left: -6px;
   display: flex;
   align-items: center;
   justify-content: center;

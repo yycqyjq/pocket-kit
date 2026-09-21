@@ -124,7 +124,7 @@ function codeTone(code) {
   margin-right: 16rpx;
 }
 .item__code--info {
-  color: #4A6FA5;
+  color: var(--pk-info);
 }
 .item__code--ok {
   color: var(--pk-accent);
@@ -136,7 +136,7 @@ function codeTone(code) {
   color: var(--pk-danger);
 }
 .item__name {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text-2);
   flex: 1;
 }
@@ -147,7 +147,7 @@ function codeTone(code) {
   min-width: 130rpx;
 }
 .item__mime {
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-accent);
   flex: 1;

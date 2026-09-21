@@ -151,14 +151,14 @@ function pasteValue() {
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   margin-left: 22rpx;
 }
 .verdict {
   margin: 4rpx 24rpx 16rpx;
   padding: 24rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   display: flex;
   flex-direction: column;
 }
@@ -168,7 +168,7 @@ function pasteValue() {
   letter-spacing: 2rpx;
 }
 .verdict__tip {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   margin-top: 10rpx;
   line-height: 1.6;

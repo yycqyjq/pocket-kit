@@ -34,9 +34,9 @@ function onTap() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 76rpx;
+  height: 88rpx;
   padding: 0 34rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   border: var(--pk-line-w) solid transparent;
   box-sizing: border-box;
 }
@@ -73,7 +73,7 @@ function onTap() {
   color: var(--pk-danger);
 }
 .pk-btn__t {
-  font-size: 27rpx;
+  font-size: 28rpx;
   letter-spacing: 1rpx;
 }
 .pk-btn--disabled {

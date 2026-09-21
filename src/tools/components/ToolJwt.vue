@@ -130,11 +130,11 @@ function paste() {
 .warn {
   margin: 8rpx 24rpx 14rpx;
   padding: 14rpx 18rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: rgba(168, 100, 47, 0.12);
 }
 .warn__t {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-warn);
   line-height: 1.6;
 }
@@ -150,7 +150,7 @@ function paste() {
   align-items: center;
 }
 .claim__k {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text-2);
   font-family: Menlo, Consolas, monospace;
   flex: 1;
@@ -170,15 +170,15 @@ function paste() {
   background: rgba(180, 85, 62, 0.12);
 }
 .claim__copy {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-2);
   padding: 8rpx 16rpx;
   border: var(--pk-line-w) solid var(--pk-line-strong);
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
 }
 .claim__v {
   display: block;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-family: Menlo, Consolas, monospace;
   word-break: break-all;
@@ -193,7 +193,7 @@ function paste() {
 }
 .claim__doc {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
 }

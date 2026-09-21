@@ -31,6 +31,12 @@ page {
      改这一处即可全局调粗细，公共组件与工具边框都走它 */
   --pk-line-w: 1px;
 
+  /* 圆角三档：卡片 lg / 输入与按钮 md / 小元件 sm。
+     取值原先散在各组件（20/16/14/12/10 各有拥趸），收口成 token 后改一处全局生效 */
+  --pk-radius-lg: 20rpx;
+  --pk-radius-md: 14rpx;
+  --pk-radius-sm: 10rpx;
+
   --pk-text: #1d2521;
   --pk-text-2: #5d6862;
   /* 三级文字也要保证可读：此值对米白底约 4.5:1、对白卡片约 4.9:1 */
@@ -49,6 +55,8 @@ page {
   --pk-danger: #b4553e;
   --pk-danger-soft: rgba(180, 85, 62, 0.35);
   --pk-warn: #a8642f;
+  /* 蓝色信息色：代码类标签与数据图表的次强调色（与青瓷主色区分） */
+  --pk-info: #4a6fa5;
 
   --pk-shadow: 0 6rpx 24rpx rgba(29, 37, 33, 0.06);
   --pk-shadow-sm: 0 2rpx 8rpx rgba(29, 37, 33, 0.08);
@@ -87,6 +95,7 @@ page {
   --pk-danger: #d98070;
   --pk-danger-soft: rgba(217, 128, 112, 0.4);
   --pk-warn: #d0a05a;
+  --pk-info: #8fb0de;
 
   --pk-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.35);
   --pk-shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
@@ -132,7 +141,7 @@ slider {
    写成 0-3-0 是为了稳定压过各工具组件里的 scoped 同名规则 */
 .pk-page .pk-field .mini-act {
   display: inline-block;
-  padding: 14rpx 10rpx;
+  padding: 20rpx 12rpx;
   margin-left: 12rpx;
   line-height: 1.3;
 }
@@ -141,7 +150,7 @@ slider {
    上一条匹配不到。padding 本地规则没有声明，所以 0-2-0 就能生效 */
 .pk-page .mini-act {
   display: inline-block;
-  padding: 14rpx 10rpx;
+  padding: 20rpx 12rpx;
   line-height: 1.3;
 }
 

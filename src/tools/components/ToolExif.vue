@@ -324,14 +324,14 @@ async function saveClear() {
   align-items: center;
   justify-content: center;
   height: 96rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-accent-soft);
 }
 .pick--hover {
   opacity: 0.7;
 }
 .pick__t {
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-accent);
   font-weight: 600;
 }
@@ -341,7 +341,7 @@ async function saveClear() {
   justify-content: center;
   align-items: center;
   height: 320rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   overflow: hidden;
 }
@@ -355,7 +355,7 @@ async function saveClear() {
 .notice {
   padding: 14rpx 18rpx;
   margin-bottom: 12rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-bg-soft);
   border-left: 6rpx solid var(--pk-text-3);
 }
@@ -400,7 +400,7 @@ async function saveClear() {
   align-items: baseline;
 }
 .field__name {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-weight: 600;
 }
@@ -415,7 +415,7 @@ async function saveClear() {
 .field__val {
   display: block;
   margin-top: 4rpx;
-  font-size: 25rpx;
+  font-size: 26rpx;
   line-height: 1.5;
   color: var(--pk-text-2);
   word-break: break-all;
@@ -423,7 +423,7 @@ async function saveClear() {
 .field__note {
   display: block;
   margin-top: 4rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
 }
 .field__copy {
@@ -445,7 +445,7 @@ async function saveClear() {
 .thumb {
   margin: 8rpx 24rpx 12rpx;
   height: 240rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   display: flex;
   align-items: center;
@@ -460,12 +460,12 @@ async function saveClear() {
   max-height: 340rpx;
   margin: 4rpx 24rpx 12rpx;
   padding: 16rpx 18rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
 }
 .segs__t {
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.7;
   color: var(--pk-text-2);
 }
@@ -477,7 +477,7 @@ async function saveClear() {
   border-bottom: none;
 }
 .warn__t {
-  font-size: 23rpx;
+  font-size: 24rpx;
   line-height: 1.55;
   color: var(--pk-warn);
 }

@@ -329,7 +329,7 @@ function profileText() {
 .tip {
   display: block;
   padding: 6rpx 24rpx 14rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
 }
@@ -344,7 +344,7 @@ function profileText() {
   color: var(--pk-text-2);
 }
 .freq-head__a {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   padding: 8rpx 12rpx;
 }
@@ -357,19 +357,19 @@ function profileText() {
 .freq-cell {
   min-width: 148rpx;
   padding: 12rpx 16rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
 }
 .freq-cell__i {
   display: block;
-  font-size: 19rpx;
+  font-size: 20rpx;
   color: var(--pk-text-3);
 }
 .freq-cell__v {
   display: block;
   margin-top: 4rpx;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text);
 }
@@ -389,7 +389,7 @@ function profileText() {
 }
 .sensor-row__n {
   flex: 1;
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text);
   word-break: break-all;
 }
@@ -397,7 +397,7 @@ function profileText() {
   flex-shrink: 0;
   max-width: 46%;
   text-align: right;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   word-break: break-all;
 }

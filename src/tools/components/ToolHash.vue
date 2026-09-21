@@ -134,7 +134,7 @@ watch(input, (v) => {
   margin: 8rpx 14rpx 0 0;
   padding: 10rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   border: var(--pk-line-w) solid var(--pk-line-strong);
 }
 .algo-chip--on {
@@ -154,7 +154,7 @@ watch(input, (v) => {
   align-items: center;
 }
 .algo-item__n {
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-text);
   font-weight: 600;
   margin-right: 16rpx;
@@ -165,7 +165,7 @@ watch(input, (v) => {
   flex: 1;
 }
 .algo-item__tag {
-  font-size: 21rpx;
+  font-size: 22rpx;
   padding: 4rpx 14rpx;
   border-radius: 999rpx;
 }

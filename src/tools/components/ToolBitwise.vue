@@ -429,7 +429,7 @@ function applyQuick(v) {
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   margin-left: 24rpx;
 }
@@ -444,7 +444,7 @@ function applyQuick(v) {
   color: var(--pk-text-2);
 }
 .seg-label__warn {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-warn);
 }
 .quick-row {
@@ -484,7 +484,7 @@ function applyQuick(v) {
 .bit {
   width: 72rpx;
   margin-right: 6rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-bg-soft);
   border: var(--pk-line-w) solid var(--pk-line);
   display: flex;
@@ -510,13 +510,13 @@ function applyQuick(v) {
   font-weight: 600;
 }
 .bit__i {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: var(--pk-text-3);
   margin-top: 2rpx;
 }
 .grid-hint {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin: 4rpx 24rpx 14rpx;
 }
@@ -531,13 +531,13 @@ function applyQuick(v) {
   align-items: baseline;
 }
 .op-name {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-weight: 600;
   margin-right: 14rpx;
 }
 .op-expr {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
 }
@@ -548,7 +548,7 @@ function applyQuick(v) {
   margin-top: 6rpx;
 }
 .op-hex {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-accent);
   font-family: Menlo, Consolas, monospace;
   margin-right: 20rpx;
@@ -560,7 +560,7 @@ function applyQuick(v) {
 }
 .op-bin {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-2);
   font-family: Menlo, Consolas, monospace;
   margin-top: 4rpx;
@@ -598,7 +598,7 @@ function applyQuick(v) {
   flex-direction: column;
 }
 .step__v {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-family: Menlo, Consolas, monospace;
 }
@@ -609,7 +609,7 @@ function applyQuick(v) {
 }
 .twos-note {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-2);
   margin: 12rpx 24rpx 4rpx;
 }
@@ -643,7 +643,7 @@ function applyQuick(v) {
   line-height: 1.2;
 }
 .stat-cell__k {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
 }
@@ -658,7 +658,7 @@ function applyQuick(v) {
 .cheat__name {
   flex: none;
   width: 168rpx;
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   margin-right: 16rpx;
 }
@@ -704,7 +704,7 @@ function applyQuick(v) {
   flex-direction: column;
 }
 .check__name {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text);
 }
 .check__val {

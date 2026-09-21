@@ -229,7 +229,7 @@ watch(input, (v) => {
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   margin-left: 24rpx;
 }
@@ -264,7 +264,7 @@ watch(input, (v) => {
 .op {
   padding: 16rpx 22rpx;
   margin: 8rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-seg-bg);
   border: var(--pk-line-w) solid var(--pk-line);
 }
@@ -272,7 +272,7 @@ watch(input, (v) => {
   opacity: 0.6;
 }
 .op__t {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
 }
 .act-row {

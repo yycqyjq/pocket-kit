@@ -42,7 +42,7 @@ const bodyPadding = computed(() => {
 <style scoped>
 .pk-card {
   background: var(--pk-card);
-  border-radius: 20rpx;
+  border-radius: var(--pk-radius-lg);
   margin-bottom: 24rpx;
   overflow: hidden;
   border: var(--pk-line-w) solid var(--pk-line);

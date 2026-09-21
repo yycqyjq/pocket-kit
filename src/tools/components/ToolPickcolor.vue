@@ -436,14 +436,14 @@ function copyPalette() {
   align-items: center;
   justify-content: center;
   height: 96rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-accent-soft);
 }
 .pick--hover {
   opacity: 0.7;
 }
 .pick__t {
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-accent);
   font-weight: 600;
 }
@@ -457,13 +457,13 @@ function copyPalette() {
   margin-bottom: 10rpx;
 }
 .bar__t {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
 }
 .stage {
   width: 100%;
   height: 560rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
   white-space: nowrap;
@@ -481,7 +481,7 @@ function copyPalette() {
   width: 180rpx;
   height: 180rpx;
   flex-shrink: 0;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   overflow: hidden;
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line-strong);
@@ -521,17 +521,17 @@ function copyPalette() {
   margin-bottom: 8rpx;
 }
 .mag__k {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
   width: 140rpx;
   flex-shrink: 0;
 }
 .mag__v {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
 }
 .mag__note {
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.5;
   color: var(--pk-warn);
 }
@@ -539,7 +539,7 @@ function copyPalette() {
   margin-top: 16rpx;
 }
 .hint__t {
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.6;
   color: var(--pk-text-3);
 }
@@ -568,7 +568,7 @@ function copyPalette() {
 }
 .swatch {
   height: 140rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -599,11 +599,11 @@ function copyPalette() {
 }
 .cr__v {
   flex: 1;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
 }
 .badge {
-  font-size: 21rpx;
+  font-size: 22rpx;
   padding: 2rpx 12rpx;
   border-radius: 8rpx;
 }
@@ -630,7 +630,7 @@ function copyPalette() {
 .hist__dot {
   width: 56rpx;
   height: 56rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   flex-shrink: 0;
   border: var(--pk-line-w) solid var(--pk-line-strong);
 }
@@ -641,19 +641,19 @@ function copyPalette() {
 }
 .hist__hex {
   display: block;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
 }
 .hist__pos {
   display: block;
   margin-top: 2rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
 }
 .hist__del {
   flex-shrink: 0;
   padding: 6rpx 16rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-bg-soft);
 }
 .hist__del-t {
@@ -663,7 +663,7 @@ function copyPalette() {
 .pal {
   display: flex;
   height: 96rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   overflow: hidden;
   margin-top: 18rpx;
   border: var(--pk-line-w) solid var(--pk-line-strong);
@@ -686,7 +686,7 @@ function copyPalette() {
 .pal-item__dot {
   width: 40rpx;
   height: 40rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   flex-shrink: 0;
   border: var(--pk-line-w) solid var(--pk-line-strong);
 }
@@ -703,7 +703,7 @@ function copyPalette() {
 .pal-item__tip {
   display: block;
   margin-top: 2rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
 }
 </style>

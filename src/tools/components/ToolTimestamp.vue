@@ -163,7 +163,7 @@ function useNow() {
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
 }
 .now {
@@ -180,7 +180,7 @@ function useNow() {
   letter-spacing: 1rpx;
 }
 .now__s {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
   margin-top: 12rpx;
 }

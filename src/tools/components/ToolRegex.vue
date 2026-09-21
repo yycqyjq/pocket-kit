@@ -126,7 +126,7 @@ function useItem(item) {
   flex-direction: column;
   align-items: center;
   padding: 12rpx 20rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-seg-bg);
   border: var(--pk-line-w) solid var(--pk-line);
 }
@@ -170,7 +170,7 @@ function useItem(item) {
   color: var(--pk-text-2);
 }
 .hl-hit {
-  color: #fff;
+  color: var(--pk-on-accent);
   background: var(--pk-accent);
   border-radius: 4rpx;
 }
@@ -214,7 +214,7 @@ function useItem(item) {
   margin-left: 16rpx;
   padding: 10rpx 20rpx;
   line-height: 1.2;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   border: var(--pk-line-w) solid var(--pk-accent);
   flex-shrink: 0;
   align-self: center;

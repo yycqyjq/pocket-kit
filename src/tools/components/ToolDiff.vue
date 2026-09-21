@@ -136,7 +136,7 @@ function loadSample() {
   margin: 8rpx 14rpx 0 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .diff {
@@ -157,7 +157,7 @@ function loadSample() {
 .diff__no {
   width: 52rpx;
   flex-shrink: 0;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
   text-align: right;
@@ -171,7 +171,7 @@ function loadSample() {
 }
 .diff__t {
   flex: 1;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text);
   word-break: break-all;
@@ -188,7 +188,7 @@ function loadSample() {
 }
 .charline {
   padding: 12rpx 24rpx;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-family: Menlo, Consolas, monospace;
   line-height: 1.8;
   color: var(--pk-text-2);

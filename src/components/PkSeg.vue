@@ -46,11 +46,11 @@ function pick(v) {
   display: inline-flex;
   padding: 6rpx;
   background: var(--pk-seg-bg);
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
 }
 .pk-seg__item {
   padding: 12rpx 26rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   transition: background 0.15s;
   flex-shrink: 0;
   flex-grow: 0;
@@ -63,7 +63,7 @@ function pick(v) {
   opacity: 0.7;
 }
 .pk-seg__text {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text-2);
   white-space: nowrap;
 }

@@ -237,7 +237,7 @@ function runSelfTest() {
   margin: 8rpx 14rpx 0 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .crow {
@@ -268,7 +268,7 @@ function runSelfTest() {
   word-break: break-all;
 }
 .crow__dec {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
   margin-right: 16rpx;
@@ -278,7 +278,7 @@ function runSelfTest() {
   font-size: 22rpx;
   color: var(--pk-text-2);
   padding: 10rpx 18rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   border: var(--pk-line-w) solid var(--pk-line-strong);
   flex-shrink: 0;
 }
@@ -309,7 +309,7 @@ function runSelfTest() {
   border-bottom: none;
 }
 .vrow__n {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   margin-bottom: 4rpx;
 }
@@ -333,7 +333,7 @@ function runSelfTest() {
 }
 .note__t {
   display: block;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-weight: 600;
   margin-bottom: 8rpx;

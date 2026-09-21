@@ -165,7 +165,7 @@ function swapWithOutput() {
 }
 .picker {
   height: 76rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
   display: flex;
@@ -174,7 +174,7 @@ function swapWithOutput() {
   padding: 0 20rpx;
 }
 .picker__t {
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-text);
 }
 .picker__chev {

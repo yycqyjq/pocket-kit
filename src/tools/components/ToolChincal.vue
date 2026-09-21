@@ -527,12 +527,12 @@ function copySources() {
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
 }
 .tip {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
   padding: 10rpx 0 4rpx;
@@ -549,7 +549,7 @@ function copySources() {
   margin: 8rpx 12rpx 0 0;
   padding: 12rpx 18rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .chips__i--on {
@@ -569,7 +569,7 @@ function copySources() {
   letter-spacing: 4rpx;
 }
 .hero__sub {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
   margin-top: 12rpx;
 }
@@ -577,7 +577,7 @@ function copySources() {
   padding: 6rpx 24rpx 16rpx;
 }
 .para__t {
-  font-size: 25rpx;
+  font-size: 26rpx;
   line-height: 1.9;
   color: var(--pk-text-2);
 }
@@ -592,13 +592,13 @@ function copySources() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
 }
 .sc__i--on {
   background: var(--pk-accent-soft);
 }
 .sc__z {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
 }
 .sc__i--on .sc__z {
@@ -617,11 +617,11 @@ function copySources() {
   padding: 8rpx 24rpx 14rpx;
 }
 .nt__k {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
 }
 .nt__v {
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-accent);
   font-weight: 600;
   text-align: right;
@@ -638,7 +638,7 @@ function copySources() {
   display: flex;
   align-items: center;
   padding: 12rpx 8rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
 }
 .terms__i--on {
   background: var(--pk-accent-soft);
@@ -654,7 +654,7 @@ function copySources() {
   font-family: Menlo, Consolas, monospace;
 }
 .terms__j {
-  font-size: 19rpx;
+  font-size: 20rpx;
   color: var(--pk-text-3);
   margin-left: auto;
 }

@@ -185,7 +185,7 @@ function build(key, a, b) {
 .warn {
   margin: 8rpx 24rpx 16rpx;
   padding: 14rpx 18rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: rgba(168, 100, 47, 0.12);
 }
 .warn__t {

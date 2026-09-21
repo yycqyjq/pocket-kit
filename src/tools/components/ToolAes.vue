@@ -503,7 +503,7 @@ function runSelfTest() {
   margin: 6rpx 0 6rpx 14rpx;
   padding: 10rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   border: var(--pk-line-w) solid var(--pk-line-strong);
 }
 .chip--on {
@@ -521,12 +521,12 @@ function runSelfTest() {
   background: var(--pk-input);
 }
 .blk--head .blk__h {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
 }
 .blk__i {
   width: 44rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
   flex-shrink: 0;
@@ -551,13 +551,13 @@ function runSelfTest() {
   border-bottom: var(--pk-line-w) solid var(--pk-line);
 }
 .vrow__n {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   margin-right: 16rpx;
   flex-shrink: 0;
 }
 .vrow__r {
-  font-size: 21rpx;
+  font-size: 22rpx;
   text-align: right;
   word-break: break-all;
   color: var(--pk-text-3);
@@ -580,7 +580,7 @@ function runSelfTest() {
 .note__i {
   width: 34rpx;
   flex-shrink: 0;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
 }

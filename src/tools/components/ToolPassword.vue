@@ -137,13 +137,13 @@ onMounted(gen)
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
 }
 .pw-box {
   margin: 4rpx 24rpx 0;
   padding: 28rpx 22rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-seg-bg);
   border: var(--pk-line-w) solid var(--pk-line);
   min-height: 108rpx;

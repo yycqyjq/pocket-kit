@@ -137,7 +137,7 @@ const entityTable = computed(() => NAMED_ENTITIES.slice(0, 48))
   margin: 0 16rpx;
 }
 .esc__to {
-  font-size: 25rpx;
+  font-size: 26rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-accent);
   flex: 1;
@@ -158,7 +158,7 @@ const entityTable = computed(() => NAMED_ENTITIES.slice(0, 48))
   width: calc(25% - 12rpx);
   margin: 6rpx;
   padding: 12rpx 6rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
   display: flex;

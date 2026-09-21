@@ -565,7 +565,7 @@ const uptimeNote = computed(() => {
 .env {
   padding: 20rpx 24rpx;
   margin: 16rpx 24rpx 8rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-bg-soft);
   border-left: 6rpx solid var(--pk-line-strong);
 }
@@ -580,7 +580,7 @@ const uptimeNote = computed(() => {
 }
 .env__t {
   display: block;
-  font-size: 27rpx;
+  font-size: 28rpx;
   font-weight: 600;
   color: var(--pk-text);
   line-height: 1.6;
@@ -599,7 +599,7 @@ const uptimeNote = computed(() => {
   line-height: 1.8;
   margin: 12rpx 24rpx 4rpx;
   padding: 14rpx 18rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-bg-soft);
 }
 .notes {
@@ -648,7 +648,7 @@ const uptimeNote = computed(() => {
   flex: 1;
 }
 .batt__s {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
 }
 .cores {
@@ -670,7 +670,7 @@ const uptimeNote = computed(() => {
   color: var(--pk-text-2);
   padding: 10rpx 16rpx;
   margin: 0 12rpx 12rpx 0;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-bg-soft);
 }
 .sensors {

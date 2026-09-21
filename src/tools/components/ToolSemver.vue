@@ -403,12 +403,12 @@ function usePair(p) {
   margin: 8rpx 14rpx 0 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .tip {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
   padding: 10rpx 24rpx 12rpx;
@@ -427,7 +427,7 @@ function usePair(p) {
   line-height: 1.4;
 }
 .hero__s {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 4rpx;
 }
@@ -441,7 +441,7 @@ function usePair(p) {
   justify-content: space-between;
 }
 .fld__k {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
   flex-shrink: 0;
   margin-right: 16rpx;
@@ -457,7 +457,7 @@ function usePair(p) {
 }
 .fld__t {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.7;
   color: var(--pk-text-3);
   margin-top: 6rpx;
@@ -488,11 +488,11 @@ function usePair(p) {
 }
 .inc__v--bad {
   color: var(--pk-danger);
-  font-size: 21rpx;
+  font-size: 22rpx;
 }
 .inc__note {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.7;
   color: var(--pk-text-3);
   margin-top: 6rpx;
@@ -508,14 +508,14 @@ function usePair(p) {
 }
 .grp__t {
   flex: 1;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text-2);
   word-break: break-all;
   line-height: 1.6;
 }
 .grp__hit {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-left: 14rpx;
   flex-shrink: 0;
@@ -566,20 +566,20 @@ function usePair(p) {
   margin-top: 4rpx;
 }
 .cr__rel {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-left: 14rpx;
   flex-shrink: 0;
 }
 .grp__more {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   padding-top: 10rpx;
 }
 .grp__pre {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.7;
   color: var(--pk-warn);
   padding-top: 10rpx;
@@ -593,7 +593,7 @@ function usePair(p) {
 .brk__lvl {
   width: 84rpx;
   flex-shrink: 0;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   text-align: center;
   border-radius: 8rpx;
@@ -623,7 +623,7 @@ function usePair(p) {
 }
 .brk__d {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.75;
   color: var(--pk-text-3);
   margin-top: 6rpx;
@@ -642,7 +642,7 @@ function usePair(p) {
 }
 .srow__v {
   flex: 1;
-  font-size: 25rpx;
+  font-size: 26rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text);
   word-break: break-all;
@@ -665,7 +665,7 @@ function usePair(p) {
   padding: 10rpx 24rpx 0;
 }
 .rej__i {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-danger);
   background: var(--pk-danger-soft);
   margin: 6rpx 10rpx 0 0;
@@ -682,7 +682,7 @@ function usePair(p) {
 }
 .note__t {
   display: block;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-weight: 600;
   margin-bottom: 8rpx;

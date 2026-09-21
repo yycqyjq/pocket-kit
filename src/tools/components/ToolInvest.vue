@@ -188,7 +188,7 @@ const rule72Out = computed(() => {
 .tip-box {
   margin: 10rpx 24rpx 16rpx;
   padding: 14rpx 18rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .tip-box__t {

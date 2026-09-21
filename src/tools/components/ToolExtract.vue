@@ -123,7 +123,7 @@ function paste() {
 }
 .item__v {
   display: block;
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text);
   font-family: Menlo, Consolas, monospace;
   padding: 10rpx 0;
@@ -136,7 +136,7 @@ function paste() {
 }
 .note {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   padding: 0 24rpx 14rpx;
   line-height: 1.6;

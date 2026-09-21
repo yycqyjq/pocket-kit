@@ -60,7 +60,7 @@ function onTap() {
   align-items: stretch;
 }
 .pk-row__k {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text-3);
   flex-shrink: 0;
   margin-right: 20rpx;
@@ -81,7 +81,7 @@ function onTap() {
   justify-content: flex-start;
 }
 .pk-row__v {
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-text);
   text-align: right;
   word-break: break-all;
@@ -93,7 +93,7 @@ function onTap() {
 }
 .pk-row__v--mono {
   font-family: Menlo, Consolas, "Courier New", monospace;
-  font-size: 25rpx;
+  font-size: 26rpx;
   letter-spacing: 0.5rpx;
 }
 .pk-row__v--big {
@@ -103,8 +103,11 @@ function onTap() {
 .pk-row__copy {
   margin-left: 16rpx;
   margin-top: 2rpx;
-  padding: 10rpx 18rpx;
-  border-radius: 10rpx;
+  min-height: 72rpx;
+  display: flex;
+  align-items: center;
+  padding: 14rpx 20rpx;
+  border-radius: var(--pk-radius-sm);
   /* 素色描边而不是实心色块：结果行里六成都有复制按钮，
      实心色块一屏堆十几个非常吵，压过了数据本身 */
   background: transparent;

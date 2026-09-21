@@ -314,7 +314,7 @@ function copyOutline() {
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   margin-left: 24rpx;
 }
@@ -324,7 +324,7 @@ function copyOutline() {
   margin: 4rpx 0 14rpx;
 }
 .sample {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   background: var(--pk-seg-bg);
   border: var(--pk-line-w) solid var(--pk-line);
@@ -369,7 +369,7 @@ function copyOutline() {
   word-break: break-all;
 }
 .ol-meta {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
 }
@@ -394,7 +394,7 @@ function copyOutline() {
   line-height: 1.2;
 }
 .stat-cell__k {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
 }
@@ -403,7 +403,7 @@ function copyOutline() {
 .md-panel {
   background: var(--pk-bg-soft);
   border: var(--pk-line-w) solid var(--pk-line);
-  border-radius: 16rpx;
+  border-radius: var(--pk-radius-md);
   padding: 24rpx 22rpx;
 }
 /*
@@ -411,7 +411,7 @@ function copyOutline() {
   否则深色模式会白底白字。scoped + :deep() 才能命中 v-html 插进来的节点。
 */
 .md-body {
-  font-size: 27rpx;
+  font-size: 28rpx;
   line-height: 1.75;
   color: var(--pk-text);
   word-break: break-word;
@@ -439,7 +439,7 @@ function copyOutline() {
   font-size: 28rpx;
 }
 :deep(.pk-md__h--5) {
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: var(--pk-text-2);
 }
 :deep(.pk-md__h--6) {
@@ -479,7 +479,7 @@ function copyOutline() {
 :deep(.pk-md__pre) {
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   padding: 20rpx 18rpx;
   margin: 18rpx 0;
   overflow-x: auto;
@@ -494,7 +494,7 @@ function copyOutline() {
 :deep(.pk-md__code) {
   display: block;
   font-family: Menlo, Consolas, monospace;
-  font-size: 23rpx;
+  font-size: 24rpx;
   line-height: 1.7;
   color: var(--pk-text);
   white-space: pre;
@@ -563,7 +563,7 @@ function copyOutline() {
 }
 :deep(.pk-md__img) {
   max-width: 100%;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   border: var(--pk-line-w) solid var(--pk-line);
   display: block;
   margin: 14rpx 0;

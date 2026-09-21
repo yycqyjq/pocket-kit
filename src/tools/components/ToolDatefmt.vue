@@ -118,7 +118,7 @@ const resultText = computed(() => {
 
 <style scoped>
 .mini-act {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-accent);
   margin-left: 18rpx;
 }
@@ -140,7 +140,7 @@ const resultText = computed(() => {
   align-items: baseline;
 }
 .fmt__n {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-weight: 600;
   flex: 1;
@@ -151,7 +151,7 @@ const resultText = computed(() => {
 }
 .fmt__p {
   display: block;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-accent);
   margin-top: 8rpx;
@@ -159,7 +159,7 @@ const resultText = computed(() => {
 }
 .fmt__s {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
   font-family: Menlo, Consolas, monospace;

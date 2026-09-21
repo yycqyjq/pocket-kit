@@ -665,18 +665,18 @@ function copyPolicy() {
 <style scoped>
 .tip {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
   padding: 10rpx 24rpx 6rpx;
 }
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
 }
 .sub {
   display: block;
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   padding: 8rpx 0 10rpx;
 }
@@ -696,7 +696,7 @@ function copyPolicy() {
   margin: 8rpx 12rpx 0 0;
   padding: 12rpx 18rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .hero {
@@ -737,7 +737,7 @@ function copyPolicy() {
   color: var(--pk-text-2);
 }
 .tb__h .tb__c {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
 }
 .tb__c--1 {
@@ -760,7 +760,7 @@ function copyPolicy() {
   padding-bottom: 8rpx;
 }
 .ins__t {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
 }
 .ins__h .ins__t {
@@ -779,7 +779,7 @@ function copyPolicy() {
 .ins__n {
   width: 150rpx;
   flex-shrink: 0;
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
 }
 .ins__f {
@@ -800,7 +800,7 @@ function copyPolicy() {
 .cmp__col {
   flex: 1;
   padding: 20rpx 18rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-seg-bg);
   border: var(--pk-line-w) solid var(--pk-line);
   display: flex;
@@ -823,7 +823,7 @@ function copyPolicy() {
   font-family: Menlo, Consolas, monospace;
 }
 .cmp__s {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   line-height: 1.8;
 }
@@ -837,14 +837,14 @@ function copyPolicy() {
   border-bottom: var(--pk-line-w) solid var(--pk-line);
 }
 .steps__k {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   width: 120rpx;
   flex-shrink: 0;
 }
 .steps__v {
   flex: 1;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-2);
   font-family: Menlo, Consolas, monospace;
   line-height: 1.7;
@@ -860,7 +860,7 @@ function copyPolicy() {
   color: var(--pk-text-3);
 }
 .src__v {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   line-height: 1.8;
   margin-top: 6rpx;
@@ -878,19 +878,19 @@ function copyPolicy() {
   justify-content: space-between;
 }
 .sdr__n {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text);
   font-weight: 500;
 }
 .sdr__v {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   font-family: Menlo, Consolas, monospace;
   margin-left: 16rpx;
 }
 .sdr__h {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   line-height: 1.7;
   margin-top: 6rpx;
@@ -898,7 +898,7 @@ function copyPolicy() {
 .out {
   margin: 0 24rpx 12rpx;
   padding: 20rpx 22rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
 }

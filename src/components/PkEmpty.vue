@@ -57,7 +57,7 @@ defineProps({
   letter-spacing: 2rpx;
 }
 .pk-empty__desc {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-3);
   margin-top: 12rpx;
   text-align: center;

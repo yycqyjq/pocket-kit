@@ -164,20 +164,20 @@ function paste() {
   border-bottom: none;
 }
 .row__i {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   min-width: 110rpx;
   font-family: Menlo, Consolas, monospace;
 }
 .row__hex {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   font-family: Menlo, Consolas, monospace;
   min-width: 130rpx;
 }
 .row__name {
   flex: 1;
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   line-height: 1.6;
 }

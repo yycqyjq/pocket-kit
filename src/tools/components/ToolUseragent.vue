@@ -239,7 +239,7 @@ function runSelfTest() {
   margin: 8rpx 14rpx 0 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .act-row {
@@ -250,7 +250,7 @@ function runSelfTest() {
 .tip {
   display: block;
   padding: 8rpx 24rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
 }
@@ -270,7 +270,7 @@ function runSelfTest() {
   margin-top: 6rpx;
 }
 .hero__gen {
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-family: Menlo, Consolas, monospace;
   line-height: 1.7;
   color: var(--pk-accent);
@@ -279,7 +279,7 @@ function runSelfTest() {
 .bot {
   margin: 8rpx 24rpx 12rpx;
   padding: 16rpx 20rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-danger-soft);
 }
 .bot__t {
@@ -290,7 +290,7 @@ function runSelfTest() {
 }
 .bot__d {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-2);
   margin-top: 6rpx;
 }
@@ -299,7 +299,7 @@ function runSelfTest() {
 }
 .note {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-2);
 }
@@ -318,7 +318,7 @@ function runSelfTest() {
   align-items: center;
 }
 .seg__kind {
-  font-size: 19rpx;
+  font-size: 20rpx;
   color: var(--pk-accent);
   background: var(--pk-accent-soft);
   border-radius: 6rpx;
@@ -327,12 +327,12 @@ function runSelfTest() {
 .seg__pos {
   flex: 1;
   text-align: right;
-  font-size: 19rpx;
+  font-size: 20rpx;
   color: var(--pk-text-3);
 }
 .seg__txt {
   display: block;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text);
   word-break: break-all;
@@ -341,7 +341,7 @@ function runSelfTest() {
 }
 .seg__note {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.7;
   color: var(--pk-text-3);
   margin-top: 4rpx;

@@ -401,7 +401,7 @@ function copySpki() {
 }
 .hint {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   line-height: 1.7;
   margin-top: 6rpx;
@@ -409,12 +409,12 @@ function copySpki() {
 .warn {
   margin: 8rpx 24rpx 14rpx;
   padding: 14rpx 18rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
   border-left: var(--pk-line-w) solid var(--pk-warn);
 }
 .warn__t {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-warn);
   line-height: 1.6;
 }
@@ -433,11 +433,11 @@ function copySpki() {
 }
 .san__copy,
 .ext__copy {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-2);
   padding: 6rpx 16rpx;
   border: var(--pk-line-w) solid var(--pk-line-strong);
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
 }
 .san__v {
   display: block;
@@ -468,7 +468,7 @@ function copySpki() {
 }
 .checked__w {
   flex: 1;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   line-height: 1.6;
 }
@@ -485,7 +485,7 @@ function copySpki() {
 }
 .ext__name {
   flex: 1;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   font-family: Menlo, Consolas, monospace;
   word-break: break-all;
@@ -512,7 +512,7 @@ function copySpki() {
 }
 .ext__sum {
   display: block;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   word-break: break-all;
   margin-top: 10rpx;
@@ -520,7 +520,7 @@ function copySpki() {
 }
 .ext__doc {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 8rpx;
   line-height: 1.6;

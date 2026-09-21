@@ -245,7 +245,7 @@ function flip() {
   margin: 8rpx 14rpx 0 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .opt-row {
@@ -278,7 +278,7 @@ function flip() {
   padding: 20rpx 24rpx 12rpx;
 }
 .hero__val {
-  font-size: 27rpx;
+  font-size: 28rpx;
   font-weight: 600;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-accent);
@@ -302,7 +302,7 @@ function flip() {
 .tip {
   display: block;
   padding: 8rpx 24rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
 }
@@ -350,7 +350,7 @@ function flip() {
   align-items: center;
   margin: 6rpx;
   padding: 12rpx 10rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-danger-soft);
 }
 .cell__ch {
@@ -360,7 +360,7 @@ function flip() {
   color: var(--pk-danger);
 }
 .cell__p {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: var(--pk-text-3);
   margin-top: 4rpx;
 }
@@ -385,7 +385,7 @@ function flip() {
   color: var(--pk-text);
 }
 .alpha__i {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: var(--pk-text-3);
 }
 </style>

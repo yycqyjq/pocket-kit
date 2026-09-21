@@ -188,7 +188,7 @@ function utf8Size(str) {
 
 <style scoped>
 .mini-act {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   margin-left: 24rpx;
 }

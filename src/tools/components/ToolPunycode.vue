@@ -133,11 +133,11 @@ function paste() {
   margin-right: 14rpx;
 }
 .pair__copy {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-2);
   padding: 8rpx 16rpx;
   border: var(--pk-line-w) solid var(--pk-line-strong);
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
 }
 .label {
   display: flex;
@@ -146,19 +146,19 @@ function paste() {
   border-bottom: var(--pk-line-w) solid var(--pk-line);
 }
 .label__in {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-text-2);
   font-family: Menlo, Consolas, monospace;
   word-break: break-all;
   max-width: 220rpx;
 }
 .label__arrow {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin: 0 12rpx;
 }
 .label__out {
-  font-size: 23rpx;
+  font-size: 24rpx;
   color: var(--pk-accent);
   font-family: Menlo, Consolas, monospace;
   word-break: break-all;
@@ -173,7 +173,7 @@ function paste() {
 .warn {
   margin: 10rpx 24rpx 16rpx;
   padding: 16rpx 18rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: rgba(180, 85, 62, 0.1);
 }
 .warn__t {

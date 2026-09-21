@@ -216,7 +216,7 @@ const ratio = computed(() => {
 }
 .bmi-hero__tag-t {
   font-size: 24rpx;
-  color: #fff;
+  color: var(--pk-on-accent);
   font-weight: 600;
   letter-spacing: 2rpx;
 }
@@ -250,7 +250,7 @@ const ratio = computed(() => {
 .goal__i {
   flex: 1;
   padding: 18rpx 12rpx;
-  border-radius: 12rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-seg-bg);
   border: var(--pk-line-w) solid var(--pk-line);
   display: flex;

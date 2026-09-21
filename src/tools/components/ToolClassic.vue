@@ -136,13 +136,13 @@ function useOutput() {
 }
 .brute__s {
   width: 56rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
 }
 .brute__t {
   flex: 1;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text-2);
   word-break: break-all;
@@ -156,7 +156,7 @@ function useOutput() {
   width: calc(25% - 12rpx);
   margin: 6rpx;
   padding: 10rpx 6rpx;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-input);
   border: var(--pk-line-w) solid var(--pk-line);
   display: flex;

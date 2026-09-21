@@ -139,7 +139,7 @@ function pasteIn() {
   justify-content: center;
   align-items: center;
   height: 320rpx;
-  border-radius: 14rpx;
+  border-radius: var(--pk-radius-md);
   background: var(--pk-input);
   overflow: hidden;
 }

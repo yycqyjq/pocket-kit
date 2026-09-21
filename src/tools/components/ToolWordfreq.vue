@@ -113,13 +113,13 @@ function paste() {
 }
 .row__rank {
   width: 52rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   font-family: Menlo, Consolas, monospace;
 }
 .row__w {
   width: 200rpx;
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: var(--pk-text);
   word-break: break-all;
   margin-right: 12rpx;
@@ -137,7 +137,7 @@ function paste() {
   background: var(--pk-accent);
 }
 .row__fill--blue {
-  background: #4A6FA5;
+  background: var(--pk-info);
 }
 .row__n {
   width: 70rpx;

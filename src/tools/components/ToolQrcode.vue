@@ -44,8 +44,8 @@
         <text class="segs__t">分段明细（同种模式合并成段，段长与字符计数都按标准编码）</text>
         <view v-for="(g, i) in qr.segments" :key="i" class="segs__r">
           <text class="segs__m">{{ g.mode }}</text>
-          <text class="segs__c">{{ g.chars }} 字符</text>
-          <text class="segs__b">{{ g.bytes }} 字节</text>
+          <text class="segs__c">{{ g.chars }} 字符 · {{ g.bytes }} 字节</text>
+          <text class="segs__b">{{ g.bits }} bit</text>
         </view>
       </view>
       <text class="tip">{{ levelTip }}</text>
@@ -94,7 +94,6 @@
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
 import { encode, decodeMatrix, buildWifi, buildVCard, QR_SAMPLES, ELEVEL_INFO, QUIET_ZONE } from '@/utils/qrcode'
-import { utf8Bytes } from '@/utils/base64'
 import { copyText, toast } from '@/utils/clipboard'
 import { saveCanvasImage } from '@/utils/image'
 
@@ -177,24 +176,21 @@ const usedText = computed(() => {
   const q = qr.value
   if (!q) return ''
   const cap = q.capacity || {}
-  const byteMode = q.mode === 'byte' || q.mode === 'mixed'
-  const unit = byteMode ? 'byte' : q.mode
-  const limit = cap[unit] || cap.byte
-  const raw = String(q.text || '')
-  const used = byteMode ? utf8Bytes(raw).length : raw.length
-  const isByte = unit === 'byte'
+  const unit = q.mode === 'numeric' || q.mode === 'alphanumeric' ? q.mode : 'byte'
+  const label = { numeric: '数字', alphanumeric: '字母数字' }[unit] || '字节'
+  const used = unit === 'byte' ? q.bytes : String(q.text || '').length
   return (
     used +
-    ' ' +
-    (isByte ? '字节' : '字符') +
+    ' 个' +
+    label +
     ' / 版本 ' +
     q.version +
     ' ' +
     q.elevel +
-    ' 级同模式上限 ' +
-    limit +
-    '（约 ' +
-    Math.round((used / limit) * 100) +
+    ' 级上限 ' +
+    (cap[unit] || '—') +
+    '（位流已用约 ' +
+    Math.round((q.usedRatio || 0) * 100) +
     '%）'
   )
 })
@@ -350,12 +346,12 @@ function useVCard() {
   margin: 8rpx 14rpx 0 0;
   padding: 12rpx 20rpx;
   line-height: 1.3;
-  border-radius: 10rpx;
+  border-radius: var(--pk-radius-sm);
   background: var(--pk-accent-soft);
 }
 .tip {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--pk-text-3);
   padding: 10rpx 24rpx 12rpx;
@@ -384,7 +380,7 @@ function useVCard() {
   padding-top: 12rpx;
 }
 .meta__i {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin: 4rpx 12rpx;
   font-family: Menlo, Consolas, monospace;
@@ -394,7 +390,7 @@ function useVCard() {
 }
 .segs__t {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   line-height: 1.7;
   margin-bottom: 6rpx;
@@ -418,7 +414,7 @@ function useVCard() {
   color: var(--pk-text-2);
 }
 .segs__b {
-  font-size: 21rpx;
+  font-size: 22rpx;
   font-family: Menlo, Consolas, monospace;
   color: var(--pk-text-3);
 }

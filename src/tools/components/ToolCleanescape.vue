@@ -113,13 +113,13 @@ const scanned = computed(() => scan(cleaned.value))
   color: var(--pk-danger);
 }
 .dirty__c {
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-left: 12rpx;
 }
 .dirty__note {
   display: block;
-  font-size: 21rpx;
+  font-size: 22rpx;
   color: var(--pk-text-3);
   margin-top: 6rpx;
   line-height: 1.6;
