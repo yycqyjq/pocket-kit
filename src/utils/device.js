@@ -637,6 +637,68 @@ export function readSwap() {
   return out
 }
 
+
+/** 温度探针：/sys/class/thermal 全量温区（连续缺号 3 次即停，最多扫 48 个） */
+export function readThermal() {
+  const out = { zones: [], count: 0 }
+  // #ifdef APP-PLUS
+  try {
+    if (!isAndroidApp()) return out
+    let miss = 0
+    for (let i = 0; i < 48 && miss < 3; i++) {
+      const type = execCat('/sys/class/thermal/thermal_zone' + i + '/type')
+      const raw = execCat('/sys/class/thermal/thermal_zone' + i + '/temp')
+      if (!type && !raw) {
+        miss++
+        continue
+      }
+      miss = 0
+      const t = Number(raw)
+      const c = isFinite(t) && t > -300 ? t / 1000 : null
+      out.zones.push({
+        key: 'tz' + i,
+        type: type || 'zone' + i,
+        temp: c != null ? c.toFixed(1) + ' °C' : '',
+        hot: c != null && c >= 45,
+      })
+    }
+    out.count = out.zones.length
+  } catch (e) {}
+  // #endif
+  return out
+}
+
+/**
+ * Wi-Fi 链路：速率 / 频段 / 信号 / 局域网 IP。
+ * 需要 ACCESS_WIFI_STATE（普通级权限，装即授）；没有授权时返回空，视图显示 —。
+ * 只读当前连接的链路状态，不扫描周边网络、不读浏览记录。
+ */
+export function readWifi() {
+  const out = { linkSpeed: '', band: '', rssi: '', ip: '' }
+  // #ifdef APP-PLUS
+  try {
+    if (!isAndroidApp()) return out
+    const activity = androidActivity()
+    if (!activity) return out
+    const wm = activity.getSystemService('wifi')
+    const info = wm.getConnectionInfo()
+    if (!info) return out
+    const speed = Number(info.getLinkSpeed())
+    out.linkSpeed = speed > 0 ? speed + ' Mbps' : ''
+    const freq = Number(info.getFrequency())
+    if (freq > 0) {
+      const band = freq >= 5925 ? '6 GHz' : freq >= 4900 ? '5 GHz' : freq >= 2400 ? '2.4 GHz' : ''
+      out.band = (band ? band + ' · ' : '') + freq + ' MHz'
+    }
+    const rssi = Number(info.getRssi())
+    out.rssi = isFinite(rssi) && rssi < 0 ? rssi + ' dBm' : ''
+    const ip = Number(info.getIpAddress())
+    if (ip > 0) out.ip = [ip & 0xff, (ip >> 8) & 0xff, (ip >> 16) & 0xff, (ip >>> 24) & 0xff].join('.')
+  } catch (e) {}
+  // #endif
+  return out
+}
+
 /** 开机时长（不含休眠的累计运行时间） */
 export function readUptime() {
   // #ifdef APP-PLUS

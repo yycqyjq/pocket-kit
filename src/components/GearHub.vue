@@ -86,6 +86,25 @@
       </view>
     </PkCard>
 
+    <!-- 温度探针 -->
+    <PkCard v-if="thermal.zones.length" title="温度探针" accent="#B4553E">
+      <view class="grid24">
+        <view v-for="z in thermal.zones" :key="z.key" class="gcell" :class="{ 'gcell--hot': z.hot }">
+          <text class="gcell__a">{{ z.type }}</text>
+          <text class="gcell__b">{{ z.temp || '—' }}</text>
+        </view>
+      </view>
+      <text class="tip">来自内核温区（/sys/class/thermal），名称因机型而异；≥45°C 标橙。电池温度在上方电池卡里单列。</text>
+    </PkCard>
+
+    <!-- 网络 -->
+    <PkCard v-if="wifiRow.link" title="网络" accent="#2F7A8C">
+      <PkRow label="Wi-Fi 链路" :value="wifiRow.link" :copy="false" />
+      <PkRow v-if="wifiRow.rssi" label="信号强度" :value="wifiRow.rssi" :copy="false" />
+      <PkRow v-if="wifiRow.ip" label="局域网 IP" :value="wifiRow.ip" mono />
+      <text class="tip">只读当前连接的链路状态；不扫描周边网络、不读浏览记录</text>
+    </PkCard>
+
     <!-- 系统与安全 -->
     <PkCard title="系统与安全" accent="#5B7A3E">
       <PkRow label="Project Treble" :value="secText.treble" :copy="false" />
@@ -98,6 +117,10 @@
 
     <!-- 图形与生态 -->
     <PkCard title="图形与生态" accent="#3F5A75">
+      <view class="gpu-host" :prop="gpuTick" :change:prop="gpu.onTick"></view>
+      <PkRow v-if="gpuStr.renderer" label="GPU 渲染器" :value="gpuStr.renderer" mono :copy="false" stack />
+      <PkRow v-if="gpuStr.vendor" label="GPU 厂商" :value="gpuStr.vendor" :copy="false" />
+      <PkRow v-if="gpuStr.version" label="WebGL 版本" :value="gpuStr.version" mono :copy="false" />
       <PkRow label="GPU 版本" :value="ecoText.gles" :copy="false" />
       <PkRow label="Vulkan" :value="ecoText.vulkan" :copy="false" />
       <PkRow v-if="ecoText.vulkanCompute" label="Vulkan 计算" :value="ecoText.vulkanCompute" :copy="false" />
@@ -145,6 +168,8 @@ import {
   readCameras,
   readBatteryPower,
   readSwap,
+  readThermal,
+  readWifi,
   fmtWatts,
 } from '@/utils/device'
 
@@ -163,6 +188,17 @@ const drm = ref(null)
 const cameraList = ref([])
 const power = ref({ currentUa: 0 })
 const swap = ref({})
+const thermal = ref({ zones: [] })
+const wifi = ref(null)
+const gpuTick = ref(0)
+const gpuStr = ref({ renderer: '', vendor: '', version: '' })
+
+/** renderjs 视图层把 WebGL 问到的 GPU 字符串送回逻辑层 */
+function onGpuString(payload) {
+  if (payload && payload.renderer) gpuStr.value = payload
+}
+
+defineExpose({ onGpuString })
 
 function nowText() {
   try {
@@ -193,6 +229,9 @@ async function loadAll() {
     cameraList.value = readCameras().list || []
     power.value = readBatteryPower()
     swap.value = readSwap()
+    thermal.value = readThermal()
+    wifi.value = readWifi()
+    gpuTick.value++
     if (app) {
       battery.value = readBattery()
     } else {
@@ -315,6 +354,15 @@ function fmtGbSafe(bytes) {
 }
 
 /* ---------- 系统与安全 / 图形生态 / 摄像头 ---------- */
+const wifiRow = computed(() => {
+  const w = wifi.value || {}
+  return {
+    link: w.linkSpeed ? w.linkSpeed + (w.band ? ' · ' + w.band : '') : '',
+    rssi: w.rssi || '',
+    ip: w.ip || '',
+  }
+})
+
 const secText = computed(() => {
   const s = security.value || {}
   return { treble: s.treble || '', dynamic: s.dynamicPartitions || '', seamless: s.seamlessUpdates || '', verifiedBoot: s.verifiedBoot || '', crypto: s.cryptoType || '' }
@@ -375,6 +423,28 @@ function profileText() {
     sensorList.value.forEach((s) => L.push('  · ' + s.name + (s.meta ? '（' + s.meta + '）' : '')))
   }
   return L.filter(Boolean).join('\n')
+}
+</script>
+
+<script module="gpu" lang="renderjs">
+/** GPU 型号只能在视图层问：WebGL 上下文只存在于渲染层，逻辑层（v8/jscore）没有 DOM */
+export default {
+  methods: {
+    onTick(newVal, oldVal, ownerInstance) {
+      setTimeout(() => {
+        try {
+          const c = document.createElement('canvas')
+          const gl = c.getContext('webgl') || c.getContext('experimental-webgl')
+          if (!gl) return
+          const dbg = gl.getExtension('WEBGL_debug_renderer_info')
+          const renderer = String(dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER) || '')
+          const vendor = String(dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR) || '')
+          const version = String(gl.getParameter(gl.VERSION) || '')
+          if (renderer) ownerInstance.callMethod('onGpuString', { renderer: renderer, vendor: vendor, version: version })
+        } catch (e) {}
+      }, 30)
+    },
+  },
 }
 </script>
 
