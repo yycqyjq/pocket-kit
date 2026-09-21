@@ -128,6 +128,11 @@
         </template>
       </template>
 
+      <!-- ============ 搞机 ============ -->
+      <template v-else-if="tab === 'gear'">
+        <GearHub />
+      </template>
+
       <!-- ============ 设置 ============ -->
       <template v-else>
         <PkCard title="外观" accent="var(--pk-accent)">
@@ -212,6 +217,7 @@ import {
   toolsByCategory,
   getTool,
 } from '@/tools/registry'
+import GearHub from '@/components/GearHub.vue'
 import {
   readFavorites,
   readRecent,
@@ -226,6 +232,7 @@ const tabbarHeight = 58
 
 const tabs = [
   { key: 'home', glyph: '匣', label: '工具' },
+  { key: 'gear', glyph: '机', label: '搞机' },
   { key: 'fav', glyph: '藏', label: '收藏' },
   { key: 'recent', glyph: '迹', label: '记录' },
   { key: 'me', glyph: '设', label: '设置' },
@@ -240,6 +247,7 @@ const settings = ref(readSettings())
 
 const startTabItems = [
   { key: 'home', name: '工具' },
+  { key: 'gear', name: '搞机' },
   { key: 'fav', name: '收藏' },
   { key: 'recent', name: '记录' },
 ]
@@ -257,6 +265,7 @@ const startTabModel = computed({
 
 const headSub = computed(() => {
   if (tab.value === 'home') return TOOL_COUNT + ' 件小工具，离线可用'
+  if (tab.value === 'gear') return '这台机器的底细'
   if (tab.value === 'fav') return '常用的一并收在这里'
   if (tab.value === 'recent') return '最近动过手的工具'
   return '偏好与数据'
@@ -357,7 +366,7 @@ function confirmClearRecent() {
 onMounted(() => {
   reload()
   const s = readSettings()
-  if (['home', 'fav', 'recent'].indexOf(s.startTab) > -1) tab.value = s.startTab
+  if (['home', 'gear', 'fav', 'recent'].indexOf(s.startTab) > -1) tab.value = s.startTab
 })
 // 从工具页返回时刷新收藏与使用记录
 onShow(reload)

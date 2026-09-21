@@ -5,6 +5,8 @@ H5 只作为开发期的浏览器预览手段（小程序/快应用目标已移�
 
 内置 **63 件小工具**，全部本地计算，不联网、不上传、无后端。
 
+首页另有「搞机」页签：电池（电量/状态/温度/电压）、CPU（逐核实时频率与调频策略）、屏幕（物理分辨率/刷新率）、内存存储、传感器清单等整机信息，数据层在 `src/utils/device.js`，App 端经 Native.js 读系统 API，**不申请任何新权限**；H5 预览只显示浏览器放行的部分字段。
+
 工具清单参考了 GitHub 上三个同类项目——[it-tools](https://github.com/CorentinTh/it-tools)（40k+ star，GPL-3.0）、
 [CyberChef](https://github.com/gchq/CyberChef)（35k+ star，Apache-2.0，505 个操作）、
 [DevToys](https://github.com/DevToys-app/DevToys)（32k+ star，MIT）。
@@ -184,6 +186,7 @@ pocket-kit/
     │   ├── storage.js       #   本地存储：主题、收藏、记录、设置
     │   ├── theme.js         #   深浅色主题单例
     │   ├── clipboard.js     #   复制、提示、震动反馈
+│   ├── device.js        #   搞机页签数据层：电池/CPU/屏幕/内存/传感器（App 走 Native.js）
     │   ├── base64.js        #   手写 Base64（不依赖 btoa/atob）
     │   ├── text.js          #   文本统计与批量整理
     │   ├── date.js          #   日期时间计算
@@ -232,7 +235,8 @@ pocket-kit/
     │   ├── datefmt.js       #   strftime / Java / moment / Go 格式串互转
     │   └── httpdump.js      #   HTTP 请求 / 响应报文解析
     ├── components/          # 通用 UI 组件
-    │   ├── PkPage.vue       #   页面外壳（导航栏 + 安全区）
+    │   ├── GearHub.vue      #   搞机页签：设备信息中枢（配合 utils/device.js）
+│   ├── PkPage.vue       #   页面外壳（导航栏 + 安全区）
     │   ├── PkNavBar.vue     #   自定义导航栏
     │   ├── PkCard.vue       #   卡片
     │   ├── PkField.vue      #   输入框 / 文本域
@@ -246,7 +250,7 @@ pocket-kit/
     │   ├── registry.js      #   ★ 工具注册表（新增工具只改这里）
     │   └── components/      #   63 个工具组件（另 6 个待补测试后接入）
     └── pages/
-        ├── index/index.vue  # 主壳：工具 / 收藏 / 记录 / 设置 四个页签
+        ├── index/index.vue  # 主壳：工具 / 搞机 / 收藏 / 记录 / 设置 五个页签
         └── tool/tool.vue    # 工具详情容器（按 id 动态渲染组件）
 ```
 
