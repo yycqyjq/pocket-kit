@@ -96,6 +96,7 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { encode, decodeMatrix, buildWifi, buildVCard, QR_SAMPLES, ELEVEL_INFO, QUIET_ZONE } from '@/utils/qrcode'
 import { utf8Bytes } from '@/utils/base64'
 import { copyText, toast } from '@/utils/clipboard'
+import { saveCanvasImage } from '@/utils/image'
 
 const SCALE_ITEMS = [
   { key: 's', name: '小（适合屏幕看）' },

@@ -155,6 +155,7 @@
       <PkRow label="那边是否周末" :value="pair.weekendThere ? '是周末，约之前先确认对方上班' : '工作日'" :copy="false" />
       <PkRow label="工作时段重叠" :value="overlapText" :copy="false" stack />
       <PkRow label="偏移明细" :value="pair.note" :copy="false" stack />
+      <PkRow label="两边换表情况" :value="pairDstText" :copy="false" stack />
       <PkRow
         v-if="pair.dstState !== 'ok'"
         label="夏令时切换"
@@ -409,10 +410,10 @@ const offsetOf = (k) => (hasZone(k) ? offsetLabel(zone(k).std) : '')
 const cnOffsetOf = (k) => (hasZone(k) ? offsetCn(zone(k).std) : '')
 const dstMarkOf = (k) => (hasZone(k) && zoneHasDst(k) ? ' · 实行夏令时' : '')
 
-/** 某城市此刻的偏移与是否在夏令时里：先查会不会换表，再查这一刻换没换 */
-function dstBadgeOf(k) {
+/** 某城市某时刻的偏移与是否在夏令时里：先查会不会换表，再查这一刻换没换 */
+function dstBadgeOf(k, atMs) {
   if (!hasZone(k)) return { active: false, text: '' }
-  const ms = tick.value
+  const ms = atMs === undefined ? tick.value : atMs
   const o = offsetAt(k, ms)
   const d = isDstActive(k, ms)
   if (!zoneHasDst(k)) {
@@ -562,14 +563,17 @@ const overlapText = computed(() => {
   if (!pair.value) return ''
   const r = pair.value.overlapRatio
   return (
-    r + '（把 A 城当天 24 小时逐格对着 B 城看，双方都在 9:00~18:00 的小时数 ÷ 9。' +
+    Math.round(r * 100) + '%（把 A 城当天 24 小时逐格对着 B 城看，双方都落在 9:00~18:00 的小时数 ÷ 9。' +
     (r === 0 ? '完全错开，只能一方熬夜或改异步' : r === 1 ? '两边作息完全同步' : '按比例挑共同工作时段') +
     '）'
   )
 })
+const pairDstText = computed(() => {
+  if (!pair.value) return ''
+  return dstBadgeOf(pair.value.a.key, pair.value.ms).text + '；' + dstBadgeOf(pair.value.b.key, pair.value.ms).text
+})
 
 /* ---------------- 指定时刻 → 各城 ---------------- */
-
 const atWallRun = computed(() =>
   attempt(() =>
     atWallInZone(Object.assign({ zoneKey: wZoneKey.value, zones: picked.value.length ? picked.value : [wZoneKey.value] }, wallInput.value))
@@ -583,6 +587,35 @@ const inviteRun = computed(() =>
   )
 )
 const invite = computed(() => (inviteRun.value.data ? inviteRun.value.data : ''))
+const candidateText = computed(() => {
+  if (!atWall.value) return ''
+  return atWall.value.candidates
+    .map((c) => offsetLabel(c.offsetMinutes) + '（' + utcText(c.ms) + '）')
+    .join(' 或 ')
+})
+
+/* ---------------- 时间戳四对齐 ---------------- */
+
+const stampRun = computed(() =>
+  attempt(() =>
+    stampLinks(Object.assign({ zoneKey: wZoneKey.value }, wallInput.value))
+  )
+)
+const stamp = computed(() => stampRun.value.data)
+const stampError = computed(() => stampRun.value.error)
+function copyStamp() {
+  if (!stamp.value) return
+  copyText(
+    [
+      '时间戳（秒） ' + stamp.value.stampSec,
+      '时间戳（毫秒） ' + stamp.value.stampMs,
+      'UTC ' + stamp.value.utc,
+      'ISO ' + stamp.value.iso,
+      '本机 ' + stamp.value.deviceDate + ' ' + stamp.value.deviceTime + ' ' + stamp.value.deviceOffsetText,
+      '北京 ' + stamp.value.beijing.date + ' ' + stamp.value.beijing.hm + ' ' + stamp.value.beijing.offsetText,
+    ].join('\n')
+  )
+}
 
 /* ---------------- 会议窗口 / 网格 ---------------- */
 
@@ -714,6 +747,32 @@ const gridError = computed(() => (slotDate.value.trim() ? gridRun.value.error : 
   display: block;
   font-size: 20rpx;
   color: var(--pk-text-3);
+}
+.city__dst {
+  display: block;
+  font-size: 19rpx;
+  line-height: 1.6;
+  color: var(--pk-text-3);
+}
+.city__dst--on {
+  color: var(--pk-warn);
+}
+.grp {
+  padding-top: 6rpx;
+}
+.grp__h {
+  display: block;
+  font-size: 21rpx;
+  font-weight: 600;
+  color: var(--pk-text-2);
+  margin-bottom: 4rpx;
+}
+.chip-row--in {
+  padding-bottom: 10rpx;
+}
+.chip--sm {
+  font-size: 20rpx;
+  padding: 9rpx 12rpx;
 }
 .city__act {
   font-size: 21rpx;

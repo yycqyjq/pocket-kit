@@ -42,6 +42,7 @@
           <text class="hero__t">{{ shoe.label }}</text>
           <text class="hero__s">脚长 {{ shoe.mm }} mm</text>
         </view>
+        <text class="sum">{{ shoeLine }}</text>
         <PkRow label="CN 新码（毫米，国标口径）" :value="shoe.cn + ' mm'" />
         <PkRow label="CN 旧码（厘米 × 2 − 10）" :value="shoe.cnOld + ' 码'" />
         <PkRow label="欧码 EU" :value="shoe.eu + '（公式 ' + shoe.euExact + '）'" />
@@ -137,6 +138,7 @@
           <text class="hero__t">{{ cloth.sex }}装 {{ cloth.label }}</text>
           <text class="hero__s">号型 {{ cloth.seq }}</text>
         </view>
+        <text class="sum">{{ clothLine }}</text>
         <PkRow label="字母码" :value="cloth.label + '（第 ' + (cloth.order + 1) + ' 档 / 共 9 档）'" :copy="false" />
         <PkRow label="国际码" :value="'欧码 ' + cloth.eu + ' · 美码 ' + cloth.us" :copy="false" />
         <PkRow label="适穿区间" :value="cloth.rangeText" :copy="false" stack />
@@ -232,6 +234,7 @@
           <text class="hero__t">{{ bra.cn }}</text>
           <text class="hero__s">上下差 {{ bra.diff }} cm</text>
         </view>
+        <text class="sum">{{ braLine }}</text>
         <PkRow label="CN" :value="bra.cn + '（罩杯 ' + bra.cupCn + '）'" />
         <PkRow label="JP（罩杯写在前面）" :value="bra.jp" />
         <PkRow label="EU" :value="bra.eu + '（罩杯 ' + bra.cupEu + '）'" />
@@ -296,6 +299,7 @@
           <text class="hero__t">美码 {{ ring.us }} 号</text>
           <text class="hero__s">按{{ ring.from }}</text>
         </view>
+        <text class="sum">{{ ringLine }}</text>
         <PkRow label="内周长" :value="ring.circ + ' mm'" />
         <PkRow label="内直径" :value="ring.diameter + ' mm（' + ring.diameterIn + ' 英寸）'" />
         <PkRow label="美码 US" :value="ring.us + ' 号（公式 ' + ring.usExact + '）'" />
@@ -304,6 +308,10 @@
         <PkRow label="ISO / 欧码" :value="ring.iso + '（直接取内周长毫米数）'" :copy="false" />
         <PkRow label="算法" :value="ring.note" :copy="false" stack />
         <PkRow v-if="ring.warning" label="注意" :value="ring.warning" color="var(--pk-warn)" :copy="false" stack />
+        <view v-for="(w, i) in ringWarn" :key="'rw' + i" class="li li--warn">
+          <text class="li__dot">!</text>
+          <text class="li__t">{{ w.text }}</text>
+        </view>
         <view v-for="(t, i) in RING_TIPS" :key="i" class="li">
           <text class="li__dot">·</text>
           <text class="li__t">{{ t }}</text>
@@ -378,13 +386,13 @@ import {
 import { copyText } from '@/utils/clipboard'
 
 /** 本工具的品牌色（唯一的硬编码颜色，其余全走 CSS 变量） */
-const TINT = '#8C5B3E'
+const TINT = '#3F7A6E'
 
 const KIND_ITEMS = [
   { key: 'shoe', name: '鞋码' },
+  { key: 'ring', name: '戒指' },
   { key: 'clothing', name: '服装' },
   { key: 'bra', name: '文胸' },
-  { key: 'ring', name: '戒指' },
 ]
 
 const KIND_NOTES = {
@@ -560,6 +568,18 @@ const ringWarn = computed(() => (ringRun.value.data ? ringRun.value.data.warning
 const ringTableData = computed(() => ringTable({ from: 44, to: 68 }))
 const ringSummary = computed(() => sizeSummaryText({ kind: '戒指', ring: ring.value, warnings: ringWarn.value }))
 
+/* ---------------- 每张结果卡顶部的一句话 ---------------- */
+
+/** sizeSummaryText 的第一行是抬头，第二行就是这一类的一句话结论 */
+function summaryLine(t) {
+  const lines = String(t).split('\n')
+  return lines.length > 1 ? lines[1] : ''
+}
+const shoeLine = computed(() => (shoe.value ? summaryLine(sizeSummaryText({ kind: '鞋码', shoe: shoe.value })) : ''))
+const ringLine = computed(() => (ring.value ? summaryLine(ringSummary.value) : ''))
+const clothLine = computed(() => (cloth.value ? summaryLine(clothSummary.value) : ''))
+const braLine = computed(() => (bra.value ? summaryLine(braSummary.value) : ''))
+
 /* ---------------- 预填 ---------------- */
 
 function useSample(s) {
@@ -631,6 +651,13 @@ function useRingSample(s) {
 .hero__s {
   font-size: 22rpx;
   color: var(--pk-text-3);
+}
+.sum {
+  display: block;
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: var(--pk-accent);
+  padding: 0 24rpx 12rpx;
 }
 .li {
   display: flex;
