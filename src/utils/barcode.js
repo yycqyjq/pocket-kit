@@ -201,10 +201,7 @@ export function normalize(text, sym) {
   if (!upper) throw new Error('先输入要编码的内容')
   const bad = [...new Set([...upper].filter((c) => CODE39_CHARS.indexOf(c) < 0))]
   if (bad.length) {
-    const hasLower = [...raw].some((c) => c >= 'a' && c <= 'z')
-    throw new Error(
-      'Code 39 只支持 43 个字符，' + (hasLower ? '且没有小写字母。' : '。') + '用不了的字符：' + bad.map((c) => '「' + c + '」').join(' ')
-    )
+    throw new Error('Code 39 只支持 43 个字符，用不了的字符：' + bad.map((c) => '「' + c + '」').join(' '))
   }
   if (upper.length > 40) throw new Error('Code 39 没有内置长度上限，但太长的码扫不出来，先截到 40 字符以内')
   return upper
@@ -259,9 +256,11 @@ export function runsOf(modules) {
   let cur = null
   for (let i = 0; i < modules.length; i++) {
     const on = modules[i] === '1'
-    if (cur && cur.on === on) cur.len++
-    else {
-      cur = { on, len: 1 }
+    if (cur && cur.on === on) {
+      cur.len++
+      cur.end++
+    } else {
+      cur = { on, len: 1, start: i, end: i + 1 }
       runs.push(cur)
     }
   }
@@ -306,28 +305,40 @@ export function readBack(modules, sym) {
     return out.join('')
   }
   const leftCount = sym === 'ean8' ? 4 : 6
-  const blockCount = sym === 'ean8' ? 8 : 12
   if (modules.slice(0, 3) !== GUARD_SIDE || modules.slice(-3) !== GUARD_SIDE) throw new Error('回读：两侧守卫位不对')
   let i = 3
   const digits = []
+  let parStr = ''
   for (let p = 0; p < leftCount; p++) {
     const b = modules.slice(i, i + 7)
-    const v = EAN_L.indexOf(b) >= 0 ? EAN_L.indexOf(b) : EAN_G.indexOf(b)
-    if (v < 0) throw new Error('回读：左半块 ' + b + ' 不在表里')
-    digits.push(String(v))
+    const l = EAN_L.indexOf(b)
+    if (l >= 0) {
+      parStr += 'L'
+      digits.push(String(l))
+    } else {
+      const g = EAN_G.indexOf(b)
+      if (g < 0) throw new Error('回读：左半块 ' + b + ' 不在表里')
+      parStr += 'G'
+      digits.push(String(g))
+    }
     i += 7
   }
   if (modules.slice(i, i + 5) !== GUARD_MID) throw new Error('回读：中间守卫位不对')
   i += 5
-  for (let p = leftCount; p < blockCount; p++) {
+  while (i < modules.length - 3) {
     const b = modules.slice(i, i + 7)
-    const v = EAN_R.indexOf(b)
-    if (v < 0) throw new Error('回读：右半块 ' + b + ' 不在表里')
-    digits.push(String(v))
+    const r = EAN_R.indexOf(b)
+    if (r < 0) throw new Error('回读：右半块 ' + b + ' 不在表里')
+    digits.push(String(r))
     i += 7
   }
   if (i !== modules.length - 3) throw new Error('回读：模块总数对不上')
-  return sym === 'upca' ? digits.slice(1).join('') : digits.join('')
+  if (sym === 'ean8') return digits.join('')
+  // EAN-13 的首位不占模块，只体现在左半 6 位的 L/G 排列上
+  const lead = EAN_PAR.indexOf(parStr)
+  if (lead < 0) throw new Error('回读：左半的 L/G 排列 ' + parStr + ' 不在奇偶表里')
+  const full = String(lead) + digits.join('')
+  return sym === 'upca' ? full.slice(1) : full
 }
 
 /* ------------------------------------------------------------------ *

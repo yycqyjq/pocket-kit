@@ -7,7 +7,7 @@
     "build:app": "uni build -p app",
     "dev:h5": "uni",
     "build:h5": "uni build",
-    "test": "sh scripts/selftest/life/run.sh stats.test.mjs numtheory.test.mjs chincal.test.mjs splitbill.test.mjs taxcn.test.mjs bodysize.test.mjs worldclock.test.mjs && node scripts/selftest/aes.test.mjs && node scripts/selftest/dev8/bases.test.mjs && node scripts/selftest/dev8/semver.test.mjs && node scripts/selftest/dev8/useragent.test.mjs && node scripts/selftest/device.test.mjs && node scripts/selftest/pickcolor.test.mjs && node scripts/selftest/checksum.test.mjs && node scripts/selftest/bitwise.test.mjs && node scripts/selftest/exif.test.mjs && node scripts/selftest/x509.test.mjs && node scripts/selftest/markdown.test.mjs && node scripts/selftest/qrcode.test.mjs"
+    "test": "sh scripts/selftest/life/run.sh stats.test.mjs numtheory.test.mjs chincal.test.mjs splitbill.test.mjs taxcn.test.mjs bodysize.test.mjs worldclock.test.mjs && node scripts/selftest/aes.test.mjs && node scripts/selftest/dev8/bases.test.mjs && node scripts/selftest/dev8/semver.test.mjs && node scripts/selftest/dev8/useragent.test.mjs && node scripts/selftest/device.test.mjs && node scripts/selftest/pickcolor.test.mjs && node scripts/selftest/checksum.test.mjs && node scripts/selftest/bitwise.test.mjs && node scripts/selftest/exif.test.mjs && node scripts/selftest/x509.test.mjs && node scripts/selftest/markdown.test.mjs && node scripts/selftest/qrcode.test.mjs && node scripts/selftest/barcode.test.mjs"
   },
   "dependencies": {
     "@dcloudio/uni-app": "3.0.0-5020620260917001",

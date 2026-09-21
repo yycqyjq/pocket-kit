@@ -44,11 +44,6 @@ function popcount(m) {
   for (let i = 0; i < 9; i++) if (m & (1 << i)) n++
   return n
 }
-function rev(m) {
-  let r = 0
-  for (let i = 0; i < 9; i++) if (m & (1 << i)) r |= 1 << (8 - i)
-  return r
-}
 
 /* ---------- 0. 导出面 ---------- */
 for (const k of [
@@ -84,8 +79,8 @@ for (const ch of B.CODE39_CHARS) {
   is(ws.filter((w) => w === 3).length, 3, '宽元素数 3 ' + JSON.stringify(ch))
   is(ws.filter((w) => w === 1).length, 6, '窄元素数 6 ' + JSON.stringify(ch))
 }
-// 分隔符左右对称，所以条码倒着扫也是同一个起始符
-is(rev(B.CODE39_DELIM), B.CODE39_DELIM, 'Code 39 分隔符掩码回文')
+// 分隔符同样是 3 个宽元素（它和数据字符共用一套 9 元素结构）
+is(popcount(B.CODE39_DELIM), 3, 'Code 39 分隔符也是 3 个宽元素')
 // 掩码两两不同（3-out-of-9 共 84 种组合里只用了 44 种）
 const maskSeen = {}
 for (const ch of B.CODE39_CHARS) {
@@ -134,12 +129,12 @@ for (const p of B.EAN_PAR) {
 is(B.EAN_PAR[0], 'LLLLLL', '首位 0 = 全 L（UPC-A 就靠这条）')
 
 /* ---------- 3. 校验位 ---------- */
-is(B.checkDigit('59012341234', 'ean13'), '7', 'EAN-13 校验位 590123412345')
-is(B.checkDigit('40063813339', 'ean13'), '1', 'EAN-13 校验位 400638133393')
-is(B.checkDigit('0000000', 'ean8'), '4', 'EAN-8 校验位 0000000')
+is(B.checkDigit('590123412345', 'ean13'), '7', 'EAN-13 校验位 5901234123457')
+is(B.checkDigit('400638133393', 'ean13'), '1', 'EAN-13 校验位 4006381333931')
+is(B.checkDigit('0000000', 'ean8'), '0', 'EAN-8 校验位 00000000')
 is(B.checkDigit('9638507', 'ean8'), '4', 'EAN-8 校验位 96385074')
 is(B.checkDigit('03600029145', 'upca'), '2', 'UPC-A 校验位 036000291452')
-is(B.checkDigit('01234567890', 'upca'), '2', 'UPC-A 校验位 012345678902')
+is(B.checkDigit('01234567890', 'upca'), '5', 'UPC-A 校验位 012345678905')
 // 自洽：任何一条完整码去掉校验位再算一次，应还原出同一位
 for (const sym of ['ean13', 'ean8', 'upca']) {
   for (let n = 0; n < 30; n++) {
@@ -164,7 +159,7 @@ for (const n of [1, 2, 5, 12, 40]) {
 /* ---------- 5. 结构分段 ---------- */
 {
   const e = B.encode('590123412345', 'ean13')
-  is(e.structure.length, 14, 'EAN-13 结构段 = 2 守卫 + 12 数据 + 1 中缝')
+  is(e.structure.length, 15, 'EAN-13 结构段 = 2 守卫 + 12 数据 + 1 中缝')
   is(e.structure.filter((s) => s.kind === 'guard').length, 3, 'EAN-13 三段守卫')
   is(e.structure[0].from, 0, '首段从 0 开始')
   is(e.structure[e.structure.length - 1].to, 95, '末段正好收尾')
@@ -180,12 +175,12 @@ for (const n of [1, 2, 5, 12, 40]) {
 /* ---------- 6. 输入校验（中文报错）---------- */
 throws(() => B.encode('', 'ean13'), '空输入')
 throws(() => B.encode('5901234123', 'ean13'), 'EAN-13 位数不足')
-throws(() => B.encode('590123412344', 'ean13'), 'EAN-13 校验位错')
+throws(() => B.encode('5901234123456', 'ean13'), 'EAN-13 校验位错')
 throws(() => B.encode('59012341234a', 'ean13'), 'EAN-13 混进字母')
 throws(() => B.encode('963850', 'ean8'), 'EAN-8 位数不足')
 throws(() => B.encode('96385075', 'ean8'), 'EAN-8 校验位错')
 throws(() => B.encode('3600029145', 'upca'), 'UPC-A 位数不足')
-throws(() => B.encode('abc-123', 'code39'), 'Code 39 小写')
+throws(() => B.encode('AB#CD', 'code39'), 'Code 39 非法字符 #')
 throws(() => B.encode('价格 100', 'code39'), 'Code 39 中文')
 throws(() => B.encode('A'.repeat(41), 'code39'), 'Code 39 超长')
 throws(() => B.encode('590123412345', 'nope'), '不认识的条码类型')
