@@ -467,5 +467,55 @@ const CASES = {
   is(N.NATIVE_NOTES.some((n) => n.d.indexOf('不联网') > -1 || n.t.indexOf('不联网') > -1), true, '说清楚数据不出本机')
 }
 
+/* ---------- 11. H5 按需注入对账：字面量表必须与 uni-h5 的真实现一致 ---------- */
+{
+  // 表内容从源码里读，不给模块加只为测试用的导出
+  const nativeSrc = fs.readFileSync(path.join(utilsDir(), 'native.js'), 'utf8')
+  const block = nativeSrc.slice(nativeSrc.indexOf('const UNI_LITERAL = {'), nativeSrc.indexOf('\n}', nativeSrc.indexOf('const UNI_LITERAL = {')))
+  const entries = [...block.matchAll(/^ {2}([A-Za-z0-9_]+): \(\) => uni\.([A-Za-z0-9_]+),/gm)]
+  const table = entries.map((m) => m[1])
+  is(entries.length >= 20, true, '字面量表读到 ' + entries.length + ' 项，解析失败要查格式')
+  for (const [k, v] of entries.map((m) => [m[1], m[2]])) is(k === v, true, k + ' 的表项必须指向同名接口 uni.' + v)
+
+  const h5File = path.join(utilsDir(), '..', '..', 'node_modules', '@dcloudio', 'uni-h5', 'dist', 'uni-h5.es.js')
+  let h5 = ''
+  try {
+    h5 = fs.readFileSync(h5File, 'utf8')
+  } catch (e) {
+    is(false, true, '读不到 uni-h5 产物，先 npm install 再跑自测：' + h5File)
+  }
+  /** real=H5 真做了，unsupported=占位桩，absent=产物里根本没有 */
+  const h5State = (k) => {
+    const m = h5.match(new RegExp('const ' + k + ' = [\\s\\S]{0,200}?\\);'))
+    if (!m) return 'absent'
+    return /createUnsupported|notSupport/.test(m[0]) ? 'unsupported' : 'real'
+  }
+  is(h5State('getSystemInfoSync'), 'real', '判据本身要能认出真实现')
+  is(h5State('getScreenBrightness'), 'unsupported', '判据本身要能认出占位桩')
+  is(h5State('onProximityChange'), 'absent', '判据本身要能认出根本没有')
+
+  // 视图层反射用到的接口清单：传感器的三件套从 sensor.js 现取，避免两处各写一遍
+  const S = await useUtils('sensor')
+  const reflective = new Set(['getSystemInfoSync', 'getLocation', 'openLocation', 'makePhoneCall', 'getClipboardData', 'setClipboardData', 'createInnerAudioContext', 'getNetworkType', 'onNetworkStatusChange', 'vibrateShort', 'vibrateLong', 'setKeepScreenOn', 'getScreenBrightness', 'setScreenBrightness'])
+  for (const k of S.SENSOR_KINDS) for (const x of [k.start, k.stop, k.api, 'off' + String(k.api).slice(2)]) reflective.add(x)
+
+  for (const k of reflective) {
+    const st = h5State(k)
+    if (st === 'real') {
+      is(table.indexOf(k) > -1, true, 'uni-h5 真实现了 ' + k + '，字面量表里必须登记，否则 build:h5 会谎报「读不到」')
+    } else {
+      is(table.indexOf(k) === -1, true, k + ' 在 uni-h5 里' + (st === 'unsupported' ? '是占位桩' : '根本不存在') + '，不许进表（进了就是假称可用）')
+    }
+  }
+  for (const k of table) {
+    is(reflective.has(k), true, '表里的 ' + k + ' 视图层根本没用到，是死登记')
+  }
+  // 传感器 kinds 一旦新增，必须同时决定「H5 有没有」，不能默默漏掉
+  for (const k of S.SENSOR_KINDS) {
+    is(typeof k.start === 'string' && typeof k.api === 'string', true, k.key + ' 的接口名要写全')
+    is(/^(start|on)/.test(k.start) && /^on/.test(k.api), true, k.key + ' 的命名要和 uni 一致')
+  }
+}
+
 console.log('native ' + (fail ? 'FAIL ' + fail : '全绿') + ' ' + ok + '/' + (ok + fail))
 process.exit(fail ? 1 : 0)

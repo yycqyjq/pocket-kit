@@ -68,6 +68,12 @@ function uniOf() {
  * 只有被字面引用过的接口才会挂上去。这一层全程用 u[key] 反射调用，于是静态预览里所有接口
  * 都显示「不存在」——开发模式（dev:h5）不会这样，真机也不会（App 端 uni 是完整全局对象）。
  * 表里只登记 H5 真有的那几项，缺的接口在浏览器预览里本来就该报缺失。
+ *
+ * 边界（拿 node_modules/@dcloudio/uni-h5 的产物逐个核过，scripts/selftest/native.test.mjs 会回查）：
+ * 加速度计走 devicemotion、指南针走 deviceorientation、震动走 navigator.vibrate、
+ * 常亮走 Wake Lock，这四项 H5 是真实现，所以要登记；亮度两项与陀螺仪两项在 H5 里是
+ * createUnsupportedAsyncApi，光线 / 接近 / 设备方向三项干脆没有，这些都不许进表。
+ * uniOff 会把 onXxxChange 换成 offXxxChange 再查一次表，所以 on/off 得成对登记。
  */
 const UNI_LITERAL = {
   getSystemInfoSync: () => uni.getSystemInfoSync,
@@ -79,6 +85,17 @@ const UNI_LITERAL = {
   createInnerAudioContext: () => uni.createInnerAudioContext,
   getNetworkType: () => uni.getNetworkType,
   onNetworkStatusChange: () => uni.onNetworkStatusChange,
+  vibrateShort: () => uni.vibrateShort,
+  vibrateLong: () => uni.vibrateLong,
+  setKeepScreenOn: () => uni.setKeepScreenOn,
+  startAccelerometer: () => uni.startAccelerometer,
+  stopAccelerometer: () => uni.stopAccelerometer,
+  onAccelerometerChange: () => uni.onAccelerometerChange,
+  offAccelerometerChange: () => uni.offAccelerometerChange,
+  startCompass: () => uni.startCompass,
+  stopCompass: () => uni.stopCompass,
+  onCompassChange: () => uni.onCompassChange,
+  offCompassChange: () => uni.offCompassChange,
 }
 
 /** 接口函数本体：先反射拿（App 与开发模式），拿不到再试字面量表（H5 生产包） */
