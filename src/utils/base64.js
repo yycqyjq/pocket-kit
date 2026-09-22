@@ -122,3 +122,19 @@ export function bytesToHex(bytes, sep) {
     .map((b) => (b & 0xff).toString(16).padStart(2, '0'))
     .join(sep || '')
 }
+
+/** 字节数组 -> Base64（不经过 UTF-8，二进制安全） */
+export function bytesToBase64(bytes) {
+  let out = ''
+  const arr = bytes.length !== undefined ? bytes : Array.from(bytes)
+  for (let i = 0; i < arr.length; i += 3) {
+    const b0 = arr[i]
+    const b1 = i + 1 < arr.length ? arr[i + 1] : NaN
+    const b2 = i + 2 < arr.length ? arr[i + 2] : NaN
+    out += TABLE[b0 >> 2]
+    out += TABLE[((b0 & 3) << 4) | (isNaN(b1) ? 0 : b1 >> 4)]
+    out += isNaN(b1) ? '=' : TABLE[((b1 & 15) << 2) | (isNaN(b2) ? 0 : b2 >> 6)]
+    out += isNaN(b2) ? '=' : TABLE[b2 & 63]
+  }
+  return out
+}

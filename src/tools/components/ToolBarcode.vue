@@ -96,7 +96,7 @@
     <PkCard v-if="enc" title="结构分段" :accent="TINT">
       <view class="seg">
         <view v-for="(s, i) in segRows" :key="i" class="seg__r">
-          <text class="seg__k">{{ KIND_NAME[s.kind] || s.kind }}</text>
+          <text class="seg__k">{{ kindName(s.kind) }}</text>
           <text class="seg__v">{{ s.text || '—' }}</text>
           <text class="seg__m">{{ s.to - s.from }} 模块 · {{ s.from }}–{{ s.to }}</text>
         </view>
@@ -134,7 +134,7 @@ import { copyText, toast } from '@/utils/clipboard'
 import { saveCanvasImage } from '@/utils/image'
 
 /** 本工具的品牌色：视图里唯一允许的字面色，其余颜色一律走 CSS 变量 */
-const TINT = '#4A6B7A'
+const TINT = '#3F5A75'
 /** 预览最长边（px），超过就把单模块压到 1 px 并允许横向滚动 */
 const PREVIEW_MAX = 300
 const SEG_MAX = 60
@@ -157,29 +157,42 @@ const QUIET_ITEMS = [
   { key: 1, name: '1× 标准' },
   { key: 2, name: '2× 宽松' },
 ]
-const KIND_NAME = { guard: '守卫', delim: '分隔符', data: '数据（L／正序）', dataG: '数据（G 反色）' }
+/** 同一种 kind 在不同码制里叫法不一样，这里按当前码制给名字 */
+function kindName(kind) {
+  if (kind === 'data') return sym.value === 'code128' ? '数据' : '数据（L／正序）'
+  const m = {
+    guard: '守卫',
+    delim: '分隔符',
+    dataG: '数据（G 反色）',
+    start: '起始码',
+    switch: '码集切换',
+    check: '校验和',
+    stop: '终止符',
+  }
+  return m[kind] || kind
+}
 
 const BC_NOTES = [
   { t: '全离线', d: '查表、校验位、模块排布全在本机算，不联网、不上传内容。' },
   {
     t: '依据标准',
-    d: 'Code 39 按 9 元素 3 宽（15 模块／字符 + 1 模块间隔）、43 个数据字符加一个起止分隔符；EAN／UPC 按 GS1 的模块布局：守卫 101／01010／101，一位数字 7 模块，EAN-13 共 95 模块、EAN-8 共 67 模块，首位不占模块、只由左半 6 位的 L／G 奇偶排列表示。',
+    d: 'Code 39 按 9 元素 3 宽（15 模块／字符 + 1 模块间隔）、43 个数据字符加一个起止分隔符；Code 128 按 6 元素合计 11 模块一个符号、三套码集（A 含控制符、B 全打印 ASCII、C 两位数字一格）加 mod 103 校验和、终止符 13 模块；EAN／UPC 按 GS1 的模块布局：守卫 101／01010／101，一位数字 7 模块，EAN-13 共 95 模块、EAN-8 共 67 模块，首位不占模块、只由左半 6 位的 L／G 奇偶排列表示。',
   },
   {
     t: '校验位',
-    d: 'mod-10 加权求和：EAN-13 从左边第一位按 1、3、1、3…，EAN-8 与 UPC-A 按 3、1、3、1…。填 12 位（EAN-8 填 7 位）自动补末位；填满整位则复核，错了直接报中文提示并指出应为几。',
+    d: 'EAN 系用 mod-10 加权求和：EAN-13 从左边第一位按 1、3、1、3…，EAN-8 与 UPC-A 按 3、1、3、1…。填 12 位（EAN-8 填 7 位）自动补末位；填满整位则复核，错了直接报中文提示并指出应为几。Code 128 的校验和是另一套：起始码值 + 每个符号值乘上它的序号，mod 103，它不显示在可读文字里。',
   },
   {
     t: '第三方复核',
-    d: '这套位模表是拿开源解码器 zbar（zbarimg）反向标定与验收的：Code 39 的 44 个图案靠遍历 3-out-of-9 全部 84 种组合、逐个渲染再让 zbar 认出来的；EAN／UPC 则是 100 组随机码全部被 zbar 逐字符读回一致。自查脚本里这 50 组判官用例每次都会重跑。',
+    d: '这套位模表是拿开源解码器 zbar（zbarimg）反向标定与验收的：Code 39 的 44 个图案靠遍历 3-out-of-9 全部 84 种组合、逐个渲染再让 zbar 认出来的；Code 128 的 107 个图案靠校验位同余式反推（只放一个数据符号时 check = 起始值 + 值 mod 103），A／B／C 三组分别复核 96、96、100 例；EAN／UPC 则是 100 组随机码全部被 zbar 逐字符读回一致。自查脚本里这 90 组判官用例每次都会重跑。',
   },
   { t: 'UPC-A 的口径', d: 'UPC-A 就是补了前导 0 的 EAN-13（奇偶行全 L）。zbar 常把这种码报成 EAN-13 形式，所以判官比对的是 0 + 载荷，工具本身仍按 12 位进出。' },
-  { t: '静区', d: '各码制的标准静区不一样（Code 39 为 10 模块，EAN-13／UPC-A 为 11，EAN-8 为 7），页面里按倍数放宽；选 0 会把白边裁掉，部分扫码枪会认不出。' },
+  { t: '静区', d: '各码制的标准静区不一样（Code 39 与 Code 128 为 10 模块，EAN-13／UPC-A 为 11，EAN-8 为 7），页面里按倍数放宽；选 0 会把白边裁掉，部分扫码枪会认不出。' },
   {
     t: '长度与上限',
-    d: 'Code 39 标准本身不限长度，这里截到 40 字符是自选的护栏——码体太长会超出打印宽度，条空压到极限就扫不出了。EAN／UPC 位数固定。',
+    d: 'Code 39 与 Code 128 标准本身不限长度，这里分别截到 40 与 80 字符是自选的护栏——码体太长会超出打印宽度，条空压到极限就扫不出了。EAN／UPC 位数固定。',
   },
-  { t: '不做的部分', d: '不做 Code 128、ITF-25、Codabar、PDF417 与减位 UPC-E；二维码请走「二维码」那件工具。' },
+  { t: '不做的部分', d: 'Code 128 只写普通数据，FNC 功能码（EAN／ISBT 附加、字母锁定这些）一律不用，非 ASCII（中文、emoji）也编不了；ITF-25、Codabar、PDF417 与减位 UPC-E 不做；二维码请走「二维码」那件工具。' },
   { t: '颜色与保存', d: '前景背景都取当前主题的 CSS 变量，换深色模式预览和保存图片一起变；预览是 <view> 色块，只有保存时才用画布，App 端先写私有目录再存相册，没给相册权限会失败并提示。' },
 ]
 
@@ -199,11 +212,15 @@ const quietPx = computed(() => quietStd.value * quietMul.value)
 
 const phText = computed(() => {
   const s = spec.value
+  if (s.key === 'code128') return 'ASCII 全字符（含大小写），最长 80 字符'
   if (!s.digits) return '英文数字与 - . 空格 $ / + %，最长 40 字符'
   return s.name + ' 填前 ' + (s.digits - 1) + ' 位数字，校验位自动补'
 })
 const charsetTip = computed(() => {
   const s = spec.value
+  if (s.key === 'code128') {
+    return 'Code 128 覆盖全部 128 个 ASCII，大小写分开，制表与换行也能编；纯数字会自动走 C 组，长度几乎减半。非 ASCII（中文、emoji）编不了。'
+  }
   if (!s.digits) {
     return 'Code 39 的字符集只有 43 个（0-9 A-Z - . 空格 $ / + %），没有小写字母——这里输小写会自动转大写。'
   }
@@ -252,8 +269,11 @@ const unit = computed(() => {
   if (!t) return 1
   return Math.max(1, Math.min(4, Math.floor(PREVIEW_MAX / t)))
 })
-/** 守卫的条要往下扎一截，这是 EAN／UPC 的样子；Code 39 没有守卫 */
-const guardExt = computed(() => (sym.value === 'code39' ? 0 : Math.max(3, Math.round(heightPx.value * 0.16))))
+/** 只有 EAN／UPC 的守卫条要往下扎一截，Code 39 与 Code 128 没有守卫 */
+const guardExt = computed(() => {
+  const hasGuard = enc.value ? enc.value.structure.some((s) => s.kind === 'guard') : false
+  return hasGuard ? Math.max(3, Math.round(heightPx.value * 0.16)) : 0
+})
 const barAreaH = computed(() => heightPx.value + guardExt.value)
 const capH = computed(() => (showText.value ? Math.max(14, Math.round(heightPx.value * 0.34)) : 0))
 const stripH = computed(() => barAreaH.value + capH.value)
@@ -291,9 +311,9 @@ const bars = computed(() => {
 const capPieces = computed(() => {
   const e = enc.value
   if (!e || !showText.value) return []
-  const p = e.payload
+  const p = e.sym === 'code128' ? readable(e.payload) : e.payload
   const q = quietPx.value
-  if (e.sym === 'code39' || q === 0) {
+  if (e.sym === 'code39' || e.sym === 'code128' || q === 0) {
     return [{ text: p, align: 'center', xm: q + e.moduleCount / 2, wide: e.sym === 'code39' }]
   }
   if (e.sym === 'ean13') {
@@ -316,6 +336,11 @@ const capPieces = computed(() => {
     { text: p[11], align: 'left', xm: q + e.moduleCount + 1 },
   ]
 })
+
+/** 控制字符画不出字形，用两个符号顶上，免得可读文字看起来凭空少一位 */
+function readable(s) {
+  return String(s).replace(/\t/g, '⇥').replace(/\n/g, '⏎')
+}
 
 function capStyle(c) {
   return {
@@ -346,6 +371,9 @@ const segTip = computed(() => {
   if (!enc.value) return ''
   if (enc.value.sym === 'code39') {
     return '首尾两格是起止分隔符（星号），它不算数据；中间每格一个字符，固定 15 模块。'
+  }
+  if (enc.value.sym === 'code128') {
+    return '每个符号固定 11 模块、终止符 13 模块：起始码先定码集，码集切换那一格表示换组（C 组一位顶两位数字），倒数第二格是按位加权的 mod 103 校验和。'
   }
   return '三段守卫固定占 3+5+3 模块；标了 G 反色的左半位就是奇偶表在起作用，首位数字靠这一排列表示。'
 })

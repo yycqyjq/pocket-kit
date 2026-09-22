@@ -9,6 +9,8 @@
  *      （一个查表写、一个切块读），但共用同一张表，所以只算自洽层。
  * 表结构断言（每个字符恰好 3 个宽元素、L/G/R 三张表互不重叠、镜像关系）
  * 是第三层：不依赖任何解码器。
+ * Code 128 同理：103 个值图案 + 3 个起始码 + 终止符过结构层（6 元素、合计 11 模块、
+ * 互不重复），95 个可打印 ASCII 加控制符过回读层，40 组随机内容过 zbar 层。
  */
 import { useUtils } from './harness.mjs'
 import { execFileSync } from 'node:child_process'
@@ -48,14 +50,15 @@ function popcount(m) {
 /* ---------- 0. 导出面 ---------- */
 for (const k of [
   'CODE39_CHARS', 'CODE39_DELIM', 'EAN_L', 'EAN_G', 'EAN_R', 'EAN_PAR',
+  'C128_PATTERNS', 'C128_START', 'C128_STOP', 'c128Check',
   'SYMS', 'SYM_ITEMS', 'BARCODE_SAMPLES', 'checkDigit', 'normalize',
   'encode', 'readBack', 'runsOf', 'widthProfile',
 ]) {
   is(B[k] !== undefined, true, '导出 ' + k)
 }
-is(B.SYMS.length, 4, 'SYMS 数量')
-is(B.SYM_ITEMS.length, 4, 'SYM_ITEMS 数量')
-is(B.SYM_ITEMS.map((i) => i.name).join('/'), 'Code 39/EAN-13/EAN-8/UPC-A', 'SYM_ITEMS 名字')
+is(B.SYMS.length, 5, 'SYMS 数量')
+is(B.SYM_ITEMS.length, 5, 'SYM_ITEMS 数量')
+is(B.SYM_ITEMS.map((i) => i.name).join('/'), 'Code 39/EAN-13/EAN-8/UPC-A/Code 128', 'SYM_ITEMS 名字')
 
 /* ---------- 1. Code 39 表结构 ---------- */
 is(B.CODE39_CHARS.length, 43, 'Code 39 字符集大小')
@@ -127,6 +130,74 @@ for (const p of B.EAN_PAR) {
   is(/^[LG]{6}$/.test(p), true, '奇偶行只含 L/G ' + p)
 }
 is(B.EAN_PAR[0], 'LLLLLL', '首位 0 = 全 L（UPC-A 就靠这条）')
+
+/* ---------- 2b. Code 128 表结构 ---------- */
+const digitSum = (p) => [...p].reduce((s, c) => s + Number(c), 0)
+is(B.C128_PATTERNS.length, 103, 'Code 128 值图案 103 个')
+for (let v = 0; v < 103; v++) {
+  const p = B.C128_PATTERNS[v]
+  is(p.length, 6, '值 ' + v + ' 图案 6 个元素')
+  is(digitSum(p), 11, '值 ' + v + ' 图案合计 11 模块')
+  is(/^[1-4]{6}$/.test(p), true, '值 ' + v + ' 元素宽度落在 1..4')
+}
+is(new Set(B.C128_PATTERNS).size, 103, '103 个图案互不相同')
+for (const k of ['A', 'B', 'C']) {
+  is(/^[1-4]{6}$/.test(B.C128_START[k]), true, '起始码 ' + k + ' 宽度合法')
+  is(digitSum(B.C128_START[k]), 11, '起始码 ' + k + ' 合计 11 模块')
+  is(B.C128_PATTERNS.indexOf(B.C128_START[k]), -1, '起始码 ' + k + ' 不与数据图案撞车')
+}
+is(/^[1-4]{7}$/.test(B.C128_STOP), true, '终止符 7 个元素宽度合法')
+is(digitSum(B.C128_STOP), 13, '终止符合计 13 模块')
+is(B.C128_PATTERNS.indexOf(B.C128_STOP), -1, '终止符不在值表里')
+// 校验和：只放一个数据符号时 check = (起始值 + 值) mod 103——这张表当初就是靠这个同余式标出来的
+for (const v of [0, 1, 42, 74, 95, 98, 102]) {
+  is(B.c128Check(103, [v]), (103 + v) % 103, 'A 组单符号校验和 值=' + v)
+  is(B.c128Check(104, [v]), (104 + v) % 103, 'B 组单符号校验和 值=' + v)
+  is(B.c128Check(105, [v]), (105 + v) % 103, 'C 组单符号校验和 值=' + v)
+}
+is(B.c128Check(104, [40, 7, 25, 1]), (104 + 40 + 14 + 75 + 4) % 103, '多符号按位加权')
+{
+  const e = B.encode('AB-12', 'code128')
+  is(e.structure[0].kind, 'start', '首段是起始码')
+  is(e.structure[0].text, 'START B', '普通文本走 B 组')
+  is(e.structure[e.structure.length - 1].kind, 'stop', '末段是终止符')
+  is(e.structure.filter((s) => s.kind === 'check').length, 1, '有且只有一个校验符号')
+  is(e.moduleCount, 11 * 7 + 13, '5 个字符 = 起始+5+校验 共 7 符号 + 终止符')
+  is(e.structure.reduce((s, x) => s + (x.to - x.from), 0), e.moduleCount, '结构段拼起来正好等于模块总数')
+  is(e.structure.every((s) => s.kind === 'stop' || digitSumOf(s.bits)), true, '每段都是满的')
+  const c = B.encode('12345678', 'code128')
+  is(c.structure[0].text, 'START C', '偶数位纯数字走 C 组')
+  is(c.structure.filter((s) => s.kind === 'data').map((s) => s.text).join(''), '12345678', 'C 组数据段拼起来是原数字')
+  is(c.moduleCount, 11 * 6 + 13, '8 位数字 = 6 符号，比 B 组的 8 符号省')
+  const odd = B.encode('1234567', 'code128')
+  is(odd.structure[0].text, 'START B', '奇数位纯数字先用 B 组起头')
+  is(odd.structure.filter((s) => s.kind === 'switch').length, 1, '奇数只切一次 C')
+  const mix = B.encode('Order 9999 paid', 'code128')
+  is(mix.structure.filter((s) => s.kind === 'switch').length, 0, '4 位数字夹在中间，进出 C 组不划算')
+  const atEnd = B.encode('Order 9999', 'code128')
+  is(atEnd.structure.filter((s) => s.kind === 'switch').length, 1, '4 位数字在末尾，只进不出就划算')
+  const long = B.encode('Order 999999 paid', 'code128')
+  is(long.structure.filter((s) => s.kind === 'switch').length, 2, '6 位数字进出各一次，仍然划算')
+  // 改动校验符号里的一个模块：图案会变（或变成不在表里的），总之必须报错
+  const ck = e.structure.find((s) => s.kind === 'check')
+  const flipped = e.modules.slice(0, ck.from) + (e.modules[ck.from] === '1' ? '0' : '1') + e.modules.slice(ck.from + 1)
+  throws(() => B.readBack(flipped, 'code128'), '校验符号被动过要报错')
+  throws(() => B.readBack(e.modules + '1', 'code128'), '模块总数对不上要报错')
+}
+function digitSumOf(bits) {
+  // 段宽 = 该段的模块数，Code 128 每段应为 11（终止符 13）
+  return bits.length === 11 || bits.length === 13
+}
+
+/* ---------- 2c. Code 128 输入 ---------- */
+throws(() => B.encode('   ', 'code128'), 'Code 128 只有空白')
+throws(() => B.encode('价格 100', 'code128'), 'Code 128 中文')
+throws(() => B.encode('A'.repeat(81), 'code128'), 'Code 128 超长')
+throws(() => B.encode('a\u0000b', 'code128'), 'Code 128 里有 NUL')
+is(B.normalize('a b C', 'code128'), 'a b C', 'Code 128 保留大小写')
+is(B.normalize('x\r\ny', 'code128'), 'x\ny', 'CRLF 归一成 LF')
+is(B.normalize('ID-001', 'code128'), 'ID-001', 'Code 128 不改内容')
+is(B.encode('abc', 'code128').appended, null, 'Code 128 没有补校验位的说法')
 
 /* ---------- 3. 校验位 ---------- */
 is(B.checkDigit('590123412345', 'ean13'), '7', 'EAN-13 校验位 5901234123457')
@@ -205,6 +276,28 @@ is(B.encode('5901234123457', 'ean13').appended, null, '自带校验位时 append
   throws(() => B.readBack('11111111111', 'code39'), '回读能识别坏 Code 39')
 }
 
+/* ---------- 7b. Code 128 回读自洽 ---------- */
+{
+  const msgs = ['A', 'Pocket-2026#42', 'Hello World', 'a1B2', 'X'.repeat(80), '12', '1234567890', '1234567', 'No.20260922/3', 'Order 999999 paid', '\tX', 'A\tB', 'a\nb', ' !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~']
+  for (const m of msgs) is(B.readBack(B.encode(m, 'code128').modules, 'code128'), m, 'Code 128 回读 ' + JSON.stringify(m))
+  // 95 个可打印 ASCII 逐个走一遍，顺带把三套码表的解释压满
+  for (let c = 32; c <= 126; c++) {
+    const m = 'Q' + String.fromCharCode(c) + '7z'
+    is(B.readBack(B.encode(m, 'code128').modules, 'code128'), m, 'Code 128 回读 U+' + c.toString(16))
+  }
+  for (let n = 0; n < 30; n++) {
+    let s = ''
+    const L = 1 + Math.floor(Math.random() * 24)
+    for (let i = 0; i < L; i++) s += String.fromCharCode(32 + Math.floor(Math.random() * 95))
+    if (!s.trim()) s = 'x' + s
+    is(B.readBack(B.encode(s, 'code128').modules, 'code128'), s, 'Code 128 随机回读 ' + JSON.stringify(s))
+    const d = String(Math.floor(Math.random() * 1e18)).slice(0, 1 + Math.floor(Math.random() * 18))
+    is(B.readBack(B.encode(d, 'code128').modules, 'code128'), d, 'Code 128 数字回读 ' + d)
+  }
+  throws(() => B.readBack('1101101101101', 'code128'), '回读能识别坏 Code 128')
+  throws(() => B.readBack(B.encode('AB', 'code128').modules.slice(0, -13), 'code128'), '缺终止符要报错')
+}
+
 /* ---------- 8. runs / widthProfile ---------- */
 {
   const e = B.encode('590123412345', 'ean13')
@@ -269,6 +362,22 @@ if (!Z) {
   for (let n = 0; n < 20; n++) cases.push({ sym: 'ean13', symb: 'ean13', payload: String(Math.floor(Math.random() * 1e12)).padStart(12, '0') })
   for (let n = 0; n < 10; n++) cases.push({ sym: 'ean8', symb: 'ean8', payload: String(Math.floor(Math.random() * 1e7)).padStart(7, '0') })
   for (let n = 0; n < 10; n++) cases.push({ sym: 'upca', symb: 'ean13', payload: String(n % 2) + String(Math.floor(Math.random() * 1e10)).padStart(10, '0') })
+  for (const m of ['A', 'Pocket-2026#42', 'Hello World', 'a1B2', ' !"#$%&\'()*+,-./:;<=>?@[\\]^_`', '{|}~', 'ID-99999', 'Order 999999 paid']) {
+    cases.push({ sym: 'code128', symb: 'code128', payload: m })
+  }
+  for (let n = 0; n < 20; n++) {
+    let s = ''
+    const L = 1 + Math.floor(Math.random() * 20)
+    for (let i = 0; i < L; i++) s += String.fromCharCode(33 + Math.floor(Math.random() * 93))
+    cases.push({ sym: 'code128', symb: 'code128', payload: s })
+  }
+  // 数字段：起始码选择、进出 C 组、奇偶长度都靠这 12 组压
+  for (let n = 0; n < 12; n++) {
+    const L = 1 + Math.floor(Math.random() * 20)
+    let d = ''
+    for (let i = 0; i < L; i++) d += String(Math.floor(Math.random() * 10))
+    cases.push({ sym: 'code128', symb: 'code128', payload: n % 3 === 0 ? 'No.' + d + '/' + (n + 1) : d })
+  }
   for (const c of cases) {
     const enc = B.encode(c.payload, c.sym)
     const f = TMP + '/b.pbm'
