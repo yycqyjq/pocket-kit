@@ -126,6 +126,23 @@ npm run build:app          # 产出 dist/build/app
 再配合 [Android 离线打包 SDK](https://nativesupport.dcloud.net.cn/AppDocs/download/android)
 用 Android Studio 出 APK。第一次做建议直接用云打包，省去配置 NDK 的麻烦。
 
+### GitHub Actions（自动到资源为止，不出 APK）
+
+`.github/workflows/android.yml`：push 到 `main`、提 PR 或手动触发时跑
+`npm ci → npm test → build:h5 → build:app`，最后把 `dist/build/app` 传成 artifact。
+
+APK 那一步不在里面，也不是漏写：DCloud 的云打包没有可供 CI 调用的接口，
+离线打包 SDK 又要登录下载且不许再分发。两条自动化出路写在
+[`docs/打包安卓.md`](docs/打包安卓.md) 的「路线 C」。
+
+### 开发脚本（本地）
+
+| 命令 | 干什么 |
+| --- | --- |
+| `npm test` | 全量自查：自动发现 `scripts/selftest/**/*.test.mjs` 逐套运行；条码与二维码拿 zbarimg / magick 当外部判官，缺判官的套件会 SKIP 并在汇总里点名 |
+| `npm run check:docs` | README 工具表 ↔ 注册表 ↔ manifest 三方对撞，件数漂移当场报错 |
+| `node scripts/screenshot.mjs` | 构建后整批重拍 README 截图（先起 `python3 -m http.server 4173 --directory dist/build/h5`） |
+
 ---
 
 ## 二、内置工具

@@ -15,7 +15,7 @@
  */
 import { useUtils } from './harness.mjs'
 import { execFileSync } from 'node:child_process'
-import { writeFileSync, unlinkSync, existsSync } from 'node:fs'
+import { writeFileSync, unlinkSync } from 'node:fs'
 
 const Q = await useUtils('qrcode')
 
@@ -296,13 +296,24 @@ is(vc.split('\r\n').length >= 4, true, 'vcCrlf')
 is(Q.buildWifi({ ssid: '' }), 'WIFI:T:WPA;S:;P:;;', 'wifiNoSsid')
 
 /* ---------- 9. 外部判官：zbarimg 真解码（缺工具就跳过） ---------- */
-const HAS_ZBAR = existsSync('/opt/homebrew/bin/zbarimg') || existsSync('/usr/local/bin/zbarimg')
-const HAS_MAGICK = existsSync('/opt/homebrew/bin/magick') || existsSync('/opt/homebrew/bin/convert')
-if (!HAS_ZBAR || !HAS_MAGICK) {
-  console.log('SKIP zbar 判官：没找到 zbarimg / ImageMagick，第 9 组外部验证未跑')
+// 按 PATH 找，不按 /opt/homebrew 写死：macOS 的家目录和 Linux CI 的 /usr/bin 都得认，
+// 否则在流水线里会「静默跳过」，把没验证说成验证过了。
+function findBin(names) {
+  for (const n of names) {
+    try {
+      const p = execFileSync('which', [n], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+      if (p) return p
+    } catch (e) {
+      /* next */
+    }
+  }
+  return null
+}
+const ZBAR = findBin(['zbarimg'])
+const MAGICK = findBin(['magick', 'convert'])
+if (!ZBAR || !MAGICK) {
+  console.log('SKIP zbar 判官：PATH 里缺 ' + [!ZBAR && 'zbarimg', !MAGICK && 'ImageMagick'].filter(Boolean).join(' / ') + '，第 9 组外部验证未跑')
 } else {
-  const magick = existsSync('/opt/homebrew/bin/magick') ? 'magick' : 'convert'
-  const zbar = execFileSync('which', ['zbarimg'], { encoding: 'utf8' }).trim() || '/opt/homebrew/bin/zbarimg'
   let judged = 0
   RT.concat(['POCKET-KIT 2026', '13800138000', '中文与 emoji 🚀 混排']).forEach((t, i) => {
     const e = ['L', 'M', 'Q', 'H'][i % 4]
@@ -328,10 +339,10 @@ if (!HAS_ZBAR || !HAS_MAGICK) {
     const pbm = '/tmp/pk-qr-' + i + '.pbm'
     const png = '/tmp/pk-qr-' + i + '.png'
     writeFileSync(pbm, 'P1\n' + side + ' ' + side + '\n' + rows.join('\n') + '\n')
-    execFileSync(magick, [pbm, '-scale', '600x600', '-border', '12', '-bordercolor', 'white', png])
+    execFileSync(MAGICK, [pbm, '-scale', '600x600', '-border', '12', '-bordercolor', 'white', png])
     let out = ''
     try {
-      out = execFileSync(zbar, ['-q', '--raw', png], { encoding: 'utf8' })
+      out = execFileSync(ZBAR, ['-q', '--raw', png], { encoding: 'utf8' })
     } catch (err) {
       out = String((err && err.stdout) || '')
     }

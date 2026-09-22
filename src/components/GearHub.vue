@@ -171,6 +171,7 @@ import {
   readThermal,
   readWifi,
   fmtWatts,
+  fmtGB,
 } from '@/utils/device'
 
 const loading = ref(false)
@@ -335,23 +336,17 @@ const memText = computed(() => {
   let ramPct = ''
   if (m.ramTotal > 0) {
     const used = Math.max(0, m.ramTotal - (m.ramAvail || 0))
-    ram = fmtGbSafe(used) + ' / ' + fmtGbSafe(m.ramTotal)
+    ram = fmtGB(used) + ' / ' + fmtGB(m.ramTotal)
     ramPct = Math.round((used / m.ramTotal) * 100) + '%'
   }
   return {
     ram: ram,
     ramPct: ramPct,
     heap: m.heapMB ? m.heapMB + ' MB' : '',
-    storage: m.storageTotal > 0 ? fmtGbSafe(m.storageTotal - (m.storageAvail || 0)) + ' 已用 / ' + fmtGbSafe(m.storageTotal) : '',
+    storage: m.storageTotal > 0 ? fmtGB(m.storageTotal - (m.storageAvail || 0)) + ' 已用 / ' + fmtGB(m.storageTotal) : '',
     swap: [m.swapFree, m.swapTotal].filter(Boolean).length === 2 ? m.swapFree + ' 可用 / ' + m.swapTotal : '',
   }
 })
-
-function fmtGbSafe(bytes) {
-  const g = Number(bytes) / 1073741824
-  if (!isFinite(g) || g <= 0) return ''
-  return (g >= 10 ? g.toFixed(1) : g.toFixed(2)).replace(/\.?0+$/, '') + ' GB'
-}
 
 /* ---------- 系统与安全 / 图形生态 / 摄像头 ---------- */
 const wifiRow = computed(() => {
