@@ -78,7 +78,13 @@ import ToolExif from './components/ToolExif.vue'
 import ToolPickcolor from './components/ToolPickcolor.vue'
 import ToolBodysize from './components/ToolBodysize.vue'
 import ToolQrcode from './components/ToolQrcode.vue'
+import ToolBarcode from './components/ToolBarcode.vue'
 import ToolWorldclock from './components/ToolWorldclock.vue'
+import ToolGeo from './components/ToolGeo.vue'
+import ToolSensor from './components/ToolSensor.vue'
+import ToolHardware from './components/ToolHardware.vue'
+import ToolScreen from './components/ToolScreen.vue'
+import ToolShortcut from './components/ToolShortcut.vue'
 import { initials } from '@/utils/text'
 import ToolDevice from './components/ToolDevice.vue'
 
@@ -525,6 +531,16 @@ export const TOOLS = [
     keywords: '二维码 qrcode qr 条码 生成 wifi 无线 名片 vcard 联系人 扫码 纠错 ecc 掩码 版本 容量 静区',
   },
   {
+    id: 'barcode',
+    name: '条形码',
+    glyph: '条',
+    tint: '#3F5A75',
+    cat: 'image',
+    desc: 'EAN/UPC/Code128 一维码',
+    intro: '纯本地生成一维条形码：Code 39、Code 128、EAN-13、EAN-8、UPC-A 五种码制，校验位自动补或复核，模块宽度/高度/静区/可读文字可调，带分段结构与回读自检，可存相册。位模表经 zbar 解码逐字符复核。',
+    keywords: '条形码 条码 barcode 一维码 商品码 ean ean13 ean8 upc upca code39 code 39 code128 code 128 校验位 静区 守卫 生成 打印',
+  },
+  {
     id: 'garbled',
     name: '乱码恢复',
     glyph: '乱',
@@ -824,6 +840,56 @@ export const TOOLS = [
     intro: '在 App 真机上读机型与系统补丁号、物理分辨率与刷新率档位、逐核实时频率、内存与存储占用、电池温度电压与健康度，以及传感器清单；读不到的字段如实显示，不猜。',
     keywords: '设备 信息 机型 型号 厂商 soc 处理器 核心 频率 governor 内存 存储 电量 电池 温度 电压 健康度 屏幕 分辨率 密度 刷新率 高刷 传感器 开机时长 android build',
   },
+  {
+    id: 'geo',
+    name: '定位与坐标',
+    glyph: '标',
+    tint: '#2F6B4F',
+    cat: 'dev',
+    desc: 'WGS84 · GCJ02 · BD09 互转',
+    intro: '同一位置在 GPS 原始、国测局、百度三套坐标系里对照与互转，附带度分秒写法、剪贴板解析、两点距离与方位角，也能取一次系统定位；换算全程本机离线。',
+    keywords: '坐标 经纬度 坐标系 wgs84 gps gcj02 国测局 火星坐标 bd09 百度 偏移 纠偏 换算 度分秒 定位 距离 方位角 haversine 地图 lat lng',
+  },
+  {
+    id: 'sensor',
+    name: '传感器实验室',
+    glyph: '传',
+    tint: '#5B7A2F',
+    cat: 'dev',
+    desc: '加速度 · 指南针 · 光线',
+    intro: '把加速度计、指南针、陀螺仪、设备姿态、光线与接近传感器逐个接上实时读数，附带水平仪气泡、方位表盘、照度档位和抖动统计，离开页面自动停止采样。',
+    keywords: '传感器 加速度 重力 水平仪 气泡 指南针 方位 磁力 陀螺仪 角速度 姿态 光线 照度 lux 接近 距离 采样 频率 校准 校准仪 sensor',
+  },
+  {
+    id: 'hardware',
+    name: '硬件测试',
+    glyph: '硬',
+    tint: '#7A5C3E',
+    cat: 'dev',
+    desc: '震动 · 闪光灯 · 扬声器',
+    intro: '逐个点一遍马达、闪光灯、屏幕常亮与亮度、扬声器与左右声道：测试音由本机按采样率现算成正弦波，还带扫频、白噪声与媒体音量档位，二手验机不用另装 App。',
+    keywords: '硬件 测试 验机 马达 震动 闪光灯 手电筒 torch 常亮 亮度 扬声器 喇叭 听筒 左右声道 扫频 白噪声 媒体音量 坏音 破音 speaker',
+  },
+  {
+    id: 'screen',
+    name: '屏幕测试',
+    glyph: '屏',
+    tint: '#4F3E8C',
+    cat: 'dev',
+    desc: '坏点 · 灰阶 · 触摸盲区',
+    intro: '纯色轮播、多级灰阶、网格斜线条纹与色彩渐变全屏铺开找坏点，再按 3×4 统计手指抹过的触摸覆盖率与盲区格，顺手给出物理分辨率和屏幕比例。',
+    keywords: '屏幕 测试 坏点 亮点 暗点 漏光 偏色 纯色 红绿蓝 灰阶 伽马 网格 斜线 条纹 摩尔纹 渐变 断带 触摸 盲区 断触 多点触控 覆盖率 分辨率 比例',
+  },
+  {
+    id: 'shortcut',
+    name: '快捷唤起',
+    glyph: '唤',
+    tint: '#8C3E6B',
+    cat: 'dev',
+    desc: '拨号 · 短信 · 地图 · 设置',
+    intro: '把号码、邮箱、经纬度和包名校验干净后拼成一条 URI，交给系统唤起拨号盘、短信、邮件、地图落点、应用商店或直接跳到某一页系统设置；协议走白名单，javascript: 一律拒绝。',
+    keywords: '快捷 唤起 跳转 拨号 打电话 短信 邮件 mailto 地图 落点 经纬度 geo 应用商店 market 包名 系统设置 settings action 白名单 URI intent',
+  },
 ]
 
 const COMPONENTS = {
@@ -899,7 +965,13 @@ const COMPONENTS = {
   bodysize: ToolBodysize,
   device: ToolDevice,
   qrcode: ToolQrcode,
+  barcode: ToolBarcode,
   worldclock: ToolWorldclock,
+  geo: ToolGeo,
+  sensor: ToolSensor,
+  hardware: ToolHardware,
+  screen: ToolScreen,
+  shortcut: ToolShortcut,
 }
 
 export const TOOL_COUNT = TOOLS.length

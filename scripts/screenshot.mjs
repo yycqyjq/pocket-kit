@@ -38,6 +38,12 @@ const SHOTS = [
   ['34-二维码', { hash: '/pages/tool/tool?id=qrcode' }, 'light'],
   ['35-世界时钟', { hash: '/pages/tool/tool?id=worldclock' }, 'light'],
   ['36-设备信息', { hash: '/pages/tool/tool?id=device' }, 'light'],
+  ['38-条形码', { hash: '/pages/tool/tool?id=barcode' }, 'light'],
+  ['39-定位与坐标', { hash: '/pages/tool/tool?id=geo' }, 'light'],
+  ['40-传感器实验室', { hash: '/pages/tool/tool?id=sensor' }, 'light'],
+  ['41-硬件测试', { hash: '/pages/tool/tool?id=hardware' }, 'light'],
+  ['42-屏幕测试', { hash: '/pages/tool/tool?id=screen' }, 'light'],
+  ['43-快捷唤起', { hash: '/pages/tool/tool?id=shortcut' }, 'light'],
   ['37-搞机页签-深色', { hash: '/pages/index/index', tap: '搞机', dark: true }, 'dark'],
 ]
 
