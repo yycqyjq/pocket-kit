@@ -116,6 +116,15 @@ function apiOf(key) {
     return null
   }
 }
+/**
+ * 这个接口在 H5 端到底有没有：判据就是上面那张与 uni-h5 对过账的表。
+ * 与 hasApi 的差别在于 hasApi 问的是「此刻这台设备能不能调到」，这里问的是
+ * 「浏览器预览这条路本身存不存在」——给文案用，免得把「我们没用反射拿到」说成「H5 没有」。
+ */
+export function h5Has(key) {
+  return !!UNI_LITERAL[key]
+}
+
 function plusOf() {
   try {
     return typeof plus !== 'undefined' && plus ? plus : null

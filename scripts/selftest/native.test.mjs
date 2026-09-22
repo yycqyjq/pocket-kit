@@ -64,7 +64,7 @@ const CASES = {
 /* ---------- 0. 导出面 ---------- */
 {
   const want = [
-    'apiName', 'probe', 'systemInfo', 'whyMissing', 'missText', 'hasApi', 'failText',
+    'apiName', 'probe', 'systemInfo', 'whyMissing', 'missText', 'hasApi', 'h5Has', 'failText',
     'uniCall', 'uniStart', 'uniStop', 'uniOn', 'uniOff', 'stopWav', 'playWav',
     'withAndroid', 'openExternal', 'startActivityAction', 'NATIVE_NOTES',
     'ANDROID_PERMS', 'permName', 'PERM_LOCATION', 'PERM_CAMERA', 'requestAndroidPermissions',
@@ -515,6 +515,16 @@ const CASES = {
     is(typeof k.start === 'string' && typeof k.api === 'string', true, k.key + ' 的接口名要写全')
     is(/^(start|on)/.test(k.start) && /^on/.test(k.api), true, k.key + ' 的命名要和 uni 一致')
   }
+  // h5Has 是这张表对外的只读判据，文案要从它推，不许再手写一句「H5 里没有」
+  is(N.h5Has('startAccelerometer'), true, '加计在 H5 有，判据要说有')
+  is(N.h5Has('startCompass'), true, '指南针同上')
+  is(N.h5Has('startGyroscope'), false, '陀螺仪在 H5 是占位桩，判据不能说有')
+  is(N.h5Has('onProximityChange'), false, '接近传感器 H5 根本没有')
+  is(N.h5Has(''), false, '空名不抛')
+  is(N.h5Has(null), false, 'null 不抛')
+  const sensorVue = fs.readFileSync(path.join(utilsDir(), '..', 'tools', 'components', 'ToolSensor.vue'), 'utf8')
+  is(sensorVue.indexOf('h5Has(') > -1, true, '传感器页的 H5 口径要由 h5Has 推出来')
+  is(sensorVue.indexOf('H5 预览里没有这些接口') === -1, true, '不许再写死那句「H5 预览里没有这些接口」')
 }
 
 console.log('native ' + (fail ? 'FAIL ' + fail : '全绿') + ' ' + ok + '/' + (ok + fail))

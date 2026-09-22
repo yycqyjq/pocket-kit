@@ -94,13 +94,21 @@ import {
   SENSOR_KINDS, SENSOR_RATES, frameRows, primaryValue, pushFrame, seriesStats,
   magnitude, tiltFromAccel, isLevel, bubble, smooth, smoothHeading, compassView, lightGrade, proximityState, GRAVITY,
 } from '@/utils/sensor'
-import { probe, hasApi, uniStart, uniStop, uniOn, uniOff, missText, NATIVE_NOTES } from '@/utils/native'
+import { probe, hasApi, h5Has, uniStart, uniStop, uniOn, uniOff, missText, NATIVE_NOTES } from '@/utils/native'
 
 const TINT = '#5B7A2F'
 const HIST = 48
 
+/** 浏览器预览里哪些传感器真能读：口径取自 native 那张与 uni-h5 对过账的表，不手写死 */
+const H5_YES = SENSOR_KINDS.filter((k) => h5Has(k.start) && h5Has(k.api)).map((k) => k.name)
+const H5_NO = SENSOR_KINDS.filter((k) => !(h5Has(k.start) && h5Has(k.api))).map((k) => k.name)
+const H5_LINE = H5_YES.length
+  ? '浏览器预览里只有' + H5_YES.join('、') + '能读，走的还是网页的运动与方向事件，采样率和精度都不如系统接口；' +
+    H5_NO.join('、') + '在 H5 端根本没有对应接口。'
+  : '浏览器预览里这几样传感器接口都没有。'
+
 const NOTES = [
-  { t: '数据从哪来', d: '全部走 uni 的传感器接口，最终落到安卓的 SensorManager。H5 预览里没有这些接口，页面上会直接写清楚缺什么，不会崩。' },
+  { t: '数据从哪来', d: '全部走 uni 的传感器接口，最终落到安卓的 SensorManager。' + H5_LINE + '不管有没有，页面上都会在原位写清楚缺什么，不会崩。' },
   { t: '为什么读数会抖', d: '系统给的是原始采样，屏幕上又只放得下三行字，所以倾角和方位都做了一阶低通（α=0.25 / 0.3）。要看不加滤波的裸值，看上面那三行轴读数。' },
   { t: '静止时应该看到什么', d: '加速度三轴合力约等于重力 ' + GRAVITY + ' m/s²，也就是平放时 Z 轴接近 9.8、X/Y 接近 0。合模长明显偏离这个数，说明手机正在动。' },
   { t: '磁北不等于真北', d: '指南针读的是地磁方向，和地图上的正北差一个磁偏角，国内东边能差到几度、西边更大；再加上钢铁和电磁干扰，取个整数方位当参考就好，别拿它当测绘。' },
