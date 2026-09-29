@@ -95,22 +95,19 @@ const timer = setInterval(() => {
 }, 1000)
 onUnmounted(() => clearInterval(timer))
 
-const error = ref('')
-const code = computed(() => {
-  error.value = ''
-  if (!secret.value.trim()) return null
+const codeCalc = computed(() => {
+  if (!secret.value.trim()) return { out: null, err: '' }
   const r = totp(secret.value, {
     period: Number(periodKey.value),
     digits: Number(digitsKey.value),
     algo: algoKey.value,
     at: tick.value,
   })
-  if (!r.ok) {
-    error.value = r.error
-    return null
-  }
-  return r
+  if (!r.ok) return { out: null, err: r.error }
+  return { out: r, err: '' }
 })
+const code = computed(() => codeCalc.value.out)
+const error = computed(() => codeCalc.value.err)
 
 const keyBytes = computed(() => {
   try {

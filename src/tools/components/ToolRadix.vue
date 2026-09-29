@@ -72,24 +72,23 @@ const fromRadix = ref(10)
 const bits = ref(32)
 const asciiIn = ref('')
 
-const error = ref('')
+const blank = () => radixItems.map((r) => ({ key: r.key, name: r.name, value: '' }))
 
-const results = computed(() => {
-  error.value = ''
+const resultsCalc = computed(() => {
   const raw = String(input.value).trim()
-  if (!raw) return radixItems.map((r) => ({ key: r.key, name: r.name, value: '' }))
+  if (!raw) return { out: blank(), err: '' }
   if (!R.isValidInRadix(raw, fromRadix.value)) {
-    error.value = '含有不属于 ' + fromRadix.value + ' 进制的字符'
-    return radixItems.map((r) => ({ key: r.key, name: r.name, value: '' }))
+    return { out: blank(), err: '含有不属于 ' + fromRadix.value + ' 进制的字符' }
   }
   try {
     const all = R.convertAll(raw, fromRadix.value)
-    return radixItems.map((r) => ({ key: r.key, name: r.name, value: all[r.key] || '' }))
+    return { out: radixItems.map((r) => ({ key: r.key, name: r.name, value: all[r.key] || '' })), err: '' }
   } catch (e) {
-    error.value = e.message || '转换失败'
-    return radixItems.map((r) => ({ key: r.key, name: r.name, value: '' }))
+    return { out: blank(), err: e.message || '转换失败' }
   }
 })
+const results = computed(() => resultsCalc.value.out)
+const error = computed(() => resultsCalc.value.err)
 
 const bit = computed(() => {
   const raw = String(input.value).trim()

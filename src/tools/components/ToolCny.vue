@@ -56,7 +56,6 @@ const modes = [
 
 const mode = ref('money')
 const input = ref('1234.56')
-const error = ref('')
 
 const quicks = [
   { n: '0.01', v: '0.01' },
@@ -65,16 +64,16 @@ const quicks = [
   { n: '100000000', v: '100000000' },
 ]
 
-const upper = computed(() => {
-  error.value = ''
-  if (!input.value) return ''
+const upperCalc = computed(() => {
+  if (!input.value) return { out: '', err: '' }
   try {
-    return mode.value === 'money' ? toChineseUpper(input.value) : numberToChinese(input.value, true)
+    return { out: mode.value === 'money' ? toChineseUpper(input.value) : numberToChinese(input.value, true), err: '' }
   } catch (e) {
-    error.value = e.message
-    return ''
+    return { out: '', err: e.message }
   }
 })
+const upper = computed(() => upperCalc.value.out)
+const error = computed(() => upperCalc.value.err)
 
 const lower = computed(() => {
   if (!input.value || error.value) return ''

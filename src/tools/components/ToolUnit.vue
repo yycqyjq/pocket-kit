@@ -89,23 +89,22 @@ const toIndex = computed(() => {
 const fromName = computed(() => group.value.units[fromIndex.value].name)
 const toName = computed(() => group.value.units[toIndex.value].name)
 
-const error = ref('')
-
 const allResults = computed(() => {
-  error.value = ''
   const v = Number(value.value)
   if (value.value === '' || !isFinite(v)) return []
   return convertToAll(v, groupId.value, fromKey.value)
 })
 
-const mainResult = computed(() => {
+const mainCalc = computed(() => {
   const hit = allResults.value.find((r) => r.key === toKey.value)
   if (!hit) {
-    if (value.value !== '' && !isFinite(Number(value.value))) error.value = '请输入有效数字'
-    return '—'
+    const bad = value.value !== '' && !isFinite(Number(value.value))
+    return { out: '—', err: bad ? '请输入有效数字' : '' }
   }
-  return fmt(hit.value)
+  return { out: fmt(hit.value), err: '' }
 })
+const mainResult = computed(() => mainCalc.value.out)
+const error = computed(() => mainCalc.value.err)
 
 function fmt(n) {
   return smartFormat(n, 6)

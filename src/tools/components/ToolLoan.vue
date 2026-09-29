@@ -117,36 +117,23 @@ const months = computed(() => {
   return y > 0 ? Math.round(y * 12) : 0
 })
 
-const error = ref('')
-
-const result = computed(() => {
-  error.value = ''
+const calc = computed(() => {
   const p = Number(principal.value)
   const r = Number(rate.value)
   const n = months.value
-  if (!(p > 0)) {
-    error.value = '请输入贷款金额'
-    return null
-  }
-  if (!(n > 0)) {
-    error.value = '请输入贷款年限'
-    return null
-  }
-  if (!(r >= 0)) {
-    error.value = '请输入有效的年利率'
-    return null
-  }
-  if (n > 600) {
-    error.value = '期数过多（超过 50 年）'
-    return null
-  }
+  if (!(p > 0)) return { out: null, err: '请输入贷款金额' }
+  if (!(n > 0)) return { out: null, err: '请输入贷款年限' }
+  if (!(r >= 0)) return { out: null, err: '请输入有效的年利率' }
+  if (n > 600) return { out: null, err: '期数过多（超过 50 年）' }
   try {
-    return mode.value === 'equal' ? equalInstallment(p, r, n) : equalPrincipal(p, r, n)
+    return { out: mode.value === 'equal' ? equalInstallment(p, r, n) : equalPrincipal(p, r, n), err: '' }
   } catch (e) {
-    error.value = e.message || '计算失败'
-    return null
+    return { out: null, err: e.message || '计算失败' }
   }
 })
+
+const result = computed(() => calc.value.out)
+const error = computed(() => calc.value.err)
 
 const interestRatio = computed(() => {
   if (!result.value) return '—'

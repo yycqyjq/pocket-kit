@@ -95,17 +95,15 @@ const age = ref('28')
 const waist = ref('')
 const activity = ref('light')
 
-const error = ref('')
-
-const bmi = computed(() => {
-  error.value = ''
+const bmiCalc = computed(() => {
   try {
-    return calcBmi(Number(weight.value), Number(height.value))
+    return { out: calcBmi(Number(weight.value), Number(height.value)), err: '' }
   } catch (e) {
-    error.value = e.message
-    return null
+    return { out: null, err: e.message }
   }
 })
+const bmi = computed(() => bmiCalc.value.out)
+const error = computed(() => bmiCalc.value.err)
 
 const toneColor = computed(() => {
   if (!bmi.value) return 'var(--pk-accent)'
