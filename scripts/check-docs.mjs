@@ -18,8 +18,12 @@ const rows = [...readme.matchAll(/^\|\s*[^|]+\|\s*\*\*([^*]+)\*\*\s*\|/gm)].map(
 const manifest = fs.readFileSync('src/manifest.json', 'utf8')
 const mCount = Number((manifest.match(/共 (\d+) 件小工具/) || [])[1])
 
-const shots = [...readme.matchAll(/docs\/screenshots\/([^)\s]+)/g)].map((m) => m[1])
-const missingShots = shots.filter((s) => !fs.existsSync('docs/screenshots/' + s))
+// 这批图住在 .agent/，而 .agent 整个目录不入库——在 clone 出来的仓库里它们根本不存在。
+// 缺目录就跳过并说明原因，别把「这里没有文件」报成「README 的图丢了」。
+const SHOT_DIR = '.agent/docs/screenshots'
+const shots = [...readme.matchAll(/!\[[^\]]*\]\(\.agent\/docs\/screenshots\/([^)\s]+)\)/g)].map((m) => m[1])
+const shotSkip = !fs.existsSync(SHOT_DIR)
+const missingShots = shotSkip ? [] : shots.filter((s) => !fs.existsSync(SHOT_DIR + '/' + s))
 
 const diffs = (a, b) => a.filter((x) => !b.includes(x)).concat(b.filter((x) => !a.includes(x)))
 const checks = [
@@ -30,7 +34,7 @@ const checks = [
   ['README 工具表行数 = 注册数', rows.length === names.length],
   ['README 与 registry 名称一致', diffs(names, rows).length === 0],
   ['manifest 件数一致', mCount === names.length],
-  ['README 引用的截图都存在', missingShots.length === 0],
+  ['README 引用的截图都存在' + (shotSkip ? '（.agent 不入库，跳过 ' + shots.length + ' 张）' : ''), missingShots.length === 0],
 ]
 let bad = 0
 for (const [name, ok] of checks) {

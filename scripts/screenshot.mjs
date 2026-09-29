@@ -13,7 +13,7 @@ import os from 'node:os'
 const exe = process.argv[2] ||
   process.env.HOME + '/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'
 const BASE = 'http://127.0.0.1:4173'
-const OUT = path.resolve('docs/screenshots')
+const OUT = path.resolve('.agent/docs/screenshots')
 fs.mkdirSync(OUT, { recursive: true })
 
 const SHOTS = [

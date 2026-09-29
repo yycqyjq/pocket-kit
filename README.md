@@ -14,71 +14,8 @@ H5 只作为开发期的浏览器预览手段（小程序/快应用目标已移�
 
 分七类：文本 · 处理 / 编码 · 解码 / 数值 · 计算 / 时间 · 日期 / 开发 · 运维 / 生成 · 校验 / 图片 · 处理。
 
-| 首页 | 文本工坊 | 色彩工坊 |
-| --- | --- | --- |
-| ![首页](docs/screenshots/01-首页.png) | ![文本工坊](docs/screenshots/02-文本工坊.png) | ![色彩工坊](docs/screenshots/03-色彩工坊.png) |
-
-| 还款试算 | 身体数据（深色） | 校验台 |
-| --- | --- | --- |
-| ![还款试算](docs/screenshots/04-还款试算.png) | ![身体数据](docs/screenshots/05-身体数据-深色.png) | ![校验台](docs/screenshots/06-校验台.png) |
-
-| 正则速查 | 开发速查 | IP 子网 |
-| --- | --- | --- |
-| ![正则速查](docs/screenshots/07-正则速查.png) | ![开发速查](docs/screenshots/08-开发速查.png) | ![IP 子网](docs/screenshots/09-IP子网.png) |
-
-| SQL 格式化 | Linux 权限 | URL 解析 |
-| --- | --- | --- |
-| ![SQL 格式化](docs/screenshots/10-SQL格式化.png) | ![Linux 权限](docs/screenshots/11-Linux权限.png) | ![URL 解析](docs/screenshots/12-URL解析.png) |
-
-| Unicode 码点 | 复利与投资 | 两步验证码 |
-| --- | --- | --- |
-| ![Unicode 码点](docs/screenshots/13-Unicode码点.png) | ![复利与投资](docs/screenshots/14-复利与投资.png) | ![两步验证码](docs/screenshots/15-两步验证码.png) |
-
-| JSON 转 TS | 古典密码 | |
-| --- | --- | --- |
-| ![JSON 转 TS](docs/screenshots/16-JSON转TS.png) | ![古典密码](docs/screenshots/17-古典密码.png) | |
-
-| AES 加解密 | UA 解析 | 语义化版本 |
-| --- | --- | --- |
-| ![AES 加解密](docs/screenshots/18-AES加解密.png) | ![UA 解析](docs/screenshots/19-UA解析.png) | ![语义化版本](docs/screenshots/20-语义化版本.png) |
-
-| 字母表编码 | 统计工坊 | 数论工具箱 |
-| --- | --- | --- |
-| ![字母表编码](docs/screenshots/21-字母表编码.png) | ![统计工坊](docs/screenshots/22-统计工坊.png) | ![数论工具箱](docs/screenshots/23-数论工具箱.png) |
-
-| 农历历书 | 账单分摊 | 个税速算 |
-| --- | --- | --- |
-| ![农历历书](docs/screenshots/24-农历历书.png) | ![账单分摊](docs/screenshots/25-账单分摊.png) | ![个税速算](docs/screenshots/26-个税速算.png) |
-
-| CRC 校验和 | X509 证书 | 位运算 |
-| --- | --- | --- |
-| ![CRC 校验和](docs/screenshots/27-CRC校验和.png) | ![X509 证书](docs/screenshots/28-X509证书.png) | ![位运算](docs/screenshots/29-位运算.png) |
-
-| Markdown 互转 | EXIF 元数据 | 图片取色 |
-| --- | --- | --- |
-| ![Markdown 互转](docs/screenshots/30-Markdown互转.png) | ![EXIF 元数据](docs/screenshots/31-EXIF元数据.png) | ![图片取色](docs/screenshots/32-图片取色.png) |
-
-| 尺码换算 | 二维码 | 世界时钟 |
-| --- | --- | --- |
-| ![尺码换算](docs/screenshots/33-尺码换算.png) | ![二维码](docs/screenshots/34-二维码.png) | ![世界时钟](docs/screenshots/35-世界时钟.png) |
-
-| 设备信息 | 搞机页签 | 搞机页签（深色） |
-| --- | --- | --- |
-| ![设备信息](docs/screenshots/36-设备信息.png) | ![搞机页签](docs/screenshots/37-搞机页签.png) | ![搞机页签（深色）](docs/screenshots/37-搞机页签-深色.png) |
-
-| 条形码 | 定位与坐标 | 传感器实验室 |
-| --- | --- | --- |
-| ![条形码](docs/screenshots/38-条形码.png) | ![定位与坐标](docs/screenshots/39-定位与坐标.png) | ![传感器实验室](docs/screenshots/40-传感器实验室.png) |
-
-| 硬件测试 | 屏幕测试 | 快捷唤起 |
-| --- | --- | --- |
-| ![硬件测试](docs/screenshots/41-硬件测试.png) | ![屏幕测试](docs/screenshots/42-屏幕测试.png) | ![快捷唤起](docs/screenshots/43-快捷唤起.png) |
-
-> 截图取自真实浏览器渲染（390×844 手机视口），非设计稿；重跑 `npm run build:h5` 后执行 `node scripts/screenshot.mjs` 可整批更新。App 端独有的读数（如设备信息的传感器清单）在浏览器里以「—」如实留空。
-> 「安卓原生」那一组的截图只能证明页面在浏览器里长什么样、缺接口时说什么话；
-> 加速度计、指南针、震动与屏幕常亮在预览里是真通的（走网页事件），但闪光灯、镜头清单、亮度、
-> 光线与接近、以及唤起链路必须在真机上看，这几张图替不了。
-> 全套页面的样式体检与逐项修正记录见 [`docs/样式修正记录.md`](docs/样式修正记录.md)。
+> 界面截图与过程文档不在版本库里：这批东西统一放本地的 `.agent/`（已 gitignore）。
+> 本地想看图就先 `npm run build:h5`，再 `node scripts/screenshot.mjs`，图会落在 `.agent/docs/screenshots/`。
 
 ---
 
@@ -113,7 +50,7 @@ npm run build:app
 6. 打包 APK：菜单 `发行 → 原生App-云打包`，选择 Android，使用公共测试证书即可出包；
    上线应用商店则需要自己生成签名证书（见下）。
    注意上架 Google Play 要求 `targetSdkVersion` ≥ 36（2026-08-31 起），
-   并且要用 HBuilderX 5.09+ 打包，详见 `docs/打包安卓.md`。
+   并且要用 HBuilderX 5.09+ 打包（逐步流程在本地文档 `.agent/docs/打包安卓.md`，这个目录不入库）。
 
 ### 用命令行打包 Android（离线打包）
 
@@ -132,8 +69,9 @@ npm run build:app          # 产出 dist/build/app
 `npm ci → npm test → build:h5 → build:app`，最后把 `dist/build/app` 传成 artifact。
 
 APK 那一步不在里面，也不是漏写：DCloud 的云打包没有可供 CI 调用的接口，
-离线打包 SDK 又要登录下载且不许再分发。两条自动化出路写在
-[`docs/打包安卓.md`](docs/打包安卓.md) 的「路线 C」。
+离线打包 SDK 又要登录下载且不许再分发。要让 CI 直接出 APK，得先把离线 SDK 私有托管
+（私有仓库或 Actions artifact）并把 keystore 放进 Secrets，或者把自建 runner 挂在
+装了 HBuilderX 的 Mac 上；细节在本地文档 `.agent/docs/打包安卓.md` 的「路线 C」。
 
 ### 开发脚本（本地）
 
@@ -141,7 +79,8 @@ APK 那一步不在里面，也不是漏写：DCloud 的云打包没有可供 CI
 | --- | --- |
 | `npm test` | 全量自查：自动发现 `scripts/selftest/**/*.test.mjs` 逐套运行；条码与二维码拿 zbarimg / magick 当外部判官，缺判官的套件会 SKIP 并在汇总里点名 |
 | `npm run check:docs` | README 工具表 ↔ 注册表 ↔ manifest 三方对撞，件数漂移当场报错 |
-| `node scripts/screenshot.mjs` | 构建后整批重拍 README 截图（先起 `python3 -m http.server 4173 --directory dist/build/h5`） |
+| `npm run lint` | ESLint 静态检查（配置见 `eslint.config.mjs`）。**只卡正确性、不卡排版**；首次接入时存量里有 118 处未清问题（3 类），一律先降为 warning 不计入退出码，清完再升回 error。另：`npm run lint:fix` 可自动修其中一部分 |
+| `node scripts/screenshot.mjs` | 构建后整批重拍界面截图，写到 `.agent/docs/screenshots/`（先起 `python3 -m http.server 4173 --directory dist/build/h5`） |
 
 ---
 
@@ -239,13 +178,10 @@ pocket-kit/
 ├── vite.config.js
 ├── package.json
 ├── README.md
-├── docs/
-│   ├── 架构说明.md          # 设计取舍、扩展方式、约定
-│   ├── 打包安卓.md          # 云打包 / 本地打包逐步说明
-│   ├── 样式修正记录.md       # 全站样式体检结果与逐项修正
-│   ├── 第四批工具说明.md     # 第 39~50 个工具的选题记录（历史快照；51~79 件见本文工具清单）
-│   ├── 体检报告.md          # 代码正确性体检：问题清单、复现、修法与回归记录
-│   └── screenshots/         # 真实渲染截图
+├── .agent/                  # 不入库，只在本机：agent 写的文档、报告、截图都收在这
+│   ├── docs/                #   架构说明 / 打包安卓 / 样式修正记录 / 体检报告 / 第四批工具说明
+│   │   └── screenshots/     #   真实渲染截图（由 scripts/screenshot.mjs 本地生成）
+│   └── workbuddy-ai/        #   另一个工具的会话记录
 └── src/
     ├── main.js              # 应用入口
     ├── App.vue              # 全局主题变量与基础样式

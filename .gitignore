@@ -22,3 +22,7 @@ dist
 # 自测脚手架运行时生成的模块副本（跑测试时自动重建）
 scripts/selftest/life/*.mjs
 !scripts/selftest/life/*.test.mjs
+
+# agent 相关的东西统一收在这里，整个目录都不入库（文档、截图、过程笔记只留在本地）。
+# 代价：README 里指向 .agent/docs/ 的那批图片和文档链接，在别人 clone 下来的仓库里不存在。
+.agent
