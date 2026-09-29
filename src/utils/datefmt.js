@@ -274,16 +274,8 @@ export function convert(pattern, notationKey, date) {
 
 export const FMT_SAMPLES = [
   { name: '常见日期时间', value: '%Y-%m-%d %H:%M:%S' },
-  { name: '带中文星期', value: '%Y年%m月%d日 %A' },
+  { name: '中文年月日带星期', value: '%Y年%m月%d日 %A' },
   { name: '12 小时制', value: '%Y/%m/%d %I:%M:%S %p' },
   { name: '紧凑', value: '%Y%m%d%H%M%S' },
   { name: 'ISO 8601 带时区', value: '%Y-%m-%dT%H:%M:%S%z' },
-]
-
-export const FMT_NOTES = [
-  'Go 不占位符，而是用「参考时间」：把 2006-01-02 15:04:05 记成 2006 年 1 月 2 日的 3 点 4 分 5 秒，所以 2006 就是年、01 是月、02 是日。',
-  'Java 与 moment 都区分大小写，但含义不同：Java 的 MM 是月、mm 是分；moment 的 MM 是月、mm 也是分，可 DD 是日而 dd 是星期。',
-  'strftime 里 %m 是月、%M 是分、%d 是日、%j 是年内第几天，大小写不能写错。',
-  'MySQL 的 DATE_FORMAT 用的是 %i 表示分钟（不是 %M），这点和 C 的 strftime 不一样，很容易踩。',
-  '格式串属于「本地化」范畴，同一个 %A 在不同语言环境下会输出不同的星期名。',
 ]

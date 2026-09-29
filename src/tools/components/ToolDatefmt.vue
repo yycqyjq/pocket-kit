@@ -61,6 +61,7 @@
         <PkRow label="大小写陷阱" value="Java 的 MM 是月、mm 是分；moment 的 DD 是日、dd 是星期——手抄时最容易错" :copy="false" stack />
         <PkRow label="MySQL 例外" value="MySQL 的 DATE_FORMAT 用 %i 表示分钟（不是 %M），这点和 C 的 strftime 不一样" :copy="false" stack />
         <PkRow label="Go 最特别" value="不用占位符，而是拿参考时间 2006-01-02 15:04:05 当模板，1 月 2 日 3 点 4 分 5 秒" :copy="false" stack />
+        <PkRow label="星期与月份名" value="示例一律按英文给（Tuesday、March）。同一串格式在 zh_CN 的 locale 下运行，strftime 的 %A、Java 的 EEEE、moment 的 dddd 会输出「星期二」；Go 的 time.Format 不带本地化，永远英文" :copy="false" stack />
       </PkCard>
     </template>
 
