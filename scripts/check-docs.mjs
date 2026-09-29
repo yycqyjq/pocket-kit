@@ -91,7 +91,7 @@ codeFiles.forEach((f, i) => {
 const PLATFORM_UNTESTED = ['clipboard', 'image', 'storage', 'sys', 'theme']
 const UNTESTED = [
   'braille', 'classic', 'cleanescape', 'codefmt', 'color', 'cron', 'dataconv', 'date',
-  'datefmt', 'devref', 'diff', 'entity', 'expr', 'extract', 'garbled', 'hash', 'health',
+  'datefmt', 'devref', 'diff', 'entity', 'expr', 'extract', 'garbled', 'health',
   'hexdump', 'httpdump', 'ip', 'ipv6', 'json2ts', 'lorem', 'naming', 'normalize',
   'percent', 'perm', 'punycode', 'qp', 'radix', 'regexlib', 'sqlfmt', 'table',
   'text', 'unicode', 'unit', 'url', 'uuidinfo', 'validate', 'wordfreq',

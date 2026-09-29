@@ -51,6 +51,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { utf8ByteLen } from '@/utils/base64'
 import { copyText, toast } from '@/utils/clipboard'
 
 const SAMPLE = '{"name":"随身匣","version":"1.0.0","tags":["工具","离线"],"author":{"nick":"you","contact":{"mail":"hi@example.com"}},"enabled":true,"weight":null}'
@@ -107,14 +108,28 @@ function parseAndSet(space, onlyCheck) {
 
 /** 把 JS 引擎的报错翻译成带位置的说明 */
 function describeError(msg, src) {
-  const m = msg.match(/position\s+(\d+)/i)
-  if (!m) return msg
-  const pos = Number(m[1])
-  const before = src.slice(0, pos)
-  const line = before.split('\n').length
-  const col = pos - before.lastIndexOf('\n')
-  const snippet = src.slice(Math.max(0, pos - 18), pos + 18).replace(/\n/g, '⏎')
-  return '第 ' + line + ' 行第 ' + col + ' 列附近：…' + snippet + '…'
+  const at = locateError(msg, src)
+  if (!at) return '引擎没给出出错位置，原文：' + msg
+  const snippet = src.slice(Math.max(0, at.idx - 18), at.idx + 18).replace(/\n/g, '⏎')
+  return '第 ' + at.line + ' 行第 ' + at.col + ' 列附近：…' + snippet + '…'
+}
+
+/** 引擎的报错有两种口径：老口径给字符位置，新口径直接给行列，两种都翻成行/列/字符下标 */
+function locateError(msg, src) {
+  const p = msg.match(/position\s+(\d+)/i)
+  if (p) {
+    const idx = Number(p[1])
+    const before = src.slice(0, idx)
+    return { line: before.split('\n').length, col: idx - before.lastIndexOf('\n'), idx }
+  }
+  const lc = msg.match(/line\s+(\d+)\s+column\s+(\d+)/i)
+  if (lc) {
+    const line = Number(lc[1])
+    const col = Number(lc[2])
+    const head = src.split('\n').slice(0, line - 1).join('\n')
+    return { line, col, idx: head.length + (line > 1 ? 1 : 0) + col - 1 }
+  }
+  return null
 }
 
 function inspect(data, byteLen) {
@@ -171,18 +186,8 @@ function inspect(data, byteLen) {
     nulls,
     depth,
     topKeys,
-    size: byteLen + ' 字符 · ' + utf8Size(JSON.stringify(data)) + ' 字节',
+    size: byteLen + ' 字符 · ' + utf8ByteLen(JSON.stringify(data)) + ' 字节',
   }
-}
-
-/** 估算 UTF-8 字节数 */
-function utf8Size(str) {
-  let n = 0
-  for (const ch of String(str)) {
-    const c = ch.codePointAt(0)
-    n += c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4
-  }
-  return n
 }
 </script>
 

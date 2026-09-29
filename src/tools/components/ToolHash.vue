@@ -59,6 +59,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { hashAll, hmac, ALGOS, supportsSHA512 } from '@/utils/hash'
+import { utf8ByteLen } from '@/utils/base64'
 import { toast } from '@/utils/clipboard'
 
 const input = ref('')
@@ -72,14 +73,7 @@ const hmacAlgoModel = computed({
   },
 })
 
-const byteLen = computed(() => {
-  let n = 0
-  for (const ch of String(input.value)) {
-    const c = ch.codePointAt(0)
-    n += c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4
-  }
-  return n
-})
+const byteLen = computed(() => utf8ByteLen(input.value))
 
 const results = computed(() => {
   const all = hashAll(input.value)

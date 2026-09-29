@@ -41,6 +41,19 @@ export function utf8Bytes(str) {
   return out
 }
 
+/**
+ * 字符串按 UTF-8 编码后的字节数，规则与 utf8Bytes 一致。
+ * 界面上「共 N 字节」那一类计数一律走这里，别在组件里再抄一遍分段阈值。
+ */
+export function utf8ByteLen(str) {
+  let n = 0
+  for (const ch of String(str)) {
+    const c = ch.codePointAt(0)
+    n += c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4
+  }
+  return n
+}
+
 /** UTF-8 字节数组 -> 字符串 */
 export function bytesUtf8(bytes) {
   let out = ''

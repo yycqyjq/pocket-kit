@@ -203,6 +203,7 @@ import {
   AES_NOTES,
   AES_SAMPLES,
 } from '@/utils/aes'
+import { utf8ByteLen } from '@/utils/base64'
 import { copyText, toast } from '@/utils/clipboard'
 
 const opItems = [
@@ -245,14 +246,7 @@ const algoInfo = computed(() => AES_ALGOS.find((a) => a.key === algo.value) || A
 const keyBytes = computed(() => algoInfo.value.keyBytes)
 const keyChars = computed(() => algoInfo.value.keyHexChars)
 const keyHexCharsIn = computed(() => String(keyHex.value).replace(/[\s:,_-]/g, '').length)
-const utf8Len = computed(() => {
-  let n = 0
-  for (const ch of String(input.value)) {
-    const c = ch.codePointAt(0)
-    n += c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4
-  }
-  return n
-})
+const utf8Len = computed(() => utf8ByteLen(input.value))
 const trail = computed(() => {
   const r = enc.value || dec.value
   return r ? r.blockTrail.shown : []
