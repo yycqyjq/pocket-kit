@@ -25,11 +25,31 @@ export function random() {
   return nextUint32() / 4294967296
 }
 
-/** [min, max] 闭区间整数 */
+/** 双精度能逐个表示到的整数上限，也是随机源的位宽（2^53） */
+const SPAN_MAX = 9007199254740992
+
+/** 均匀取 [0, span)：取 53 位，落在能被 span 整除的那段里才要。 */
+function below(span) {
+  const limit = SPAN_MAX - (SPAN_MAX % span)
+  let u
+  do {
+    // 27 位 + 26 位拼一个 53 位整数，双精度下不会糊
+    u = (nextUint32() >>> 5) * 67108864 + (nextUint32() >>> 6)
+  } while (u >= limit)
+  return u % span
+}
+
+/**
+ * [min, max] 闭区间整数
+ * 区间里一个整数都没有（例如 (2.5, 2.8)），或者宽过 2^53，返回 NaN——
+ * 界面该在调用前挡掉，别把 NaN 显示给用户。
+ */
 export function randomInt(min, max) {
   const lo = Math.ceil(Math.min(min, max))
   const hi = Math.floor(Math.max(min, max))
-  return lo + (nextUint32() % (hi - lo + 1))
+  const span = hi - lo + 1
+  if (!(span >= 1) || span > SPAN_MAX) return NaN
+  return lo + below(span)
 }
 
 /** 从数组里不重复地取 n 个 */

@@ -135,18 +135,30 @@ function runNumber() {
     toast('最小值不能大于最大值')
     return
   }
+  const span = Math.floor(hi) - Math.ceil(lo) + 1
+  if (span <= 0) {
+    toast('区间内没有整数')
+    return
+  }
+  if (span > 9007199254740992) {
+    toast('区间太宽，超出能精确表示的整数范围')
+    return
+  }
+  const want = Math.min(n, span)
   if (unique.value) {
-    const span = Math.floor(hi) - Math.ceil(lo) + 1
-    if (span <= 0) {
-      toast('区间内没有整数')
-      return
-    }
     if (n > span) {
       toast('不重复最多只能取 ' + span + ' 个')
     }
+    if (span > 1000000) {
+      // 区间宽到不能整段建池子，取到重复就重来
+      const got = new Set()
+      while (got.size < want) got.add(randomInt(lo, hi))
+      numbers.value = shuffle([...got])
+      return
+    }
     const pool = []
     for (let i = Math.ceil(lo); i <= Math.floor(hi); i++) pool.push(i)
-    numbers.value = pickMany(pool, Math.min(n, span))
+    numbers.value = pickMany(pool, want)
   } else {
     const out = []
     for (let i = 0; i < n; i++) out.push(randomInt(lo, hi))

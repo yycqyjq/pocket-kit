@@ -39,7 +39,7 @@
       <PkSwitchRow v-model="opts.upper" title="大写字母 A-Z" desc="26 个字符" @change="gen" />
       <PkSwitchRow v-model="opts.lower" title="小写字母 a-z" desc="26 个字符" @change="gen" />
       <PkSwitchRow v-model="opts.digit" title="数字 0-9" desc="10 个字符" @change="gen" />
-      <PkSwitchRow v-model="opts.symbol" title="符号 !@#$…" desc="22 个字符" @change="gen" />
+      <PkSwitchRow v-model="opts.symbol" title="符号 !@#$…" desc="25 个字符" @change="gen" />
       <PkSwitchRow v-model="opts.excludeSimilar" title="排除易混淆字符" desc="去掉 i l 1 L o 0 O" @change="gen" />
       <PkSwitchRow v-model="opts.excludeAmbiguous" title="排除需转义字符" desc="去掉大括号、中括号、斜杠与引号等" :last="true" @change="gen" />
     </PkCard>

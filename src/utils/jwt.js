@@ -55,7 +55,7 @@ function normalizePem(txt, label) {
   } catch (e) {
     throw new Error(label + '不是合法 JSON：' + (e.message || '').replace(/^JSON\.parse:\s*/, ''), { cause: e })
   }
-  if (!v || typeof v !== 'object') throw new Error(label + '解析出来不是一个对象')
+  if (!v || typeof v !== 'object' || Array.isArray(v)) throw new Error(label + '解析出来不是一个对象')
   return v
 }
 
