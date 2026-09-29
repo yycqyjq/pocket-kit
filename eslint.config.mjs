@@ -24,8 +24,9 @@
  *    首次接入时存量有 112 处「规则有价值、但当时没清」的违规，一律先设 warn、不计入
  *    退出码——当场全设 error 只会逼人加 eslint-disable 绕过，比不接更糟。
  *    之后的规矩是逐条清、清完就升：no-unused-vars 43 处、no-useless-escape 8 处、
- *    preserve-caught-error 11 处于 2026-09-29 清零，no-useless-assignment 33 处于
- *    2026-09-30 清零，四条都已升为 error（见下面的 HARD 段），只剩 1 条 17 处还在 DEBT 里排队。
+ *    preserve-caught-error 11 处于 2026-09-29 清零，no-useless-assignment 33 处与
+ *    vue/no-side-effects-in-computed-properties 17 处于 2026-09-30 清零。
+ *    112 处至此全部清完、五条全升为 error（见下面的 HARD 段），DEBT 那一层已删除。
  *
  * 5. **@typescript-eslint 在纯 JS 仓库里的真实作用（别误会）。**
  *    现在源码没有 TS、也没有 tsconfig，它的"类型感知规则"（需要类型信息）
@@ -64,16 +65,11 @@ const CONDITIONAL_COMPILE_FILES = [
   'src/utils/theme.js',
 ]
 
-/* 「存量待清理」：规则本身有价值，但现有代码有违规，先只报警告。
-   每条都标了实际处数，清完就能升回 error。 */
-const DEBT = {
-  /* 17 处，跨 7 个组件。computed 里写另一个 ref（多为 error.value = ...），
-     属系统性反模式：当前能工作，但依赖 computed 的求值时机，脆弱。
-     （这类问题在本地复核报告里逐条列过；报告住在不入库的 .agent/，这里只留口径不留链接。） */
-  'vue/no-side-effects-in-computed-properties': 'warn',
-}
+/* 首次接入时按 DEBT（warn、不计入退出码）放行的 5 条 112 处存量已全部清完，
+   DEBT 这一层随之删掉——留一个空对象只会让下一个人以为还有东西在排队。
+   将来真要放行新规则的存量时，再把它拆成两层（warn 层 + 这里的 error 层）。 */
 
-/* 已经清零、当场拦的硬门禁。
+/* 当场拦的硬门禁。
    no-unused-vars 的 43 处存量于 2026-09-29 清完（死导入 20 处、从没调用过的内部
    辅助与局部 23 处），按本文件第 4 条的约定升回 error——以后再往里塞没用的
    import 或残留变量，CI 直接红，不用等下一个人重新数一遍。
@@ -95,6 +91,13 @@ const HARD = {
      初值从没生效过，删掉即可（exif.js 那处是整条赋值被下一行覆盖，删的是一行）。
      看着像「防御性初始化」，其实防不住任何东西——真要留兜底值，就得有一条路径读它。 */
   'no-useless-assignment': 'error',
+  /* 2026-09-30 清完的最后 17 处，跨 6 个组件（ToolCny/ToolHealth/ToolLoan/ToolRadix/
+     ToolTotp/ToolUnit）：原写法是在算结果的 computed 里顺手写 error.value，
+     于是「提示」取决于哪个 computed 先被求值——别的 computed 读 error.value 当闸门时
+     （ToolCny 的 lower、ToolRadix 的 bit）读到的是上一轮的旧值。
+     改成单一来源：算的那个 computed 返回 { out, err }，结果与 error 都由它派生，
+     computed 里不再写任何东西。界面文案与取值一字未动。 */
+  'vue/no-side-effects-in-computed-properties': 'error',
 }
 
 export default [
@@ -125,7 +128,6 @@ export default [
     },
     plugins: { '@typescript-eslint': tsPlugin },
     rules: {
-      ...DEBT,
       ...HARD,
 
       /* vue/no-html 在 essential 里没有，单独打开 —— 这是防 XSS 的规则，值得开。
@@ -191,7 +193,6 @@ export default [
     },
     plugins: { '@typescript-eslint': tsPlugin },
     rules: {
-      ...DEBT,
       ...HARD,
       'no-empty': ['error', { allowEmptyCatch: true }],
       'no-irregular-whitespace': ['error', {
