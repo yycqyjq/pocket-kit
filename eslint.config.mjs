@@ -23,8 +23,9 @@
  * 4. **门禁口径：窄而硬，清完一条升一条。**
  *    首次接入时存量有 112 处「规则有价值、但当时没清」的违规，一律先设 warn、不计入
  *    退出码——当场全设 error 只会逼人加 eslint-disable 绕过，比不接更糟。
- *    之后的规矩是逐条清、清完就升：no-unused-vars 的 43 处已于 2026-09-29 清零并升为
- *    error（见下面的 HARD 段），剩下 4 条 69 处还在 DEBT 里排队。
+ *    之后的规矩是逐条清、清完就升：no-unused-vars 43 处、no-useless-escape 8 处、
+ *    preserve-caught-error 11 处已于 2026-09-29 清零并升为 error（见下面的 HARD 段），
+ *    剩下 2 条 50 处还在 DEBT 里排队。
  *
  * 5. **@typescript-eslint 在纯 JS 仓库里的真实作用（别误会）。**
  *    现在源码没有 TS、也没有 tsconfig，它的"类型感知规则"（需要类型信息）
@@ -72,10 +73,6 @@ const DEBT = {
   'vue/no-side-effects-in-computed-properties': 'warn',
   /* 33 处，多为防御性初始化（`let yearly = 0` 后各分支都赋值）。真实但无害。 */
   'no-useless-assignment': 'warn',
-  /* 11 处。re-throw 时带上原始错误（new Error(msg, { cause: e })）。ESLint 9.20 新规则。 */
-  'preserve-caught-error': 'warn',
-  /* 8 处。正则里多余的转义，多数无害。 */
-  'no-useless-escape': 'warn',
 }
 
 /* 已经清零、当场拦的硬门禁。
@@ -89,6 +86,13 @@ const HARD = {
     varsIgnorePattern: '^_',
     caughtErrors: 'none', // catch 里刻意的落空写法不报
   }],
+  /* 同日清完的 11 处：catch 里换成中文 Error 时补上 { cause: e }。
+     界面照旧只读 .message，改动对用户不可见，原始异常不再丢。 */
+  'preserve-caught-error': 'error',
+  /* 同日清完的 8 处。7 处是正则字符类里白写的反斜杠，删掉即可；
+     唯独 markdown.js 中文排版示例那 2 处是**缺**转义：那句想教人写 \*，
+     而字符串里的 \* 被 JS 折叠成了 *，示例一直在演示错的写法。 */
+  'no-useless-escape': 'error',
 }
 
 export default [
