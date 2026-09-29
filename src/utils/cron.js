@@ -21,8 +21,6 @@ export const FIELD_DEFS = [
   { key: 'dow', name: '星期', min: 0, max: 7, names: DOW_NAMES },
 ]
 
-const num = (s, def) => (s === undefined || s === '' ? def : Number(s))
-
 function resolveToken(tok, def) {
   const t = String(tok).trim().toLowerCase()
   if (def.names && def.names[t] !== undefined) return def.names[t]

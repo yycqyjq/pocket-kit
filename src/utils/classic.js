@@ -4,7 +4,6 @@
  * 这些都不算加密，只是字符变换——请勿用于保护真实机密。
  */
 
-const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const a = 'abcdefghijklmnopqrstuvwxyz'
 
 /* ---------------- 凯撒 ---------------- */

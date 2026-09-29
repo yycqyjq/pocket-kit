@@ -191,7 +191,6 @@ export function adler32(bytes) {
 /* ---------------- FNV-1a ---------------- */
 
 const FNV32_OFFSET = 0x811c9dc5
-const FNV32_PRIME = 0x01000193
 const FNV64_OFFSET_HEX = 'cbf29ce484222325'
 const FNV64_PRIME_HEX = '100000001b3'
 

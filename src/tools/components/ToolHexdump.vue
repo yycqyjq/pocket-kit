@@ -63,8 +63,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { textToHex, hexToText, hexdump, fromHexdump, BYTE_NOTES, HEX_SAMPLE } from '@/utils/hexdump'
+import { ref } from 'vue'
+import { textToHex, hexToText, hexdump, BYTE_NOTES, HEX_SAMPLE } from '@/utils/hexdump'
 import { copyText, toast } from '@/utils/clipboard'
 
 const dirItems = [
@@ -106,11 +106,6 @@ function run() {
   } catch (e) {
     error.value = e.message
   }
-}
-
-/** 把用户输入里无关的字符去掉，只留十六进制 */
-function cleanHex(x) {
-  return String(x).replace(/0x/gi, ' ').replace(/[^0-9a-fA-F]/g, '')
 }
 
 function paste() {

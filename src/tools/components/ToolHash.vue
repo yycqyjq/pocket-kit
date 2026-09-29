@@ -59,7 +59,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { hashAll, hmac, ALGOS, supportsSHA512 } from '@/utils/hash'
-import { toast, copyText } from '@/utils/clipboard'
+import { toast } from '@/utils/clipboard'
 
 const input = ref('')
 const hmacKey = ref('')

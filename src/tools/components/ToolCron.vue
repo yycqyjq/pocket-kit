@@ -107,8 +107,6 @@ function fmt(d) {
   return fmtDate(d)
 }
 
-const pad = (v) => String(v).padStart(2, '0')
-
 function generate() {
   const m = Number(minute.value)
   const h = Number(hour.value)

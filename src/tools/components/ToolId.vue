@@ -42,7 +42,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { copyText } from '@/utils/clipboard'
-import { uuidV4, shortId, objectIdLike, uintId, snowflakeLike, randomInt } from '@/utils/random'
+import { uuidV4, shortId, objectIdLike, uintId, snowflakeLike } from '@/utils/random'
 
 const kinds = [
   { key: 'uuid', name: 'UUID v4', desc: '标准 36 位，含连字符，全球唯一性最好' },

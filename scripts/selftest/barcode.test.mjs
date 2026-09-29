@@ -14,7 +14,7 @@
  */
 import { useUtils } from './harness.mjs'
 import { execFileSync } from 'node:child_process'
-import { writeFileSync, unlinkSync, existsSync, mkdirSync } from 'node:fs'
+import { writeFileSync, unlinkSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 
 const B = await useUtils('barcode')

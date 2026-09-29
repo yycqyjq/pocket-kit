@@ -168,7 +168,6 @@ export function sweepWav(from, to, opts) {
 export function noiseWav(opts) {
   const o = opts || {}
   const ms = o.ms === undefined || o.ms === null ? 1000 : Number(o.ms)
-  const frames = Math.round(((o.rate || 44100) * ms) / 1000)
   let seed = o.seed === undefined ? 20260921 : Number(o.seed)
   return assemble(() => {
     seed = (seed * 1103515245 + 12345) & 0x7fffffff

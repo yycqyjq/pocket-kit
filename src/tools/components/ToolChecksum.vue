@@ -82,7 +82,6 @@ import {
   checksumAll,
   checksum,
   groupHex,
-  bigintHexToDec,
   supportsBigInt,
   selfTest,
 } from '@/utils/checksum'

@@ -142,7 +142,7 @@ export function toChineseUpper(input) {
 /** 日常小写读法 */
 export function toChineseLower(input) {
   const a = parseAmount(input)
-  const { text, isZero } = intToChinese(a.groups.join(''), LOWER_DIGITS, LOWER_UNITS)
+  const { text } = intToChinese(a.groups.join(''), LOWER_DIGITS, LOWER_UNITS)
   // 「一十」在日常读法里就是「十」
   const tidy = (t) => t.replace(/^一十/, '十')
   let out = ''

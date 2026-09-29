@@ -103,17 +103,14 @@ export function formatCss(src, opt) {
 
   if (o.minify) {
     let out = ''
-    let depth = 0
     tokens.forEach((t, idx) => {
       if (t.t === 'comment') return
       if (t.t === '{') {
         out = out.replace(/\s+$/, '') + '{'
-        depth++
         return
       }
       if (t.t === '}') {
         out = out.replace(/;$/, '') + '}'
-        depth--
         return
       }
       if (t.t === ';') {

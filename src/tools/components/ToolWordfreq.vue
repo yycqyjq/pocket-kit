@@ -61,7 +61,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { analyze, WORDFREQ_SAMPLE, STOPWORD_NOTE } from '@/utils/wordfreq'
+import { analyze, WORDFREQ_SAMPLE } from '@/utils/wordfreq'
 import { copyText, toast } from '@/utils/clipboard'
 
 const input = ref(WORDFREQ_SAMPLE)

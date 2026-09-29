@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process'
 import { useUtils, makeTest } from './harness.mjs'
 
 const aes = await useUtils('aes')
-const { selfTest, aesEncrypt, aesDecrypt, deriveKey, fromHex, toHexBytes, randomHex, pkcs7Pad, VECTORS } = aes
+const { selfTest, aesEncrypt, aesDecrypt, deriveKey, fromHex, randomHex, pkcs7Pad, VECTORS } = aes
 const T = makeTest('aes.js')
 
 /* ---------- 0) openssl 判官 ---------- */

@@ -117,10 +117,6 @@ function toBytes(x) {
 
 /* ---------------- 定长比特分组（Base32 系 / Base64url） ---------------- */
 
-function gcd(a, b) {
-  return b ? gcd(b, a % b) : a
-}
-
 function groupEncode(bytes, alphabet, bits, pad) {
   const cycle = bits === 5 ? 8 : 4
   const mask = (1 << bits) - 1

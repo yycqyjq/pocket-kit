@@ -11,7 +11,6 @@
 import { chromium } from 'playwright-core'
 import fs from 'node:fs'
 import path from 'node:path'
-import os from 'node:os'
 
 const exe = process.argv[2] ||
   process.env.HOME + '/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'

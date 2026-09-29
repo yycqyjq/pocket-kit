@@ -53,7 +53,7 @@
 <script setup>
 import { ref, computed, reactive } from 'vue'
 import { clean, scan, OPTIONS, CLEAN_SAMPLE } from '@/utils/cleanescape'
-import { copyText, toast } from '@/utils/clipboard'
+import { copyText } from '@/utils/clipboard'
 
 const input = ref(CLEAN_SAMPLE)
 const opts = reactive({})

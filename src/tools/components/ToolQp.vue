@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { encodeQP, decodeQP, QP_SAMPLE, QP_NOTES } from '@/utils/qp'
 import { copyText, toast } from '@/utils/clipboard'
 

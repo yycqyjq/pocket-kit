@@ -34,7 +34,6 @@ function err(msg) {
 }
 
 const isX = (s) => !s || s === 'x' || s === 'X' || s === '*'
-const isNum = (s) => /^\d+$/.test(String(s))
 
 /* ---------------- 解析 ---------------- */
 

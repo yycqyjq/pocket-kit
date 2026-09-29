@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { formatCss, formatHtml, HTML_SAMPLE, CSS_SAMPLE } from '@/utils/codefmt'
 import { copyText, toast } from '@/utils/clipboard'
 

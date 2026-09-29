@@ -118,10 +118,6 @@ function gfMul(a, b) {
   return GF_EXP[GF_LOG[a] + GF_LOG[b]]
 }
 
-function gfPow(a, n) {
-  return GF_EXP[(GF_LOG[a] * n) % 255]
-}
-
 /** RS 生成多项式缓存：g(x) = (x-α^0)(x-α^1)…(x-α^(n-1))，首项系数 1，长度 n+1 */
 const GEN_CACHE = {}
 function rsGenerator(n) {

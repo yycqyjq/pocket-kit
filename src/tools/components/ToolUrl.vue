@@ -77,7 +77,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { parseUrl, urlSegments, encodeUrl, decodeUrl, defang, refang, buildQuery, SAMPLE_URL } from '@/utils/url'
+import { urlSegments, encodeUrl, decodeUrl, defang, refang, SAMPLE_URL } from '@/utils/url'
 import { copyText, toast } from '@/utils/clipboard'
 
 const input = ref(SAMPLE_URL)

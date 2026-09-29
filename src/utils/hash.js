@@ -10,17 +10,6 @@ import { utf8Bytes } from './base64'
 const rotl = (x, n) => ((x << n) | (x >>> (32 - n))) >>> 0
 const rotr = (x, n) => ((x >>> n) | (x << (32 - n))) >>> 0
 
-/** 字节数组 -> 大端 32 位字数组 */
-function toWords(bytes) {
-  const out = []
-  for (let i = 0; i < bytes.length; i += 4) {
-    out.push(
-      ((bytes[i] << 24) | (bytes[i + 1] << 16) | (bytes[i + 2] << 8) | bytes[i + 3]) >>> 0
-    )
-  }
-  return out
-}
-
 function toHex(bytes) {
   let s = ''
   for (const b of bytes) s += (b & 0xff).toString(16).padStart(2, '0')

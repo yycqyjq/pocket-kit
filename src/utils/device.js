@@ -318,7 +318,8 @@ export function readScreen() {
       out.ydpi = Number(dm.ydpi) || 0
       out.refreshRate = Math.round(Number(disp.getRefreshRate()) * 10) / 10
       try {
-        const Mode = plus.android.importClass('android.view.Display$Mode')
+        // 只为了把类引进运行时（返回的 Mode 本身用不上，模式列表是从 disp 取的）
+        plus.android.importClass('android.view.Display$Mode')
         const modes = disp.getSupportedModes()
         const list = []
         if (modes && modes.length !== undefined) {

@@ -31,7 +31,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { chooseImage, loadImage, hasAlpha, formatBytes, reduceRatio } from '@/utils/image'
-import { toast } from '@/utils/clipboard'
 
 const info = ref(null)
 const err = ref('')

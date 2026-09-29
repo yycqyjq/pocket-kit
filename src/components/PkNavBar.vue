@@ -20,7 +20,7 @@
 <script setup>
 import { statusBarHeight } from '@/utils/sys'
 
-const props = defineProps({
+defineProps({
   title: { type: String, default: '' },
   sub: { type: String, default: '' },
   back: { type: Boolean, default: false },

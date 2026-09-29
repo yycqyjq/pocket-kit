@@ -74,7 +74,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { convert as fmtConvert, detect, getNotation, NOTATIONS, FMT_SAMPLES, FMT_NOTES } from '@/utils/datefmt'
+import { convert as fmtConvert, detect, getNotation, NOTATIONS, FMT_SAMPLES } from '@/utils/datefmt'
 import { copyText } from '@/utils/clipboard'
 
 const notationItems = [

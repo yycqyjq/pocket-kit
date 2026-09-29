@@ -8,7 +8,7 @@
  * 所以「GBK 字节被当成 UTF-8」这种反向情况无法可靠还原，遇到会说清楚而不是给个错答案。
  */
 
-import { utf8Bytes, bytesUtf8 } from './base64'
+import { utf8Bytes } from './base64'
 
 /** 探测当前环境支持哪些解码器 */
 export const SUPPORTED = (() => {

@@ -16,7 +16,7 @@
 <script setup>
 import { themeColors } from '@/utils/theme'
 
-const props = defineProps({
+defineProps({
   modelValue: { type: Boolean, default: false },
   title: { type: String, default: '' },
   desc: { type: String, default: '' },

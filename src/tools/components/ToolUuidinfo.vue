@@ -80,8 +80,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { parseUuid, UUID_SAMPLES, UUID_NOTES } from '@/utils/uuidinfo'
-import { copyText, toast } from '@/utils/clipboard'
+import { parseUuid, UUID_SAMPLES } from '@/utils/uuidinfo'
+import { toast } from '@/utils/clipboard'
 
 const input = ref(UUID_SAMPLES[0].value)
 

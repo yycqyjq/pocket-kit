@@ -82,7 +82,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { parseCidr, splitSubnet, rangeToCidrs, COMMON_SUBNETS } from '@/utils/ip'
-import { toast } from '@/utils/clipboard'
 
 const input = ref('192.168.1.10/24')
 const newPrefix = ref('26')

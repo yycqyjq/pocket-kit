@@ -127,7 +127,6 @@ export function decodeJwt(token) {
     return item
   })
 
-  const expItem = claims.find((c) => c.key === 'exp')
   const exp = typeof payload.exp === 'number' ? payload.exp : null
   const nbf = typeof payload.nbf === 'number' ? payload.nbf : null
 

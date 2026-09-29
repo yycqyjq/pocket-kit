@@ -47,9 +47,6 @@ const FUNC_ARITY2 = {
   atan2: (y, x) => Math.atan2(y, x),
 }
 
-const FUNC_NAMES = Object.keys(FUNCS)
-const FUNC2_NAMES = Object.keys(FUNC_ARITY2)
-
 /* ---------------- 词法 ---------------- */
 
 function tokenize(src) {

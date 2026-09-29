@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { encodeBraille, decodeBraille, BRAILLE_SAMPLES } from '@/utils/braille'
 import { copyText, toast } from '@/utils/clipboard'
 

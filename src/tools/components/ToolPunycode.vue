@@ -72,7 +72,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { convert as punyConvert, PUNY_SAMPLES, PUNY_NOTES } from '@/utils/punycode'
+import { convert as punyConvert, PUNY_SAMPLES } from '@/utils/punycode'
 import { copyText, toast } from '@/utils/clipboard'
 
 const input = ref('中文.cn')

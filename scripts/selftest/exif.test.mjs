@@ -30,7 +30,6 @@ function buildExifJpeg2() {
   const tiff = Uint8Array.from(t)
 
   const payload = []
-  const p16 = (x) => { payload.push((x >> 8) & 0xff, x & 0xff) }
   const pstr = (s) => { for (const ch of s) payload.push(ch.charCodeAt(0) & 0xff) }
   pstr('Exif\0\0')
   for (const x of tiff) payload.push(x)
