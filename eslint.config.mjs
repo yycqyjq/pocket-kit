@@ -20,12 +20,11 @@
  *    **不用** recommended —— 它的 strongly-recommended 那一层几乎全是排版。
  *    要统一格式请另上 Prettier，别混进 lint 门禁。
  *
- * 4. **门禁口径：窄而硬。**
- *    本次首次接入 lint，存量代码里有一批「规则有价值、但当时没清」的违规（见下方
- *    「存量待清理」段，共 112 处）。它们一律先设为 warn，**不计入退出码**——
- *    这样 `npm run lint` 是绿的、可以立刻进 CI，而硬门禁（error）留给
- *    「当前已经干净的规则」，作用就是**防新增**。
- *    若把 112 处直接设成 error，CI 必红，最后必然被人加 eslint-disable 绕过，比不接更糟。
+ * 4. **门禁口径：窄而硬，清完一条升一条。**
+ *    首次接入时存量有 112 处「规则有价值、但当时没清」的违规，一律先设 warn、不计入
+ *    退出码——当场全设 error 只会逼人加 eslint-disable 绕过，比不接更糟。
+ *    之后的规矩是逐条清、清完就升：no-unused-vars 的 43 处已于 2026-09-29 清零并升为
+ *    error（见下面的 HARD 段），剩下 4 条 69 处还在 DEBT 里排队。
  *
  * 5. **@typescript-eslint 在纯 JS 仓库里的真实作用（别误会）。**
  *    现在源码没有 TS、也没有 tsconfig，它的"类型感知规则"（需要类型信息）
@@ -67,16 +66,6 @@ const CONDITIONAL_COMPILE_FILES = [
 /* 「存量待清理」：规则本身有价值，但现有代码有违规，先只报警告。
    每条都标了实际处数，清完就能升回 error。 */
 const DEBT = {
-  /* 43 处（25 处「定义了但没用」+ 18 处「赋值后没用」）。分三类：① 未使用的 import
-     （computed / toast / copyText…，删除零风险）
-     ② 未使用的常量（FMT_NOTES / WEEK_CN / FUNC_NAMES…）③ 位置必需的参数
-     （如 (f, x) => x 里的 f）—— 第三类已被下面的 args: 'none' 挡掉，剩下的都是真死代码。
-     这条是本清单里最值得清的 —— 死代码与重构残留都靠它。 */
-  'no-unused-vars': ['warn', {
-    args: 'none', // 回调里位置必需的参数不报（(f, x) => x 的 f 属噪声）
-    varsIgnorePattern: '^_',
-    caughtErrors: 'none', // catch 里刻意的落空写法不报
-  }],
   /* 17 处，跨 7 个组件。computed 里写另一个 ref（多为 error.value = ...），
      属系统性反模式：当前能工作，但依赖 computed 的求值时机，脆弱。
      （这类问题在本地复核报告里逐条列过；报告住在不入库的 .agent/，这里只留口径不留链接。） */
@@ -87,6 +76,19 @@ const DEBT = {
   'preserve-caught-error': 'warn',
   /* 8 处。正则里多余的转义，多数无害。 */
   'no-useless-escape': 'warn',
+}
+
+/* 已经清零、当场拦的硬门禁。
+   no-unused-vars 的 43 处存量于 2026-09-29 清完（死导入 20 处、从没调用过的内部
+   辅助与局部 23 处），按本文件第 4 条的约定升回 error——以后再往里塞没用的
+   import 或残留变量，CI 直接红，不用等下一个人重新数一遍。
+   args 仍留 'none'：回调里位置必需的参数（(f, x) => x 的 f）不是脏代码，报它是噪声。 */
+const HARD = {
+  'no-unused-vars': ['error', {
+    args: 'none',
+    varsIgnorePattern: '^_',
+    caughtErrors: 'none', // catch 里刻意的落空写法不报
+  }],
 }
 
 export default [
@@ -118,6 +120,7 @@ export default [
     plugins: { '@typescript-eslint': tsPlugin },
     rules: {
       ...DEBT,
+      ...HARD,
 
       /* vue/no-html 在 essential 里没有，单独打开 —— 这是防 XSS 的规则，值得开。
          目前唯一命中是 ToolMarkdown.vue 的 markdown 渲染（有意为之，已在那处
@@ -183,6 +186,7 @@ export default [
     plugins: { '@typescript-eslint': tsPlugin },
     rules: {
       ...DEBT,
+      ...HARD,
       'no-empty': ['error', { allowEmptyCatch: true }],
       'no-irregular-whitespace': ['error', {
         skipComments: true, skipStrings: true, skipTemplates: true, skipRegExps: true,
