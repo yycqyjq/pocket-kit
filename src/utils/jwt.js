@@ -40,7 +40,7 @@ function b64urlToText(part, label) {
   try {
     txt = base64Decode(s, true)
   } catch (e) {
-    throw new Error(label + '不是合法的 Base64URL 编码')
+    throw new Error(label + '不是合法的 Base64URL 编码', { cause: e })
   }
   if (txt.indexOf('\uFFFD') > -1) {
     throw new Error(label + '解出来不是合法的 UTF-8 文本')
@@ -53,7 +53,7 @@ function normalizePem(txt, label) {
   try {
     v = JSON.parse(txt)
   } catch (e) {
-    throw new Error(label + '不是合法 JSON：' + (e.message || '').replace(/^JSON\.parse:\s*/, ''))
+    throw new Error(label + '不是合法 JSON：' + (e.message || '').replace(/^JSON\.parse:\s*/, ''), { cause: e })
   }
   if (!v || typeof v !== 'object') throw new Error(label + '解析出来不是一个对象')
   return v

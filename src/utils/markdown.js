@@ -198,7 +198,7 @@ function checkUrl(raw, st, kind, allowImageData) {
   // URL scheme 探测前先剥掉控制字符：防止 java\u0000script: 这类绕过，剥离本身就是安全目的
   // eslint-disable-next-line no-control-regex
   const probe = decoded.replace(/[\u0000-\u0020\u007f-\u00a0]/g, '').toLowerCase()
-  const scheme = /^([a-z][a-z0-9+.\-]*):/.exec(probe)
+  const scheme = /^([a-z][a-z0-9+.-]*):/.exec(probe)
   if (scheme) {
     const name = scheme[1]
     if (allowImageData && name === 'data' && /^data:image\/(png|jpe?g|gif|webp);base64,/.test(probe)) return attrSafe(raw)
@@ -228,7 +228,7 @@ const RE_UL = /^(\s{0,12})([-*+])[ \t]+(.*)$/
 const RE_OL = /^(\s{0,12})(\d{1,9})([.)])[ \t]+(.*)$/
 const RE_TASK = /^\[([ xX✓☑])\][ \t]*(.*)$/
 const RE_DELIM = /^ {0,3}\|?[ \t]*:?-{1,}:?[ \t]*(\|[ \t]*:?-{1,}:?[ \t]*)*\|?$/
-const RE_ESC = /\\([\\`*_\[\]()#+\-.!<>|"~'])/g
+const RE_ESC = /\\([\\`*_[\]()#+\-.!<>|"~'])/g
 
 /* ============================================================
  * 1. 块级词法：行数组 -> token 树
@@ -596,7 +596,7 @@ function renderToken(tok, st) {
       return '<p class="pk-md__p">' + renderInline(tok.raw, st) + '</p>'
     }
     case 'code': {
-      const lang = String(tok.lang || '').replace(/[^\w+#.\-]/g, '').slice(0, 24)
+      const lang = String(tok.lang || '').replace(/[^\w+#.-]/g, '').slice(0, 24)
       let h = '<pre class="pk-md__pre"><span class="pk-md__lang">' + (lang ? escapeHtml(lang) : '纯文本') + '</span>'
       h += '<code class="pk-md__code' + (lang ? ' language-' + escapeAttr(lang) : '') + '"'
       h += lang ? ' data-lang="' + escapeAttr(lang) + '"' : ''
@@ -935,7 +935,7 @@ function blockMd(node) {
 
 function infoLang(node) {
   const cls = String((node && node.attrs && node.attrs.class) || '')
-  const m = /(?:^|\s)language-([\w+#.\-]+)/.exec(cls)
+  const m = /(?:^|\s)language-([\w+#.-]+)/.exec(cls)
   return m ? m[1] : ''
 }
 
@@ -1195,7 +1195,7 @@ export const SAMPLES = [
       '',
       '### 需要转义的符号',
       '',
-      '想显示字面量的星号就写 `\*`，比如 2 \* 3 = 6。',
+      '想显示字面量的星号就写 `\\*`，比如 2 \\* 3 = 6。',
       '',
       '外链写法：https://example.com/plain 会被自动识别。',
       '',

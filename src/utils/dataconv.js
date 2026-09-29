@@ -559,7 +559,7 @@ function toXml(value) {
 
 /* ---------- YAML ---------- */
 
-const NEEDS_QUOTE = /^(?:|~|null|true|false|[-+]?\d+(\.\d+)?|[&*!|>%@`"'#,\[\]{}?:-].*|.*[:#].*|\s.*|\s*)$/i
+const NEEDS_QUOTE = /^(?:|~|null|true|false|[-+]?\d+(\.\d+)?|[&*!|>%@`"'#,[\]{}?:-].*|.*[:#].*|\s.*|\s*)$/i
 
 function yamlScalar(v) {
   if (v === null || v === undefined) return 'null'
@@ -682,9 +682,9 @@ const PARSERS = {
         const before = String(t).slice(0, pos)
         const line = before.split('\n').length
         const col = pos - before.lastIndexOf('\n')
-        throw new Error('JSON 第 ' + line + ' 行第 ' + col + ' 列附近有语法错误')
+        throw new Error('JSON 第 ' + line + ' 行第 ' + col + ' 列附近有语法错误', { cause: e })
       }
-      throw new Error('JSON 解析失败：' + e.message)
+      throw new Error('JSON 解析失败：' + e.message, { cause: e })
     }
   },
   csv: parseCsv,
@@ -734,7 +734,7 @@ export function convert(text, from, to) {
   try {
     out = stringify(value)
   } catch (e) {
-    throw new Error('转成 ' + formatName(to) + ' 失败：' + e.message)
+    throw new Error('转成 ' + formatName(to) + ' 失败：' + e.message, { cause: e })
   }
   return { text: out, note: wrapNote }
 }

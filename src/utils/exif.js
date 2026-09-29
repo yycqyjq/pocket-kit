@@ -1398,7 +1398,7 @@ export async function readImageBytes(chosen) {
     try {
       res = await fetch(String(path))
     } catch (e) {
-      throw new Error('读不到这张图的字节：本地路径打不开（' + (e && e.message ? e.message : '未知原因') + '）')
+      throw new Error('读不到这张图的字节：本地路径打不开（' + (e && e.message ? e.message : '未知原因') + '）', { cause: e })
     }
     if (!res.ok) throw new Error('读本地文件失败：HTTP ' + res.status)
     const buf = await res.arrayBuffer()

@@ -88,7 +88,7 @@ const cssJoin = (parts) => {
       return
     }
     const noSpaceBefore = /^[,:)>\]]/.test(p) || p === '!important'
-    const noSpaceAfterPrev = /[(:,>\[]$/.test(out)
+    const noSpaceAfterPrev = /[(:,>[]$/.test(out)
     out += noSpaceBefore || noSpaceAfterPrev ? p : ' ' + p
   })
   return out

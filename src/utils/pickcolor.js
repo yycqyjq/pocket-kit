@@ -106,7 +106,7 @@ function makeContext(img, label) {
     ctx = canvas.getContext('2d', { willReadFrequently: true })
     ctx.drawImage(img, 0, 0, cw, ch)
   } catch (e) {
-    throw new Error(label + '：这台设备的画布用不了（' + (e && e.message ? e.message : '未知原因') + '）')
+    throw new Error(label + '：这台设备的画布用不了（' + (e && e.message ? e.message : '未知原因') + '）', { cause: e })
   }
   if (!ctx) throw new Error(label + '：拿不到画布上下文，取色需要 2D canvas')
   return { canvas, ctx, width: w, height: h, cw, ch, scale }
@@ -126,7 +126,7 @@ export function createSampler(img) {
     try {
       return ctx.getImageData(x, y, w, h)
     } catch (e) {
-      throw new Error('读不到图片像素：' + ((e && e.message) || '浏览器拒绝了画布读取') + '。可以先截图再取色')
+      throw new Error('读不到图片像素：' + ((e && e.message) || '浏览器拒绝了画布读取') + '。可以先截图再取色', { cause: e })
     }
   }
 
@@ -170,7 +170,7 @@ export function createSampler(img) {
         out.height = size
         octx = out.getContext('2d')
       } catch (e) {
-        throw new Error('放大镜画布创建失败：' + ((e && e.message) || '未知原因'))
+        throw new Error('放大镜画布创建失败：' + ((e && e.message) || '未知原因'), { cause: e })
       }
       if (!octx) throw new Error('放大镜拿不到 2D 画布')
       // 画布可能被降采样过，把「自然像素跨度」换算回画布像素
@@ -183,7 +183,7 @@ export function createSampler(img) {
         octx.drawImage(canvas, sx, sy, sw, sh, 0, 0, size, size)
         return { url: out.toDataURL('image/png'), span: s, zoom: z, size, sx, sy, sw, sh }
       } catch (e) {
-        throw new Error('放大镜导出失败：' + ((e && e.message) || '画布被浏览器保护'))
+        throw new Error('放大镜导出失败：' + ((e && e.message) || '画布被浏览器保护'), { cause: e })
       }
     },
     /** 取色板：网格取样 + 分桶统计 + 贪心去重，得到 k 个代表色 */
@@ -209,7 +209,7 @@ export function buildPalette(ctx, cw, ch, k, step) {
   try {
     img = ctx.getImageData(0, 0, cw, ch)
   } catch (e) {
-    throw new Error('读不到图片像素，做不了取色板：' + (e && e.message ? e.message : '画布被拒绝读取'))
+    throw new Error('读不到图片像素，做不了取色板：' + (e && e.message ? e.message : '画布被拒绝读取'), { cause: e })
   }
   const data = img.data
   const buckets = new Map()
