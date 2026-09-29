@@ -30,7 +30,7 @@
       <PkRow label="四则" value="+  -  *  /  也支持 × ÷" :copy="false" stack />
       <PkRow label="幂与余" value="2^10 表示 2 的 10 次方；1024 % 37 取余" :copy="false" stack />
       <PkRow label="阶乘" value="5! = 120，最大 170!" :copy="false" stack />
-      <PkRow label="隐式乘" value="2pi、3(4+5) 都会被当成乘法" :copy="false" stack />
+      <PkRow label="隐式乘" value="2pi、3(4+5) 会被当成乘法；两个数字之间光隔空格不算，会直接报错" :copy="false" stack />
       <PkRow label="常量" value="pi / π、e、tau" :copy="false" stack />
       <PkRow label="注意" value="数字里的千分位逗号要去掉，否则会被当成参数分隔" :copy="false" stack />
     </PkCard>

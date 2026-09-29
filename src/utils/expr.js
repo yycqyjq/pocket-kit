@@ -47,12 +47,23 @@ const FUNC_ARITY2 = {
   atan2: (y, x) => Math.atan2(y, x),
 }
 
+// min/max/hypot 本来就是任意个参数；pow/atan2 多给一个就是写错了，不能悄悄丢掉
+const FUNC_STRICT2 = ['pow', 'atan2']
+
 /* ---------------- 词法 ---------------- */
 
 function tokenize(src) {
   // 注意：不能把逗号一律删掉——它是函数参数分隔符（max(1,2)）。
   // 千分位逗号会在下面给出专门的报错提示，而不是猜。
-  const s = String(src)
+  const raw = String(src)
+  // 空格是要删掉的，但两个数字之间的空格一删就粘成一个字面量（2 3 变 23、2 .5 变 2.5），
+  // 属于悄悄改答案，宁可报错让用户自己说清楚是要相乘还是要成一个数。
+  const gap = raw.match(/([0-9.])\s+([0-9.])/)
+  if (gap) {
+    const shown = raw.slice(Math.max(0, gap.index - 8), gap.index + 9).replace(/\s+/g, ' ').trim()
+    throw new Error('数字之间不能只隔空格：「' + shown + '」把空格去掉就粘成一个数，要相乘请用 *')
+  }
+  const s = raw
     .replace(/[×✕·]/g, '*')
     .replace(/÷/g, '/')
     .replace(/，/g, ',')
@@ -64,8 +75,8 @@ function tokenize(src) {
     if (/[0-9.]/.test(c)) {
       let j = i
       while (j < s.length && /[0-9.]/.test(s[j])) j++
-      // 科学计数法
-      if (s[j] === 'e' && /[0-9+-]/.test(s[j + 1] || '')) {
+      // 科学计数法，E 和 e 都要认——表格里抄出来常是大写，只认小写会把 1.5E-3 拆成 1.5×e−3
+      if ((s[j] === 'e' || s[j] === 'E') && /[0-9+-]/.test(s[j + 1] || '')) {
         let k = j + 1
         if (s[k] === '+' || s[k] === '-') k++
         if (/[0-9]/.test(s[k] || '')) {
@@ -201,6 +212,9 @@ function parse(tokens, deg) {
       if (FUNC_ARITY2[name]) {
         const args = readArgs()
         if (args.length < 2) throw new Error(name + ' 需要至少两个参数')
+        if (args.length > 2 && FUNC_STRICT2.indexOf(name) > -1) {
+          throw new Error(name + ' 只接受两个参数，这里给了 ' + args.length + ' 个')
+        }
         const v = FUNC_ARITY2[name].apply(null, args)
         // atan2 返回弧度，角度制下要换算
         return name === 'atan2' && deg ? (v * 180) / Math.PI : v
@@ -236,7 +250,8 @@ function parse(tokens, deg) {
       }
       return args
     }
-    // 无括号：吃一个 term（这样 sin2pi 等价于 sin(2*pi)）
+    // 无括号：吃一个 term。走得到这里的情况只有函数名后面紧跟运算符或括号（sin-30），
+    // 因为词法里名字是会吃掉数字的，sin30、sin2pi 会被切成一个未知名称并报出来。
     args.push(term())
     return args
   }
@@ -268,8 +283,14 @@ export function calc(input, useDegrees) {
   const value = evaluate(input, useDegrees)
   let display
   if (!isFinite(value)) {
-    display = value > 0 ? '∞ 无穷大' : value < 0 ? '-∞ 负无穷大' : '未定义'
-  } else if (Number.isInteger(value) && Math.abs(value) < 1e15) {
+    // 到这里只可能是 ±∞：NaN 在 evaluate 里就拦掉了
+    display = value > 0 ? '∞ 无穷大' : '-∞ 负无穷大'
+  } else if (Number.isInteger(value)) {
+    // 整数结果一律 String(value) 逐位印全。整数值的双精度数本身就是精确整数，
+    // String 走的是「能读回同一个数」的最短十进制，多印不出假数字。
+    // 原来这里卡着 1e15、再往下走 12 位有效数字，于是 2^50 印成 1125899906840000、
+    // 20! 印成 2432902008180000000——末尾几位是被精度截断编出来的，
+    // 而同页的十六进制行还给得出 2^50 的 0x4000000000000，两行自相矛盾。
     display = String(value)
   } else {
     // 保留 12 位有效数字，去掉多余的零
@@ -279,8 +300,7 @@ export function calc(input, useDegrees) {
     value,
     display,
     scientific: isFinite(value) && Math.abs(value) >= 1e15 ? value.toExponential(6) : '',
-    hex: Number.isInteger(value) && Math.abs(value) < Number.MAX_SAFE_INTEGER && value >= 0 ? '0x' + value.toString(16) : '',
-    fraction: '',
+    hex: Number.isInteger(value) && Math.abs(value) <= Number.MAX_SAFE_INTEGER && value >= 0 ? '0x' + value.toString(16) : '',
   }
 }
 
