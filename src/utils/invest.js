@@ -2,19 +2,11 @@
  * 复利与投资计算
  * 说明：全部按「名义年利率按月复利」计算，不考虑通胀、税费与申购赎回费。
  */
+import { money } from './finance'
 
 const num = (v) => {
   const n = Number(String(v).replace(/[,，\s%元]/g, ''))
   return isFinite(n) ? n : NaN
-}
-
-export function money(n, digits) {
-  if (!isFinite(n)) return '—'
-  const d = digits === undefined ? 2 : digits
-  const neg = n < 0
-  const s = Math.abs(n).toFixed(d)
-  const [int, dec] = s.split('.')
-  return (neg ? '-' : '') + int.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (dec ? '.' + dec : '')
 }
 
 const pct = (n) => (isFinite(n) ? Number(n.toFixed(2)).toString() + '%' : '—')

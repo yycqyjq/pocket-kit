@@ -1,5 +1,6 @@
 /**
  * 贷款 / 还款计算
+ * money 是全站金额千分位的唯一实现，invest.js 与两个界面组件都复用它。
  */
 
 /**
@@ -97,11 +98,12 @@ export function prepaymentEffect(principal, annualRate, months, afterPeriod, ext
   }
   const newPrincipal = remainAfter - X
 
-  // 月供不变，缩短期限
+  // 月供不变，缩短期限。零利率时 n = -log(1 - B·i/M)/log(1+i) 退化成 0/0，直接按本金除以月供算
   const monthly = base.monthly
-  const remainMonths = Math.ceil(
-    -Math.log(1 - (newPrincipal * i) / monthly) / Math.log(1 + i)
-  )
+  const remainMonths =
+    i === 0
+      ? Math.ceil(newPrincipal / monthly)
+      : Math.ceil(-Math.log(1 - (newPrincipal * i) / monthly) / Math.log(1 + i))
   const interestBefore = base.schedule.slice(k).reduce((s, r) => s + r.interest, 0)
   let tmp = newPrincipal
   let interestAfter = 0
@@ -132,9 +134,9 @@ export function prepaymentEffect(principal, annualRate, months, afterPeriod, ext
   }
 }
 
-/** 格式化金额，带千分位 */
+/** 格式化金额，带千分位；算不出来的（NaN/Infinity）一律显示「—」 */
 export function money(n, digits) {
-  if (!isFinite(n)) return '-'
+  if (!isFinite(n)) return '—'
   const d = digits === undefined ? 2 : digits
   const neg = n < 0
   const s = Math.abs(n).toFixed(d)

@@ -72,7 +72,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { compoundOnce, monthlyPlan, annualizedReturn, rule72, money, INVEST_NOTES } from '@/utils/invest'
+import { compoundOnce, monthlyPlan, annualizedReturn, rule72, INVEST_NOTES } from '@/utils/invest'
+import { money } from '@/utils/finance'
 
 const modeItems = [
   { key: 'once', name: '一次性' },
