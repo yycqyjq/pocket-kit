@@ -119,21 +119,6 @@ function isNil(s) {
   return /^0{8}-0{4}-0{4}-0{4}-0{12}$/.test(String(s).trim().toLowerCase())
 }
 
-/** 给定时间反推 v1 时间戳（用来对照） */
-export function v1TimeFromDate(date) {
-  const d = date instanceof Date ? date : new Date(date)
-  const ms = d.getTime() + 12219292800000
-  return (BigInt(ms) * 10000n).toString()
-}
-
-export const UUID_NOTES = [
-  'UUID 不是随机的 128 位：第 13 个十六进制字符是版本号、第 17 个是变体位。',
-  'v4 有 6 位是固定的（版本 + 变体），真正随机的只有 122 位——所以看起来「有一半是随机」是错觉。',
-  'v7 前 48 位是毫秒时间戳，所以按字典序排序就等于按生成时间排序，适合做数据库主键（不像 v4 会让索引碎片化）。',
-  'v1 里带了网卡 MAC 与时间戳，能被反推出发出请求的机器与时刻，隐私上不建议再用。',
-  '需要「同样的输入得到同样的 UUID」时用 v3（MD5）或 v5（SHA-1），它们由命名空间加名字决定，不随机。',
-]
-
 export const UUID_SAMPLES = [
   { name: 'v4 随机（最常用）', value: 'f47ac10b-58cc-4372-a567-0e02b2c3d479' },
   { name: 'v1 带时间戳', value: 'c232ab00-9414-11ec-b3c8-9f6bdeced846' },

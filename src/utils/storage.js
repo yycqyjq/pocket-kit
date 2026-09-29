@@ -7,7 +7,6 @@ const KEY = {
   favorites: 'pk.favorites',
   recent: 'pk.recent',
   settings: 'pk.settings',
-  drafts: 'pk.drafts',
 }
 
 export const STORAGE_KEYS = KEY
@@ -128,18 +127,4 @@ export function writeSetting(key, val) {
   s[key] = val
   safeSet(KEY.settings, s)
   return s
-}
-
-/* ---------------- 工具草稿（记住上次输入） ---------------- */
-
-export function readDraft(toolId) {
-  const all = safeGet(KEY.drafts, {})
-  return (all && all[toolId]) || null
-}
-
-export function writeDraft(toolId, data) {
-  const all = safeGet(KEY.drafts, {})
-  const next = all && typeof all === 'object' ? all : {}
-  next[toolId] = data
-  safeSet(KEY.drafts, next)
 }

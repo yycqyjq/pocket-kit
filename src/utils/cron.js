@@ -244,22 +244,6 @@ export function describe(expr) {
   return { ok: true, lines, summary, parallel: p.domRestricted && p.dowRestricted }
 }
 
-/** 可视化生成：把选择结果拼回表达式 */
-export function buildCron(sel) {
-  const f = (key, all) => {
-    const v = sel[key]
-    if (!v || !v.length || v.length === all) return '*'
-    return v.slice().sort((a, b) => a - b).join(',')
-  }
-  return [
-    f('min', 60),
-    f('hour', 24),
-    f('dom', 31),
-    f('month', 12),
-    f('dow', 7),
-  ].join(' ')
-}
-
 export const CRON_PRESETS = [
   { name: '每分钟', expr: '* * * * *' },
   { name: '每 5 分钟', expr: '*/5 * * * *' },

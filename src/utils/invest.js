@@ -90,17 +90,6 @@ export function monthlyPlan(p) {
   }
 }
 
-/** 需要多少本金才能达到目标金额 */
-export function requiredPrincipal(target, annualRate, years, timesPerYear) {
-  const T = num(target)
-  const r = num(annualRate) / 100
-  const y = num(years)
-  const m = Number(timesPerYear || 12)
-  if (!(T > 0) || !(y > 0)) throw new Error('目标金额与年限都要大于 0')
-  const need = T / Math.pow(1 + r / m, Math.round(y * m))
-  return { need, text: '想 ' + y + ' 年后拿到 ' + money(T) + ' 元，现在需要 ' + money(need) + ' 元' }
-}
-
 /** 年化收益率（从期初期末反推） */
 export function annualizedReturn(initial, final, years) {
   const P = num(initial)

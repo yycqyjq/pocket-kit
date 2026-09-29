@@ -2228,6 +2228,3 @@ export function samplePem(key) {
   if (!s) throw new Error('没有这个示例：' + key + '（可选 rsa / ec / expired）')
   return s.pem
 }
-
-/** parseAny 的别名，视图里用它更符合语义 */
-export const parseCertInput = parseAny

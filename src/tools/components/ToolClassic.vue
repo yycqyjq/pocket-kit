@@ -11,7 +11,7 @@
       />
       <PkField v-model="input" type="textarea" :area-height="110" label="输入">
         <template #labelRight>
-          <text class="mini-act" @tap="input = 'Hello World'">示例</text>
+          <text class="mini-act" @tap="input = SAMPLE_CLASSIC">示例</text>
           <text class="mini-act" @tap="input = ''">清空</text>
         </template>
       </PkField>
@@ -56,14 +56,14 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { METHODS, runMethod, caesarBrute } from '@/utils/classic'
+import { METHODS, runMethod, caesarBrute, SAMPLE_CLASSIC } from '@/utils/classic'
 import { copyText, toast } from '@/utils/clipboard'
 
 const methodItems = METHODS.map((m) => ({ key: m.key, name: m.name }))
 
 const method = ref('caesar')
 const numValue = ref(3)
-const input = ref('Hello World')
+const input = ref(SAMPLE_CLASSIC)
 const output = ref('')
 const error = ref('')
 

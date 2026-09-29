@@ -32,11 +32,6 @@ export function randomInt(min, max) {
   return lo + (nextUint32() % (hi - lo + 1))
 }
 
-export function pickOne(arr) {
-  if (!arr || !arr.length) return undefined
-  return arr[randomInt(0, arr.length - 1)]
-}
-
 /** 从数组里不重复地取 n 个 */
 export function pickMany(arr, n) {
   return shuffle(arr).slice(0, Math.max(0, Math.min(n, arr.length)))

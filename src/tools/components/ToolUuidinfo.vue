@@ -18,6 +18,12 @@
           <text class="hero__n">{{ info.versionName }}</text>
         </view>
         <PkRow label="变体" :value="info.variant" :copy="false" />
+        <PkRow
+          label="位置"
+          value="去掉连字符的 32 位十六进制里，第 13 位是版本号、第 17 位是变体位——UUID 并不是 128 位全随机"
+          :copy="false"
+          stack
+        />
         <PkRow label="版本说明" :value="info.versionNote" :copy="false" stack />
       </PkCard>
 

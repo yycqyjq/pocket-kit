@@ -24,11 +24,3 @@ export const safeBottom =
 
 /** 屏幕宽度（px） */
 export const windowWidth = info.windowWidth || 375
-
-/** 是否 iOS */
-export const isIOS = (info.platform || '').toLowerCase() === 'ios'
-
-/** rpx -> px */
-export function rpx2px(rpx) {
-  return (rpx / 750) * windowWidth
-}

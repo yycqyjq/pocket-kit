@@ -80,8 +80,3 @@ export function syncNativeUI() {
     }
   } catch (e) {}
 }
-
-/** 返回当前主题下要挂在根节点上的 class 字符串 */
-export function themeClass() {
-  return theme.dark ? 'theme-dark' : ''
-}

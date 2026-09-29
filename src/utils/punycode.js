@@ -199,14 +199,6 @@ export function convert(domain) {
   }
 }
 
-export const PUNY_NOTES = [
-  'DNS 只认 ASCII，所以中文、日文、德文变音域名都要先转成 xn-- 开头的 Punycode 形式才能注册与解析。',
-  'xn-- 是 ACE 前缀，表示「后面这串是 Punycode 编码的国际化域名」。',
-  '浏览器地址栏会显示成可读的原语言，但复制出来的链接往往是 xn-- 形式——这两种写法是同一个域名。',
-  '安全提示：同形异义（homograph）钓鱼常用这招——用西里尔字母「а」冒充拉丁字母「a」，肉眼几乎分不出。看到 xn-- 开头的域名要多留个心眼。',
-  '长度限制按 ACE 形式算：一个标签最多 63 个字符，整个域名最多 253 个。',
-]
-
 export const PUNY_SAMPLES = [
   { name: '中文 .cn', value: '中文.cn' },
   { name: '中文 .公司', value: '随身匣.公司' },

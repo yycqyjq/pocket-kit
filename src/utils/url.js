@@ -25,7 +25,7 @@ const SCHEME_DOC = {
 const DEFAULT_PORTS = { http: '80', https: '443', ftp: '21', ws: '80', wss: '443', ssh: '22', smtp: '25', telnet: '23' }
 
 /** 拆解 URL。用正则而不是 URL 构造函数，因为 App 端不一定有 */
-export function parseUrl(input) {
+function parseUrl(input) {
   const raw = String(input || '').trim()
   if (!raw) return { ok: false, error: '请输入 URL' }
 
@@ -123,24 +123,6 @@ export function parseUrl(input) {
   if (out.username || out.password) out.warnings.push('URL 里带用户名密码，会出现在日志与 Referer 里，不要这样传凭证')
   if (/\d{1,3}(\.\d{1,3}){3}/.test(out.host) && out.host !== '127.0.0.1') out.warnings.push('直接写 IP 而没有域名，常见于钓鱼链接')
   return out
-}
-
-/** 把参数数组拼回查询串 */
-export function buildQuery(params) {
-  return params
-    .filter((p) => p.key !== '')
-    .map((p) => encodeURIComponent(p.key) + (p.value === '' ? '' : '=' + encodeURIComponent(p.value)))
-    .join('&')
-}
-
-/** 由拆解结果拼回完整 URL */
-export function rebuildUrl(parts) {
-  if (!parts) return ''
-  if (parts.isPseudo) return parts.scheme + ':' + parts.path
-  const auth = (parts.username ? parts.username + (parts.password ? ':' + parts.password : '') + '@' : '') +
-    parts.host + (parts.port ? ':' + parts.port : '')
-  const q = parts.params && parts.params.length ? '?' + buildQuery(parts.params) : ''
-  return parts.scheme + '://' + auth + (parts.path || '/') + q + (parts.hash ? '#' + parts.hash : '')
 }
 
 /** 编码：保留 : / ? # [ ] @ 等结构字符的选项 */

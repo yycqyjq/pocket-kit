@@ -126,17 +126,6 @@ export function readableTextOn(hex) {
   return luminance(hex) > 0.45 ? '#1D2521' : '#FFFFFF'
 }
 
-export function isLightColor(hex) {
-  return luminance(hex) > 0.45
-}
-
-/** 调整亮度（l 为百分比增量） */
-export function shiftLightness(hex, delta) {
-  const hsl = hexToHsl(hex)
-  if (!hsl) return hex
-  return hslToHex(hsl.h, hsl.s, clamp(hsl.l + delta, 0, 100))
-}
-
 /** 生成配色：互补 / 邻近 / 三角 */
 export function scheme(hex, type) {
   const hsl = hexToHsl(hex)

@@ -16,10 +16,6 @@ function toHex(bytes) {
   return s
 }
 
-export function bytesToHexStr(bytes) {
-  return toHex(bytes)
-}
-
 /* ---------------- MD5 ---------------- */
 
 const MD5_K = (() => {
@@ -374,7 +370,6 @@ const IMPL = {
 }
 
 const BLOCK = { md5: 64, sha1: 64, sha256: 64, sha512: 128 }
-const OUTLEN = { md5: 16, sha1: 20, sha256: 32, sha512: 64 }
 
 /** 对字符串求摘要，返回十六进制 */
 export function hash(algo, text) {
@@ -439,9 +434,4 @@ export function hmacBytes(algo, keyBytes, msgBytes) {
  */
 export function hmac(algo, key, message) {
   return toHex(hmacBytes(algo, utf8Bytes(key), utf8Bytes(message)))
-}
-
-/** 摘要长度（字节），用于展示 */
-export function outLength(algo) {
-  return OUTLEN[algo] || 0
 }

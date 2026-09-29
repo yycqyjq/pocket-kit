@@ -80,25 +80,6 @@ export function hexdump(input, opt) {
   return { text: lines.join('\n'), lines: lines.length, bytes: bytes.length, width: w }
 }
 
-/** 从 hexdump 视图里把字节读回来 */
-export function fromHexdump(dumpText) {
-  const lines = String(dumpText).split(/\r?\n/)
-  const bytes = []
-  for (const line of lines) {
-    const t = line.trim()
-    if (!t) continue
-    // 去掉行首的偏移量（8 位十六进制 + 空格）
-    let body = t.replace(/^[0-9a-fA-F]{4,8}\s+/, '')
-    // 去掉尾部的 |...| ASCII 列
-    body = body.replace(/\|[^|]*\|?\s*$/, '')
-    // 只保留形如「两个十六进制字符」的 token，跳过偏移与 ASCII
-    const tokens = body.split(/\s+/).filter((x) => /^[0-9a-fA-F]{2}$/.test(x))
-    for (const tk of tokens) bytes.push(parseInt(tk, 16))
-  }
-  if (!bytes.length) throw new Error('没从这段内容里认出 hexdump 格式')
-  return { text: bytesUtf8(bytes), bytes: bytes.length }
-}
-
 /** 常见字节序列的说明，帮助对照 */
 export const BYTE_NOTES = [
   { hex: 'EF BB BF', name: 'UTF-8 BOM', note: '文件开头多出来的三个字节，常导致第一行解析出错' },

@@ -159,8 +159,6 @@ export function secretFromUri(uri) {
   return m ? m[1] : ''
 }
 
-export const TOTP_DEFAULTS = { period: 30, digits: 6, algo: 'SHA1' }
-
 export const TOTP_NOTES = [
   '密钥只在本地计算，不上传、不落盘。',
   '手机上的身份验证器用的是同一套算法（RFC 6238），所以两端算出来的码一定一致。',

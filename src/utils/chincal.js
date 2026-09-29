@@ -18,6 +18,8 @@
  * 所有结果仅供日常参考，不构成命理、医疗或法律建议。
  */
 
+import { daysInMonth, isLeapYear } from './date'
+
 export const LUNAR_YEAR_FROM = 1900
 export const LUNAR_YEAR_TO = 2100
 export const LUNAR_DATA_SOURCE = '农历压缩数据表 1900—2100（据公开整理的《中国天文年历》数据）'
@@ -112,12 +114,7 @@ export function lunarMonthsOf(y) {
 
 function isSolarValid(y, m, d) {
   if (!(y >= 1 && m >= 1 && m <= 12)) return false
-  const dim = [31, gregLeap(y) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-  return d >= 1 && d <= dim[m - 1]
-}
-
-function gregLeap(y) {
-  return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0
+  return d >= 1 && d <= daysInMonth(y, m)
 }
 
 function utcOf(y, m, d) {
@@ -770,7 +767,7 @@ export function calendarSummary(y, m, d) {
     dayGanzhiIndex: gz.index,
     dayOfYear: jdn - jan1 + 1,
     daysLeftInYear: nextYearJan1 - jdn - 1,
-    leapYear: gregLeap(y),
+    leapYear: isLeapYear(y),
     weekdayCn: '星期' + week[new Date(utcOf(y, m, d)).getUTCDay()],
     lunarMonthsInYear: lunarMonthsOf(l.lunarYear).map((x) => x.name + x.days),
   }

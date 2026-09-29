@@ -106,13 +106,6 @@ export function scan(input) {
   return found
 }
 
-export const SCAN_NOTES = [
-  '从终端、PDF、网页、聊天软件里复制出来的文本，经常夹带零宽字符与全角空格。',
-  '零宽字符最常见的坑：两个字符串看起来一模一样，用 === 比对却不相等。',
-  '双向控制符可以让「实际字符顺序」和「显示顺序」不一致，文件名伪装常用这招。',
-  '先扫一遍再清洗，比直接清空干净——你能知道原文到底脏在哪。',
-]
-
 export const CLEAN_SAMPLE =
   '\u001b[32m✓\u001b[0m 构建完成\u200b\ufeff\n' +
   '  路径：/Users/me/项目　（此处有一个全角空格）   \n' +

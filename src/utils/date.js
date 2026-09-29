@@ -88,22 +88,6 @@ export function relativeTime(target) {
   return text
 }
 
-/** 把毫秒差转成「3天2小时5分」这种可读形式 */
-export function humanDuration(ms) {
-  const abs = Math.abs(ms)
-  const sec = Math.floor(abs / 1000)
-  const d = Math.floor(sec / 86400)
-  const h = Math.floor((sec % 86400) / 3600)
-  const m = Math.floor((sec % 3600) / 60)
-  const s = sec % 60
-  const parts = []
-  if (d) parts.push(d + ' 天')
-  if (h) parts.push(h + ' 小时')
-  if (m) parts.push(m + ' 分')
-  if (s || !parts.length) parts.push(s + ' 秒')
-  return (ms < 0 ? '-' : '') + parts.join(' ')
-}
-
 /** 是否闰年 */
 export function isLeapYear(y) {
   return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0

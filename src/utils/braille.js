@@ -214,14 +214,6 @@ export function decodeBraille(input) {
   return { text: out.join(''), unknown }
 }
 
-export const BRAILLE_NOTES = [
-  '盲文是 2 列 3 行的点位系统，每个单元最多 6 个点，点位编号固定为「1 4 / 2 5 / 3 6」。',
-  '英文一级盲文里，字母 a-j 和数字 1-0 共用同一批点位，靠一个「数字号」区分：先打 3456，后面按字母读就是数字。',
-  '大写字母要在前面加一个大写号（第 6 点，⠠）。',
-  'Unicode 里盲文占 U+2800–U+28FF 共 256 个码位，正好对应 6 个点的全部组合。',
-  '中文盲文（现行盲文）是按拼音的声母韵母设计的另一套体系，需要完整拼音表，本工具不做。',
-]
-
 export const BRAILLE_SAMPLES = [
   { name: 'Hello', value: 'Hello' },
   { name: '小写字母表', value: 'abcdefghijklmnopqrstuvwxyz' },

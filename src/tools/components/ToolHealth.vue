@@ -76,6 +76,7 @@ import {
   tdee as calcTdee,
   bodyFat,
   bodyFatLabel,
+  idealWeight,
   waterIntake,
   waistRatio,
   ACTIVITY_LEVELS,
@@ -119,9 +120,8 @@ const scaleSegments = computed(() => [
 
 const idealText = computed(() => {
   try {
-    const h = Number(height.value) / 100
-    if (!(h > 0)) return '—'
-    return (18.5 * h * h).toFixed(1) + ' ~ ' + (23.9 * h * h).toFixed(1) + ' 公斤'
+    const w = idealWeight(height.value)
+    return w.min.toFixed(1) + ' ~ ' + w.max.toFixed(1) + ' 公斤'
   } catch (e) {
     return '—'
   }

@@ -132,15 +132,6 @@ export function prepaymentEffect(principal, annualRate, months, afterPeriod, ext
   }
 }
 
-/** 利率口径互转：年化 <-> 月 <-> 日 */
-export function rateConvert(value, from, to) {
-  const v = Number(value)
-  if (!isFinite(v)) throw new Error('请输入有效利率')
-  const annual = { year: v, month: v * 12, day: v * 360 }[from]
-  if (annual === undefined) throw new Error('未知的利率口径')
-  return { year: annual, month: annual / 12, day: annual / 360 }[to]
-}
-
 /** 格式化金额，带千分位 */
 export function money(n, digits) {
   if (!isFinite(n)) return '-'

@@ -128,11 +128,3 @@ export function asciiFromText(text) {
     })
     .filter((x) => x !== null)
 }
-
-export function textFromAscii(codes) {
-  return String(codes)
-    .split(/[\s,，]+/)
-    .filter(Boolean)
-    .map((n) => String.fromCharCode(Number(n)))
-    .join('')
-}

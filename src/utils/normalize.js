@@ -101,15 +101,6 @@ export function check(text) {
   return { ...c, inspect: i }
 }
 
-export const NORMALIZE_NOTES = [
-  '「é」有两种写法：一个码点 U+00E9，或者 e（U+0065）加组合符号 U+0301。肉眼看完全一样，但 === 比对不相等。',
-  'macOS 的文件名用 NFD，Windows 与网络传输多用 NFC，所以同一个文件跨系统拷贝后名字可能「变了」。',
-  '搜索与去重场景通常用 NFKC：它会把全角转半角、圈号变数字、连字拆开，让「看起来一样」的真的变成一样。',
-  '反过来，NFKC/NFKD 是有损的：① 会变成 1，ﬁ 会变成 fi，改完就回不去了。',
-  '规范化的方向要统一：要么全用 NFC，要么全用 NFKC，混用等于没做。',
-  '正规化能解决「表示形式不同」，但解决不了「长得像」—— 如拉丁字母 a 与西里尔字母 а 是不同码点，NFKC 也不会统一它们。',
-]
-
 export const NORMALIZE_SAMPLES = [
   { name: 'é 的两种写法', value: 'e\u0301' },
   { name: 'NFC 写法对比', value: '\u00e9' },

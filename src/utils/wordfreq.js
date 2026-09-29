@@ -150,8 +150,6 @@ export function bars(list, width) {
   })
 }
 
-export const STOPWORD_NOTE = '开启「忽略虚词」后会跳过中文的「的、了、和、是」与英文的 the/a/of 这类高频虚词，剩下的词更能反映内容主题。'
-
 export const WORDFREQ_SAMPLE =
   '随身匣是一个离线可用的工具箱。工具箱里有文本工具、数值工具、时间工具与开发工具。\n' +
   '每个工具都只在本机计算，不联网、不上传。离线可用是这个工具箱最重要的特点。\n' +
