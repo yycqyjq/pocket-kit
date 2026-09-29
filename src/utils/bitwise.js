@@ -59,7 +59,7 @@ function zeroArr(w) {
 
 /** 数值（BigInt | Number | 整数）-> 位数组，按位宽回绕 */
 function numToArr(v, w) {
-  let x = v
+  let x
   const mod = HAS_BIGINT ? BigInt(2) ** BigInt(w) : Math.pow(2, w)
   if (HAS_BIGINT) {
     x = BigInt(v)

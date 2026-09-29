@@ -895,7 +895,7 @@ function generalNameLabel(node) {
   switch (node.tagNumber) {
     case 0: {
       let oid = ''
-      let val = ''
+      let val
       try {
         const inner = unwrapExplicit(node)
         oid = oidOf(kid(inner, 0))
@@ -924,7 +924,7 @@ function generalNameLabel(node) {
       return { type: node.value.length === 4 ? 'IPv4 地址' : 'IPv6 地址', key: node.value.length === 4 ? 'ip' : 'ip6', value: s }
     }
     case 8: {
-      let oid = ''
+      let oid
       try {
         oid = decodeOidBytes(unwrapExplicit(node).value, node.valueStart)
       } catch (e) {
@@ -2049,7 +2049,7 @@ export function matchesHost(cert, hostname) {
     const pattern = normalizeHost(raw)
     if (!pattern) continue
     let hit = false
-    let why = ''
+    let why
     if (isIp) {
       hit = pattern === host
       why = hit ? 'IP 字面相等' : '与证书里的「' + pattern + '」不等'

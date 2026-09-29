@@ -360,7 +360,7 @@ if (!ZBAR || !MAGICK) {
     const png = '/tmp/pk-qr-' + i + '.png'
     writeFileSync(pbm, 'P1\n' + side + ' ' + side + '\n' + rows.join('\n') + '\n')
     execFileSync(MAGICK, [pbm, '-scale', '600x600', '-border', '12', '-bordercolor', 'white', png])
-    let out = ''
+    let out
     try {
       out = execFileSync(ZBAR, ['-q', '--raw', png], { encoding: 'utf8' })
     } catch (err) {

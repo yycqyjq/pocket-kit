@@ -954,7 +954,6 @@ export function parseJpeg(bytes) {
       const isExif = b[p + 2] === 0x45 && b[p + 3] === 0x78 && b[p + 4] === 0x69 && b[p + 5] === 0x66 && b[p + 6] === 0x00 && b[p + 7] === 0x00
       if (isExif) {
         hasExif = true
-        byteOrder = (b[p + 8] === 0x49 ? '小端 II' : b[p + 8] === 0x4d ? '大端 MM' : '')
         const tiff = parseTiff(b, p + 8, p + 2 + payload)
         fields = fields.concat(tiff.fields)
         warnings.push.apply(warnings, tiff.warnings)
@@ -1098,7 +1097,7 @@ function pngText(data, type) {
     keyword += String.fromCharCode(data[i])
     i++
   }
-  let text = ''
+  let text
   if (type === 'iTXt') {
     let j = i + 3 // 跳过 compressionFlag + compressionMethod
     for (let k = 0; k < 2; k++) {

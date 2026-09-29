@@ -352,7 +352,7 @@ const versionTip = computed(() => {
 const structText = computed(() => {
   const q = qr.value
   if (!q) return ''
-  let s = null
+  let s
   try {
     s = layoutStats(q.version)
   } catch (e) {

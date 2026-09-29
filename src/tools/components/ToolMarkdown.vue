@@ -189,7 +189,7 @@ const srcLines = computed(() => (src.value ? String(src.value).split('\n').lengt
 const outlineFlat = computed(() => {
   const raw = String(src.value || '')
   if (!raw.trim()) return []
-  let roots = []
+  let roots
   try {
     roots = outline(raw)
   } catch (e) {

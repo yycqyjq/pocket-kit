@@ -81,7 +81,7 @@ export function parseCidr(input) {
   if (!s) throw new Error('请输入 IP 或 CIDR，例如 192.168.1.10/24')
 
   let ipPart = s
-  let prefix = null
+  let prefix
 
   // 允许用空格或 / 分隔掩码
   const bySlash = s.split('/')

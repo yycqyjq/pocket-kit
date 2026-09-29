@@ -310,7 +310,7 @@ export function annualIit(o) {
   const basic = p.basic === undefined || p.basic === '' ? BASIC_DEDUCTION : numOr(p.basic)
   const social = numOr(p.social)
   const other = numOr(p.other)
-  let yearly = 0
+  let yearly
   if (p.deductions && typeof p.deductions === 'object' && p.deductions.yearlyTotal !== undefined) {
     yearly = numOr(p.deductions.yearlyTotal) + numOr(p.deductions.medicalYear)
   } else if (p.deductionYearly !== undefined && p.deductionYearly !== null && p.deductionYearly !== '') {

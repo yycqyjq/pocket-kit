@@ -463,7 +463,7 @@ export function divisors(value) {
   const n = HAS_BIGINT ? a.big : a.num
   if (n === ZERO) throw new Error('0 的约数有无穷多个，换个非零整数')
   const f = factorize(a.str)
-  let list = []
+  let list
   if (HAS_BIGINT) {
     list = buildDivisorsBig(BigInt(f.n), f.factors)
   } else {

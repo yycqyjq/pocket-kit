@@ -231,7 +231,7 @@ export function mmFromShoe(value, system, opt) {
   if (!(v > 0)) throw new Error('请输入有效号码')
   const allow = allowanceOf(o)
   const aud = audienceOf(o.audience)
-  let foot = 0
+  let foot
   if (system === 'mm') foot = v
   else if (system === 'jp') foot = v * 10
   else if (system === 'cn') foot = (v + 10) * 5
@@ -378,8 +378,8 @@ export function ringFromCirc(circ) {
  */
 export function ringConvert(input) {
   const p = input || {}
-  let circ = 0
-  let from = ''
+  let circ
+  let from
   if (num(p.circ) > 0) {
     circ = num(p.circ)
     from = '内周长'

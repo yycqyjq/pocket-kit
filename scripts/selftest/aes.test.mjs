@@ -29,7 +29,7 @@ for (const [name, key, pt, want] of [
   ['FIPS-197 C.1', '000102030405060708090a0b0c0d0e0f', '00112233445566778899aabbccddeeff', '69c4e0d86a7b0430d8cdb78070b4c55a'],
 ]) {
   const mine = aesEncrypt({ algo: 'aes-128', mode: 'ecb', keyType: 'hex', key, input: pt, inputType: 'hex' }).blocks[0].outputHex
-  let ref = ''
+  let ref
   try {
     ref = osslRaw('-aes-128-ecb', key, '', pt)
   } catch (e) {

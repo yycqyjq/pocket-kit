@@ -151,9 +151,9 @@ const urlDecoded = computed(() => {
 const b64 = computed(() => {
   const src = input.value
   if (!src) return { basic: '', urlsafe: '', decoded: '', byteLen: '—' }
-  let basic = ''
+  let basic
   let urlsafe = ''
-  let decoded = ''
+  let decoded
   try {
     basic = T.toBase64(src, false)
     urlsafe = T.toBase64(src, true)

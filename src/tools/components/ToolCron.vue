@@ -111,7 +111,7 @@ function generate() {
   const m = Number(minute.value)
   const h = Number(hour.value)
   const x = Number(n1.value)
-  let out = ''
+  let out
   if (rhythm.value === 'everyMin') {
     if (!(x >= 1 && x <= 59)) return toast('间隔要在 1~59 分钟之间')
     out = '*/' + x + ' * * * *'

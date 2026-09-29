@@ -59,8 +59,8 @@ export function parseHttp(raw) {
   if (!headLines.length) throw new Error('没找到起始行')
 
   const first = headLines[0]
-  let kind = ''
-  let startLine = null
+  let kind
+  let startLine
 
   const reqM = /^([A-Z]+)\s+(\S+)\s*(HTTP\/[\d.]+)?$/.exec(first)
   const resM = /^(HTTP\/[\d.]+)\s+(\d{3})\s*(.*)$/.exec(first)
@@ -113,7 +113,7 @@ export function parseHttp(raw) {
   const ct = (headers.find((h) => h.name === 'content-type') || {}).value || ''
   const body = bodyPart
   let bodyKind = '空'
-  let bodyParsed = null
+  let bodyParsed
   let bodyFormat = ''
   if (body.trim()) {
     if (/json/i.test(ct) || /^\s*[{[]/.test(body)) {

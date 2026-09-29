@@ -8,8 +8,8 @@ export function bmi(weightKg, heightCm) {
   const h = Number(heightCm) / 100
   if (!(w > 0) || !(h > 0)) throw new Error('请输入有效的身高和体重')
   const value = w / (h * h)
-  let label = ''
-  let tone = 'ok'
+  let label
+  let tone
   if (value < 18.5) {
     label = '偏瘦'
     tone = 'warn'

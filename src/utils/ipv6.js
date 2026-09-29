@@ -25,7 +25,7 @@ export function expandIpv6(input) {
 
   if ((s.match(/::/g) || []).length > 1) throw new Error('一个地址里只能出现一次 ::')
 
-  let groups = []
+  let groups
   let embeddedV4 = ''
 
   // 处理内嵌 IPv4，如 ::ffff:192.168.1.1

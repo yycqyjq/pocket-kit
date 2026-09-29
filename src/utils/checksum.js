@@ -448,7 +448,7 @@ const EXPECTED = [
 export function selfTest(log) {
   const out = []
   for (const e of EXPECTED) {
-    let actual = ''
+    let actual
     try {
       actual = checksum(e.key, Uint8Array.from(utf8Bytes(e.text))).hex
     } catch (err) {

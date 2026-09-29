@@ -379,7 +379,7 @@ const FMT_CACHE = {}
 function getFormatter(tzKey) {
   if (!HAS_TZ) return null
   if (FMT_CACHE[tzKey] !== undefined) return FMT_CACHE[tzKey]
-  let f = null
+  let f
   try {
     f = new Intl.DateTimeFormat('en-GB', {
       timeZone: tzKey,
@@ -761,8 +761,8 @@ export function deviceOffsetMinutes(at) {
  */
 export function stampLinks(input) {
   const p = input || {}
-  let ms = NaN
-  let from = ''
+  let ms
+  let from
   let dst = { state: 'ok', note: '' }
   if (p.stamp !== undefined && String(p.stamp).trim() !== '') {
     const s = String(p.stamp).trim()

@@ -137,7 +137,7 @@ const error = computed(() => parsed.value.error)
 
 /* ---- 本机 UA：H5 走 navigator，App 走 uni 的系统信息 ---- */
 function readLocal() {
-  let ua = ''
+  let ua
   try {
     const sys = uni.getSystemInfoSync() || {}
     ua = sys.userAgent || sys.appName || ''

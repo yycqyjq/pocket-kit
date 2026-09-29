@@ -2,7 +2,7 @@
  * 系统信息：状态栏高度、安全区、屏幕宽度
  * 单独抽出来是因为自定义导航栏和多处布局都要用
  */
-let info = {}
+let info
 try {
   info = uni.getSystemInfoSync() || {}
 } catch (e) {

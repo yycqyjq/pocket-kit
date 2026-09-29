@@ -304,8 +304,8 @@ function naturalFromEvent(e) {
   if (!src.value || !dispW.value) return null
   const t = (e && e.touches && e.touches[0]) || (e && e.changedTouches && e.changedTouches[0]) || e
   if (!t) return null
-  let px = null
-  let py = null
+  let px
+  let py
   if (typeof t.offsetX === 'number' && typeof t.offsetY === 'number') {
     px = t.offsetX
     py = t.offsetY
