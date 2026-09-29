@@ -1,6 +1,9 @@
 /**
  * README 截图批量生成：对 dist/build/h5 的真实渲染逐页截图。
  * 前置：npm run build:h5，然后 python3 -m http.server 4173 --directory dist/build/h5
+ * 内核：依赖里只有 playwright-core 这一层驱动，浏览器要自己拉一次
+ *       （npx playwright-core install chromium，1.61.1 对应的正是下面写死的 1228）；
+ *       非 macOS 或内核不在默认路径时，把可执行文件路径当第一个参数传进来。
  * 用法：node scripts/screenshot.mjs
  * 说明：SPA 的 hash 跳转不会重新挂载页面，每次导航前先回 about:blank 强制整页重载；
  *       深色截图通过应用自己的 uni.setStorageSync 写 pk.theme 再整页重载。

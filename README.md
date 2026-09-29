@@ -16,7 +16,7 @@ H5 只作为开发期的浏览器预览手段（小程序/快应用目标已移�
 
 > 界面截图与过程文档不在版本库里：这批东西统一放本地的 `.agent/`（已 gitignore）。
 > 本地想看图就先 `npm run build:h5`，再 `node scripts/screenshot.mjs`，图会落在 `.agent/docs/screenshots/`。
-> 这个脚本要 `playwright-core`，而它没进依赖清单（截图批只是本机工具，不算构建链路），clone 下来得自己补一次 `npm i -D playwright-core`。
+> `playwright-core` 钉在 devDependencies（1.61.1 —— 它要的那个 Chromium 内核正是脚本默认路径里的 `chromium-1228`，版本别乱升）。它只带驱动、不带浏览器内核，也不挂 install 钩子，所以 CI 装它不联网不下内核；本机第一次跑得 `npx playwright-core install chromium` 把内核拉下来。默认路径是 macOS 写法，别的系统把可执行文件路径当第一个参数传：`node scripts/screenshot.mjs /path/to/chrome`。
 
 ---
 
@@ -81,7 +81,7 @@ APK 那一步不在里面，也不是漏写：DCloud 的云打包没有可供 CI
 | `npm test` | 全量自查：自动发现 `scripts/selftest/**/*.test.mjs` 逐套运行；条码与二维码拿 zbarimg / magick 当外部判官，缺判官的套件会 SKIP 并在汇总里点名 |
 | `npm run check:docs` | README 工具表 ↔ 注册表 ↔ manifest 三方对撞，件数漂移当场报错 |
 | `npm run lint` | ESLint 静态检查（配置见 `eslint.config.mjs`）。**只卡正确性、不卡排版**；首次接入时存量里有 112 处未清问题（5 类，`npm run lint` 可随时重测），一律先降为 warning 不计入退出码，清完再升回 error。另：`npm run lint:fix` 可自动修其中一部分 |
-| `node scripts/screenshot.mjs` | 构建后整批重拍界面截图，写到 `.agent/docs/screenshots/`（先起 `python3 -m http.server 4173 --directory dist/build/h5`）。要 `playwright-core`，未列入 devDependencies，见上一节说明 |
+| `node scripts/screenshot.mjs` | 构建后整批重拍界面截图，写到 `.agent/docs/screenshots/`（先起 `python3 -m http.server 4173 --directory dist/build/h5`）。依赖 devDependencies 里的 `playwright-core`，浏览器内核要自己拉一次，见上一节说明 |
 
 ---
 
