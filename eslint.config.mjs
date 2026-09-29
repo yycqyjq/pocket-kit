@@ -9,7 +9,8 @@
  *    不显式改就会把每一行 import/export 都报成语法错（几百条假错）。
  *
  * 2. **忽略清单里要排除"生成物"。**
- *    scripts/selftest/life/*.mjs 是 run.sh 从 src/utils/*.js 拷出来的
+ *    scripts/selftest/life/*.mjs 是 npm test（scripts/selftest/run-all.mjs）按用例的
+ *    import 清单从 src/utils/*.js 拷出来的
  *    （因为上面第 1 条，.js 不能当 ESM 跑），逐字节相同。扫它等于把同一份代码查两遍，
  *    还会让"改源码忘了重跑"变成假报错。.gitignore 已经忽略它，这里保持一致。
  *
@@ -107,7 +108,7 @@ export default [
       'dist/**',
       'unpackage/**',
       'node_modules/**',
-      'scripts/selftest/life/*.mjs', // run.sh 生成的副本，见文件头第 2 条
+      'scripts/selftest/life/*.mjs', // run-all 生成的副本，见文件头第 2 条
       '.agent/**', // agent 的文档、截图与过程记录（原 docs/ 与 .workbuddy-ai/ 都收在这），不是项目代码
     ],
   },
