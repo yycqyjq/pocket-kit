@@ -68,10 +68,6 @@ export function toCents(value) {
   return Math.round(n * 100)
 }
 
-export function centsToYuan(cents) {
-  return cents / 100
-}
-
 /** 分 → 「12.34」这样的字符串（不含币种符号） */
 export function centsText(cents) {
   const neg = cents < 0
