@@ -453,7 +453,7 @@ export function lunarYearProfile(ly) {
   return {
     year: ly,
     ganzhi: ganzhiOfYear(ly).ganzhi,
-    zodiac: zodiacOfYear(ly).zodiac,
+    zodiac: zodiacOfYear(ly),
     days: lunarYearDaysOf(ly),
     leapMonth: leap,
     leapMonthName: leap ? lunarMonthName(leap, true) : '无闰月',

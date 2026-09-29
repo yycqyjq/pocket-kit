@@ -1,7 +1,7 @@
 <template>
   <view>
     <PkCard title="色值" accent="#B5527A">
-      <PkField v-model="hex" placeholder="var(--pk-accent)" :maxlength="9">
+      <PkField v-model="hex" placeholder="#3f7a6e" :maxlength="9">
         <template #labelRight>
           <text class="mini-act" @tap="rollRandom">随机</text>
         </template>
@@ -121,11 +121,11 @@ import {
 import { randomInt } from '@/utils/random'
 
 const presets = [
-  'var(--pk-accent)', '#4A6FA5', '#6B5B95', '#B5527A', 'var(--pk-warn)', '#3E7A4E',
+  '#3f7a6e', '#4A6FA5', '#6B5B95', '#B5527A', '#a8642f', '#3E7A4E',
   '#1D2521', '#8C8C8C', '#E8E3D9', '#FFFFFF', '#C8503C', '#2F8C7A',
 ]
 
-const hex = ref('var(--pk-accent)')
+const hex = ref('#3f7a6e')
 
 const safeHex = computed(() => normalizeHex(hex.value) || '')
 const rgb = computed(() => (safeHex.value ? hexToRgb(safeHex.value) : null))

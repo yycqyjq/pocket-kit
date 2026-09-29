@@ -239,13 +239,24 @@ export function bracketOf(taxable, table) {
 /**
  * 超额累进计税：税额 = 应纳税所得额 × 税率 − 速算扣除数。
  * 同时用「逐档累加」再算一遍，用来验证速算扣除数没抄错。
- * @returns {{taxable,tax,percent,quick,byRate,rows,quickCheck,note}}
+ * @returns {{taxable,tax,rate,percent,quick,bracketNote,byRate,rows,quickCheck,note}}
  */
 export function taxFromTaxable(taxable, table) {
   const t = numOr(taxable)
   const list = table || ANNUAL_BRACKETS
   if (t <= 0) {
-    return { taxable: 0, tax: 0, percent: 0, rate: 0, quick: 0, rows: [], byRate: 0, note: '应纳税所得额不为正，无需缴税' }
+    return {
+      taxable: 0,
+      tax: 0,
+      rate: 0,
+      percent: 0,
+      quick: 0,
+      bracketNote: '',
+      byRate: 0,
+      rows: [],
+      quickCheck: 0,
+      note: '应纳税所得额不为正，无需缴税',
+    }
   }
   const hit = bracketOf(t, list)
   const rows = []

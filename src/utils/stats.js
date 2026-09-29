@@ -494,7 +494,9 @@ export function parseXY(text) {
 
 /**
  * 最小二乘线性回归 y = a + b·x
- * @returns {{slope,intercept,r2,r,n,predict:function,note,...}}
+ * @returns {{n, slope, intercept, r, r2, equation, meanX, meanY, sse, sst, ssr,
+ *            residualStdError, seSlope, seIntercept, tSlope, worst, residuals,
+ *            predict:function, note}}
  */
 export function linearFit(xs, ys) {
   const X = cleanValues(xs)

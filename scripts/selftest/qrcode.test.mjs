@@ -15,7 +15,7 @@
  */
 import { useUtils } from './harness.mjs'
 import { execFileSync } from 'node:child_process'
-import { writeFileSync, unlinkSync } from 'node:fs'
+import { writeFileSync, unlinkSync, existsSync } from 'node:fs'
 
 const Q = await useUtils('qrcode')
 
@@ -261,7 +261,21 @@ RT.forEach((t, i) => {
       is(back.version, q.version, `rtVersion${i}${e}`)
       is(back.elevel, e, `rtLevel${i}${e}`)
       is(back.mask, q.mask, `rtMask${i}${e}`)
+      // syndromesOk 这条本身是恒真：校验不过 decodeMatrix 直接 throw，走不到这里，
+      // 保留只为文档性。真正的判据是下面三行——破坏数据区的模块，必须被伴随式校验拦下。
+      // 破坏位置用右下角：它是码字填充起点、恒属数据/纠错区（finder 只占三个角、
+      // format 贴着 finder、alignment 最靠边的中心在 n-7，都不与 (n-1,n-1) 重叠）。
+      // 不能用几何中心——大版本的 alignment pattern 恰好在中心，翻它不抛是正常的。
       is(back.syndromesOk, true, `rtSyndromes${i}${e}`)
+      const broken = q.modules.map((row) => row.slice())
+      broken[broken.length - 1][broken.length - 1] ^= 1
+      let corruptedThrew = false
+      try {
+        Q.decodeMatrix(broken)
+      } catch (ignore) {
+        corruptedThrew = true
+      }
+      is(corruptedThrew, true, `rtDetectCorrupt${i}${e}`)
     } catch (err) {
       fail++
       console.log(`FAIL roundtrip${i}${e}: ${err.message}`)
@@ -296,21 +310,27 @@ is(vc.split('\r\n').length >= 4, true, 'vcCrlf')
 is(Q.buildWifi({ ssid: '' }), 'WIFI:T:WPA;S:;P:;;', 'wifiNoSsid')
 
 /* ---------- 9. 外部判官：zbarimg 真解码（缺工具就跳过） ---------- */
-// 按 PATH 找，不按 /opt/homebrew 写死：macOS 的家目录和 Linux CI 的 /usr/bin 都得认，
-// 否则在流水线里会「静默跳过」，把没验证说成验证过了。
-function findBin(names) {
-  for (const n of names) {
+// 定位顺序：Homebrew 常见绝对路径在前，PATH 兜底。macOS 上 zbar 明明装着
+// 却常常不在 PATH（本机就是：/opt/homebrew/bin 有、which 找不到），只按 PATH 找
+// 会「静默跳过」，把没验证说成验证过了。三个环境都要认：
+// Apple Silicon Homebrew、Intel Homebrew、Linux CI 的 /usr/bin（本就在 PATH）。
+function findBin(candidates) {
+  for (const c of candidates) {
     try {
-      const p = execFileSync('which', [n], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
-      if (p) return p
+      if (c.includes('/')) {
+        if (existsSync(c)) return c
+      } else {
+        const p = execFileSync('which', [c], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+        if (p) return p
+      }
     } catch (e) {
       /* next */
     }
   }
   return null
 }
-const ZBAR = findBin(['zbarimg'])
-const MAGICK = findBin(['magick', 'convert'])
+const ZBAR = findBin(['/opt/homebrew/bin/zbarimg', '/usr/local/bin/zbarimg', 'zbarimg'])
+const MAGICK = findBin(['/opt/homebrew/bin/magick', '/usr/local/bin/magick', 'magick', 'convert'])
 if (!ZBAR || !MAGICK) {
   console.log('SKIP zbar 判官：PATH 里缺 ' + [!ZBAR && 'zbarimg', !MAGICK && 'ImageMagick'].filter(Boolean).join(' / ') + '，第 9 组外部验证未跑')
 } else {

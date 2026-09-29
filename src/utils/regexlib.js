@@ -77,7 +77,7 @@ export const REGEX_LIB = [
 
 /**
  * 执行匹配
- * @returns { match: boolean, list: [{text, index, groups}], error }
+ * @returns {{match:boolean, list:Array<{text:string, index:number, groups:Array}>, error:string}}
  */
 export function runRegex(pattern, flags, text) {
   if (!pattern) return { match: false, list: [], error: '' }

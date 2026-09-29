@@ -223,6 +223,16 @@ is(sm.leapYear, false, 'sum.leap')
 is(C.calendarSummary(2024, 12, 31).daysLeftInYear, 0, 'sumDec31')
 is(C.calendarSummary(2024, 3, 1).dayOfYear, 61, 'sumDoyLeap')
 is(C.lunarYearProfile(2025).months.length, 13, 'profile2025')
+{
+  // 修复「zodiacOfYear 已返回字符串却被再取 .zodiac → undefined」后补的结构断言：
+  // 速查对象的所有字段都不该是 undefined（2026 丙午马年作锚点）
+  const p = C.lunarYearProfile(2026)
+  for (const k of ['year', 'ganzhi', 'zodiac', 'days', 'leapMonth', 'leapMonthName', 'leapMonthDays', 'springFestival', 'months']) {
+    is(p[k] === undefined, false, 'profile2026.' + k)
+  }
+  is(p.zodiac, '马', 'profile2026.zodiacValue')
+  is(p.ganzhi, '丙午', 'profile2026.ganzhiValue')
+}
 is(C.festivalTable().length >= 10, true, 'festivalTable')
 is(C.festivalTable().filter((f) => f.name === '中秋节')[0].label, '八月十五', 'festivalLabel')
 

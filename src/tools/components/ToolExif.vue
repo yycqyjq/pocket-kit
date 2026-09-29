@@ -61,7 +61,7 @@
       </view>
     </PkCard>
 
-    <PkCard v-for="g in groups" :key="g.id" :title="g.title + '（' + g.items.length + '）'" accent="groupAccent(g.id)">
+    <PkCard v-for="g in groups" :key="g.id" :title="g.title + '（' + g.items.length + '）'" :accent="groupAccent(g.id)">
       <view class="fields">
         <view v-for="(it, i) in g.items" :key="g.id + '-' + i" class="field" @tap="copyField(it)">
           <view class="field__main">

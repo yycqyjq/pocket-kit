@@ -316,7 +316,10 @@ export function isPrime(value) {
 
 /**
  * 素性判定（带过程）
- * @returns {{n:string, prime:boolean, method:string, reason:string, divisor:(string|null), small:boolean}}
+ * @returns {{n:string, prime:boolean, method:string, reason:string, divisor:(string|null),
+ *            exact?:boolean}} — small / exact 曾在旧注释里，实现从不返回 small，
+ *            仅「命中小素数表」分支返回 exact=true；全项目无人读取这两个字段，
+ *            故 JSDoc 对齐实现（去掉 small、补可选 exact），不动实现。
  */
 export function primeTest(value) {
   const a = absInt(value)
@@ -358,8 +361,9 @@ export function primeTest(value) {
 /**
  * 质因数分解。
  * @returns {{n:string, factors:Array<{prime:string,exp:number,primeNum:number}>, steps:string[],
- *            expression:string, divisorCount:string, sumDivisors:string, squareFree:boolean,
- *            radical:string, distinctCount:number, totalFactors:number}}
+ *            expression:string, divisorCount:string, divisorCountNum:number, sumDivisors:string,
+ *            squareFree:boolean, radical:string, distinctCount:number, totalFactors:number,
+ *            display:string}}
  */
 export function factorize(value) {
   const a = absInt(value)
