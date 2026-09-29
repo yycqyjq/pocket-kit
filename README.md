@@ -80,7 +80,7 @@ APK 那一步不在里面，也不是漏写：DCloud 的云打包没有可供 CI
 | --- | --- |
 | `npm test` | 全量自查：自动发现 `scripts/selftest/**/*.test.mjs` 逐套运行；条码与二维码拿 zbarimg / magick 当外部判官，缺判官的套件会 SKIP 并在汇总里点名 |
 | `npm run check:docs` | README 工具表 ↔ 注册表 ↔ manifest 三方对撞，件数漂移当场报错 |
-| `npm run lint` | ESLint 静态检查（配置见 `eslint.config.mjs`）。**只卡正确性、不卡排版**；首次接入的 112 处存量里，`no-unused-vars` 43 处、`no-useless-escape` 8 处、`preserve-caught-error` 11 处已清零并升为 error（死代码、白写的转义、re-throw 丢原始异常，当场拦），剩下 50 处 / 2 类仍是 warning、不计入退出码，`npm run lint` 可随时重测。另：`npm run lint:fix` 可自动修其中一部分 |
+| `npm run lint` | ESLint 静态检查（配置见 `eslint.config.mjs`）。**只卡正确性、不卡排版**；首次接入的 112 处存量里，`no-unused-vars` 43 处、`no-useless-escape` 8 处、`preserve-caught-error` 11 处、`no-useless-assignment` 33 处已清零并升为 error（死代码、白写的转义、re-throw 丢原始异常、从没生效的初值，当场拦），剩下 17 处 / 1 类（computed 里写别的 ref）仍是 warning、不计入退出码，`npm run lint` 可随时重测。另：`npm run lint:fix` 可自动修其中一部分 |
 | `node scripts/screenshot.mjs` | 构建后整批重拍界面截图，写到 `.agent/docs/screenshots/`（先起 `python3 -m http.server 4173 --directory dist/build/h5`）。依赖 devDependencies 里的 `playwright-core`，浏览器内核要自己拉一次，见上一节说明 |
 
 ---
