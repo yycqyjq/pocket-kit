@@ -1,6 +1,6 @@
 /**
  * 文档对撞：README 工具表 ↔ 注册表 ↔ manifest 三方核对，防「件数漂移」复发；
- * 顺带查全仓库零引用的导出（lint 看不见的那一类）。
+ * 顺带查全仓库零引用的导出（lint 看不见的那一类），以及每个 util 模块有没有被自查用例直接装载。
  * 任何一项不一致都让退出码非零——CI 与本地 npm run check:docs 共用。
  */
 import { execSync } from 'node:child_process'
@@ -83,6 +83,36 @@ codeFiles.forEach((f, i) => {
   }
 })
 
+/* 自查覆盖：每个 src/utils 模块都得被某个 *.test.mjs 直接装载（useUtils('x') 或
+   from './x.mjs'）。整词命中不算覆盖——注释里提一句模块名太容易，那会把没测的说成测过。
+   豁免只给「不跑在 uni.* / DOM 上就没法验」的平台边界模块；两张清单都写死在这里：
+   新增模块必须带用例，付了账必须从欠账清单里划掉，欠账清单里不许出现已不存在的模块。
+   2026-09-30 立这条时实测：模块 78 个，直接装载 31 个，平台豁免 5 个，欠账 42 个。 */
+const PLATFORM_UNTESTED = ['clipboard', 'image', 'storage', 'sys', 'theme']
+const UNTESTED = [
+  'braille', 'classic', 'cleanescape', 'codefmt', 'color', 'cron', 'dataconv', 'date',
+  'datefmt', 'devref', 'diff', 'entity', 'expr', 'extract', 'garbled', 'hash', 'health',
+  'hexdump', 'httpdump', 'ip', 'ipv6', 'json2ts', 'jwt', 'lorem', 'naming', 'normalize',
+  'percent', 'perm', 'punycode', 'qp', 'radix', 'random', 'regexlib', 'sqlfmt', 'table',
+  'text', 'unicode', 'unit', 'url', 'uuidinfo', 'validate', 'wordfreq',
+]
+
+const utilNames = codeFiles
+  .filter((f) => f.startsWith('src/utils/') && f.endsWith('.js'))
+  .map((f) => f.slice('src/utils/'.length, -3))
+const loaded = new Set()
+for (const f of codeFiles.filter((x) => x.endsWith('.test.mjs'))) {
+  for (const m of fs.readFileSync(f, 'utf8').matchAll(/useUtils\(\s*'([\w-]+)'\s*\)|from '\.\/([\w-]+)\.mjs'/g)) {
+    const n = m[1] || m[2]
+    if (n !== 'harness') loaded.add(n)
+  }
+}
+const noSuite = utilNames.filter((u) => !loaded.has(u))
+const undeclared = noSuite.filter((u) => !UNTESTED.includes(u) && !PLATFORM_UNTESTED.includes(u))
+const paidOff = UNTESTED.filter((u) => loaded.has(u)).concat(PLATFORM_UNTESTED.filter((u) => loaded.has(u)))
+const ghost = UNTESTED.concat(PLATFORM_UNTESTED).filter((u) => !utilNames.includes(u))
+const covered = utilNames.length - noSuite.length
+
 const checks = [
   ['registry id 唯一', new Set(ids).size === ids.length],
   ['id ↔ COMPONENTS 一致', cmKeys.length === ids.length && ids.every((i) => cmKeys.includes(i)) && cmKeys.every((k) => ids.includes(k))],
@@ -94,6 +124,11 @@ const checks = [
   ['README 引用的截图都存在' + (shotSkip ? '（.agent 不入库，跳过 ' + shots.length + ' 张）' : ''), missingShots.length === 0],
   ['没有零引用的导出', deadExports.length === 0],
 ]
+checks.push([
+  '模块都有直接自查（' + utilNames.length + ' 个模块：已装载 ' + covered + ' · 欠账 ' + UNTESTED.length + ' · 平台豁免 ' + PLATFORM_UNTESTED.length + '）',
+  undeclared.length === 0 && paidOff.length === 0 && ghost.length === 0,
+])
+
 let bad = 0
 for (const [name, ok] of checks) {
   console.log((ok ? '✓ ' : '✗ ') + name)
@@ -103,4 +138,7 @@ if (names.length !== rows.length) console.log('  差集 registry:', names.filter
 if (missingShots.length) console.log('  缺失截图:', missingShots)
 if (mCount !== names.length) console.log('  manifest 写的是 ' + mCount + '，实际 ' + names.length)
 if (deadExports.length) console.log('  零引用导出（删掉，或像界面上真有需求那样接回去）:', deadExports)
+if (undeclared.length) console.log('  新增模块没带自查用例:', undeclared)
+if (paidOff.length) console.log('  已有用例、还挂在清单上（划掉）:', paidOff)
+if (ghost.length) console.log('  清单里有 src/utils 下不存在的模块:', ghost)
 process.exitCode = bad ? 1 : 0
