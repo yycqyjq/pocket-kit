@@ -78,6 +78,8 @@ export function smsBodyLimit(n) {
  */
 export function smsParts(text) {
   const s = String(text || '')
+  // 「纯 ASCII」判定决定走 GSM 7-bit 还是 UCS-2 计费，\x00-\x7f 是 ASCII 的完整定义
+  // eslint-disable-next-line no-control-regex
   const ascii = /^[\x00-\x7F]*$/.test(s)
   const cap = ascii ? 153 : 67
   return { ascii, cap, chars: s.length, parts: s.length ? Math.ceil(s.length / cap) : 0 }

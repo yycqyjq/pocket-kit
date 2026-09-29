@@ -8,6 +8,8 @@
     "dev:h5": "uni",
     "build:h5": "uni build",
     "check:docs": "node scripts/check-docs.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "node scripts/selftest/run-all.mjs"
   },
   "dependencies": {
@@ -36,9 +38,16 @@
     "@dcloudio/uni-cli-shared": "3.0.0-5020620260917001",
     "@dcloudio/uni-stacktracey": "3.0.0-5020620260917001",
     "@dcloudio/vite-plugin-uni": "3.0.0-5020620260917001",
+    "@eslint/js": "^10.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.70.1",
+    "@typescript-eslint/parser": "^8.70.1",
     "@vue/runtime-core": "^3.4.21",
+    "eslint": "^10.11.0",
+    "eslint-plugin-vue": "^10.11.0",
+    "globals": "^17.12.0",
     "rollup": "4.14.3",
-    "vite": "5.2.8"
+    "vite": "5.2.8",
+    "vue-eslint-parser": "^10.4.1"
   },
   "license": "MIT"
 }

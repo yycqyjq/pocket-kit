@@ -67,6 +67,7 @@
         因此这段 HTML 里不存在可执行的标签或事件属性，视图层只负责渲染。
       -->
       <view v-else class="md-panel">
+        <!-- eslint-disable-next-line vue/no-v-html, vue/no-v-text-v-html-on-component （安全前提见上方注释：文本已转义、属性已转义、链接过协议白名单、原生 HTML 当纯文本） -->
         <view class="md-body" v-html="html"></view>
       </view>
     </PkCard>

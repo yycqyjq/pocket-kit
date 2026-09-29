@@ -141,6 +141,8 @@ export function domainToAscii(domain) {
     if (/^xn--/i.test(label)) {
       return { input: label, output: label, encoded: false, note: '本来就是 Punycode 形式' }
     }
+    // 「纯 ASCII」判定：\x00-\x7f 本来就覆盖 ASCII 全集（含控制字符），语义正确
+    // eslint-disable-next-line no-control-regex
     if (/^[\x00-\x7f]+$/.test(label)) {
       return { input: label, output: label, encoded: false, note: '纯 ASCII，无需转换' }
     }
@@ -180,6 +182,8 @@ export function domainToUnicode(domain) {
 export function convert(domain) {
   const s = String(domain).trim()
   if (!s) throw new Error('请输入域名')
+  // 与上面同一语义：ASCII 之外的字符才算「需要转换」
+  // eslint-disable-next-line no-control-regex
   const hasNonAscii = /[^\x00-\x7f]/.test(s)
   const hasPuny = /(^|\.)xn--/i.test(s)
   const toA = domainToAscii(s)

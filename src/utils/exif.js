@@ -335,6 +335,8 @@ export function bytesToBase64(bytes) {
 
 /** 洗掉控制字符，避免 EXIF 里的脏字节把界面弄乱 */
 function printable(str, max) {
+  // EXIF 厂商注释尾部常塞 NUL 填充，这里就是要匹配并洗掉它
+  // eslint-disable-next-line no-control-regex
   const s = String(str).replace(/\u0000+$/, '').replace(/[\r\n]+/g, ' / ')
   let out = ''
   for (let i = 0; i < s.length; i++) {

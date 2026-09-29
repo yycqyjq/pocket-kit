@@ -2,7 +2,7 @@
 #
 # 这里出不了 APK。APK 需要 DCloud 的运行时壳（HBuilderX 云打包，或它那份要登录下载、
 # 不许再分发的 Android 离线打包 SDK），ubuntu runner 上没有这两样，
-# 所以这一步只到 dist/build/app 为止；点「云打包」那一下仍然在本地。见 docs/打包安卓.md。
+# 所以这一步只到 dist/build/app 为止；点「云打包」那一下仍然在本地。
 name: Android
 
 on:
@@ -41,6 +41,16 @@ jobs:
 
       - name: 装依赖
         run: npm ci
+
+      # 静态检查放在最前面：它最便宜，错了就没必要再花时间构建。
+      # 配置口径见 eslint.config.mjs —— 只卡正确性、不卡排版；存量未清的问题降为
+      # warning 不计入退出码，所以这一步是绿的，作用在于「防新增」。
+      - name: 静态检查（ESLint）
+        run: npm run lint
+
+      # 「加了工具忘改 README/manifest」的提交在这里被拦下，而不是靠本地手跑。
+      - name: 文档与注册表对撞（check:docs）
+        run: npm run check:docs
 
       - name: 全量自查
         run: npm test

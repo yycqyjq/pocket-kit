@@ -55,11 +55,15 @@ function resolveTokens(html, st) {
   let out = String(html)
   let guard = 0
   while (out.indexOf(TOK) > -1 && guard++ < 24) {
+    // \u0001 包裹的数字是本模块内部的占位符令牌，这里就是要按令牌还原
+    // eslint-disable-next-line no-control-regex
     out = out.replace(/\u0001(\d+)\u0001/g, function (m, i) {
       const v = st.parts[Number(i)]
       return v == null ? '' : v
     })
   }
+  // 同上：\u0002 占位符换行标记，还原为 <br />
+  // eslint-disable-next-line no-control-regex
   return out.replace(/\u0002/g, '<br />')
 }
 
@@ -111,6 +115,8 @@ function utf8Len(s) {
 function normalizeSrc(s) {
   return String(s == null ? '' : s)
     .replace(/\r\n?/g, '\n')
+    // 本函数职责就是清洗控制字符；连内部占位符 \u0001 也一并清掉，防止输入伪造令牌
+    // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '')
 }
 
@@ -189,6 +195,8 @@ function safeCodePoint(c) {
  */
 function checkUrl(raw, st, kind, allowImageData) {
   const decoded = decodeForProbe(raw)
+  // URL scheme 探测前先剥掉控制字符：防止 java\u0000script: 这类绕过，剥离本身就是安全目的
+  // eslint-disable-next-line no-control-regex
   const probe = decoded.replace(/[\u0000-\u0020\u007f-\u00a0]/g, '').toLowerCase()
   const scheme = /^([a-z][a-z0-9+.\-]*):/.exec(probe)
   if (scheme) {
