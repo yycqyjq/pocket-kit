@@ -8,7 +8,12 @@
           <text class="mini-act" @tap="input = ''">清空</text>
         </template>
       </PkField>
-      <PkRow label="结果" :value="error ? error : '解析完成'" :color="error ? 'var(--pk-danger)' : 'var(--pk-accent)'" :copy="false" />
+      <PkRow
+        label="结果"
+        :value="error ? error : parsed ? '解析完成' : '还没输入地址'"
+        :color="error ? 'var(--pk-danger)' : parsed ? 'var(--pk-accent)' : 'var(--pk-text-3)'"
+        :copy="false"
+      />
     </PkCard>
 
     <template v-if="!error && parsed">
@@ -23,8 +28,9 @@
           v-for="r in segments"
           :key="r[0]"
           :label="r[0]"
-          :value="r[1]"
+          :value="r[2] ? r[1] + '（' + r[2] + '）' : r[1]"
           :mono="r[0] === '协议' || r[0] === '主机' || r[0] === '路径'"
+          :copy="!r[2]"
         />
         <PkRow v-if="segments.length" label="备注" :value="segmentNotes" :copy="false" stack />
       </PkCard>
@@ -51,8 +57,8 @@
           <PkBtn text="解码" kind="soft" @tap="doDecode" />
           <PkBtn text="复制结果" kind="ghost" @tap="copyText(codeOut)" />
         </view>
-        <PkRow label="结果" :value="codeOut" mono :copy="!!codeOut" />
-        <PkRow label="说明" value="编码会把空格变 %20、& 变 %26 等；解码是反过来，遇到坏的百分号编码会保留原样不报错" :copy="false" stack />
+        <PkRow label="结果" :value="codeErr || codeOut" :mono="!codeErr" :color="codeErr ? 'var(--pk-danger)' : 'var(--pk-text)'" :copy="!codeErr && !!codeOut" />
+        <PkRow label="说明" value="编码会把空格变 %20、& 变 %26 等；解码是反过来，遇到坏的百分号编码会保留原样不报错。这里的「+」按字面处理，不当成空格——查询参数那张卡才按表单规则把 + 换算成空格" :copy="false" stack />
       </PkCard>
     </template>
 
@@ -83,6 +89,7 @@ import { copyText, toast } from '@/utils/clipboard'
 const input = ref(SAMPLE_URL)
 const codeText = ref('')
 const codeOut = ref('')
+const codeErr = ref('')
 const defangText = ref('')
 const defangOut = ref('')
 
@@ -115,9 +122,17 @@ const paramText = computed(() => {
 })
 
 function doEncode() {
-  codeOut.value = encodeUrl(codeText.value)
+  if (!codeText.value) return toast('先输入要编码的文本')
+  codeErr.value = ''
+  try {
+    codeOut.value = encodeUrl(codeText.value)
+  } catch (e) {
+    codeErr.value = e.message
+  }
 }
 function doDecode() {
+  if (!codeText.value) return toast('先输入要解码的文本')
+  codeErr.value = ''
   codeOut.value = decodeUrl(codeText.value)
 }
 function doDefang() {

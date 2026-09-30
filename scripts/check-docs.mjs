@@ -94,7 +94,7 @@ const UNTESTED = [
   'datefmt', 'devref', 'diff', 'entity', 'extract', 'garbled', 'health',
   'hexdump', 'httpdump', 'json2ts', 'lorem', 'naming', 'normalize',
   'percent', 'perm', 'punycode', 'qp', 'radix', 'regexlib', 'sqlfmt', 'table',
-  'text', 'unicode', 'url', 'uuidinfo', 'wordfreq',
+  'text', 'unicode', 'uuidinfo', 'wordfreq',
 ]
 
 const utilNames = codeFiles
