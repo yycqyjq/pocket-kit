@@ -202,7 +202,21 @@ export default [
     },
   },
 
-  /* ---------- 9. .vue 单文件组件 ---------- */
+  /* ---------- 9. 界面探针：在 Node 里跑，但 evaluate 回调是给浏览器执行的 ----------
+     page.evaluate(() => document…) 传过去的是**函数**，序列化后在页面上下文里跑，
+     Node 这边从不执行它；可 ESLint 看的是原始源码，document / MouseEvent / window
+     会被 no-undef 全报成未定义。只给这一层补浏览器全局，别把 scripts 整层放开——
+     selftest 那边真靠 Node 全局，写成 window.xxx 应当当场报错。 */
+  {
+    files: ['scripts/ui-probe/**/*.{js,mjs}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: { ...globals.node, ...globals.browser },
+    },
+  },
+
+  /* ---------- 10. .vue 单文件组件 ---------- */
   {
     files: ['**/*.vue'],
     languageOptions: {

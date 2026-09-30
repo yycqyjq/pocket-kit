@@ -8,6 +8,7 @@
     "dev:h5": "uni",
     "build:h5": "uni build",
     "check:docs": "node scripts/check-docs.mjs",
+    "probe:h5": "node scripts/ui-probe/run.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "node scripts/selftest/run-all.mjs",
