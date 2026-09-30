@@ -1,7 +1,7 @@
 /**
  * URL 解析与编解码
  */
-import { parseIpv4, specialForIp } from './ip'
+import { parseIpv4, specialForIp, looksLikeIpv4 } from './ip'
 import { expandIpv6, classifyIpv6 } from './ipv6'
 
 /** 常见协议说明 */
@@ -27,7 +27,6 @@ const DEFAULT_PORTS = { http: '80', https: '443', ftp: '21', ws: '80', wss: '443
 /** 这些协议按规范会把空路径当成「/」，其余协议没写就是没写 */
 const PATH_DEFAULTED = new Set(['http', 'https', 'ftp', 'ws', 'wss', 'file'])
 
-const IPV4_SHAPE = /^\d{1,3}(\.\d{1,3}){3}$/
 /** 纯数字（含 0x 写法）拼出来的主机：浏览器会把它按 IPv4 简写换算成另一个地址 */
 const NUMERIC_HOST = /^(0x[0-9a-fA-F]+|\d+)(\.(0x[0-9a-fA-F]+|\d+))*$/
 
@@ -58,7 +57,7 @@ function hostInfo(h, shown) {
   }
   if (h.includes(']')) return { bad: '「]」出现在主机位里，IPv6 主机要整段用方括号包住，像 [::1]:8080，你写了「' + named + '」' }
   if (NUMERIC_HOST.test(h)) {
-    if (IPV4_SHAPE.test(h)) {
+    if (looksLikeIpv4(h)) {
       const r = parseIpv4(h)
       if (!r.ok) return { bad: '主机写成四段数字，但不是合法的 IPv4：' + r.tip }
       const sp = specialForIp(h)

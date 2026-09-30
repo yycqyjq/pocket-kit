@@ -1,7 +1,7 @@
 /**
  * 各类常见校验，每个校验器返回 { ok, tip, extra? }
  */
-import { specialForIp, parseIpv4 } from './ip'
+import { specialForIp, parseIpv4, looksLikeIpv4 } from './ip'
 
 /* ---------------- 手机号 ---------------- */
 const PHONE_PREFIX = /^1[3-9]\d{9}$/
@@ -170,8 +170,7 @@ export function checkUrl(v) {
     const n = Number(p)
     if (p.length > 5 || n < 1 || n > 65535) return { ok: false, tip: '端口应在 1-65535 之间，当前 ' + n }
   }
-  const looksLikeIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(host)
-  if (looksLikeIp) {
+  if (looksLikeIpv4(host)) {
     // 主机写成 IP 时按 ip.js 那一份四段判据走（含前导 0），别再各判各的
     const r = parseIpv4(host)
     if (!r.ok) return r

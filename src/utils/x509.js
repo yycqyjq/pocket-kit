@@ -24,6 +24,7 @@
 import { bytesUtf8 } from './base64'
 import { md5Bytes, sha1Bytes, sha256Bytes } from './hash'
 import { formatDate } from './date'
+import { looksLikeIpv4 } from './ip'
 
 const DAY = 86400000
 const SOON_DAYS = 30
@@ -2036,7 +2037,7 @@ export function matchesHost(cert, hostname) {
   if (host.indexOf('*') > -1) throw new Error('试算输入应该是具体域名，不能带通配符')
   if (/\s/.test(host)) throw new Error('主机名里有空格，检查一下是不是粘多了内容')
 
-  const isIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.indexOf(':') > -1
+  const isIp = looksLikeIpv4(host) || host.indexOf(':') > -1
   const hasSan = !!(c.san && c.san.present)
   const candidates = hasSan
     ? isIp ? (c.san.ip || []).concat(c.san.dns) : (c.san.dns || []).concat(c.san.ip)

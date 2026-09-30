@@ -59,6 +59,15 @@ export function parseIpv4(v) {
   return r.bad ? { ok: false, tip: r.bad } : { ok: true, int: r.int }
 }
 
+/** 「长得像点分四段」的唯一判据：只看形状，不管每段合不合法（那要接着问 parseIpv4）。
+ *  URL 拆解、校验台、证书 SAN 试算三处都得先问这一句才知道走 IP 那套还是域名那套规则，
+ *  原来各自抄了一份正则——收一处口径就会剩下两处各说各话。
+ *  这里故意不 trim：三个入口都在问之前就把空白挡掉了（校验台的正则不含 \s、URL 拆解先查
+ *  hasBlankOrControl、证书试算先按「主机名里有空格」抛错），能走到这儿的不可能带空白。 */
+export function looksLikeIpv4(v) {
+  return /^\d{1,3}(\.\d{1,3}){3}$/.test(String(v))
+}
+
 export function intToIp(n) {
   const v = Number(n) >>> 0
   return [(v >>> 24) & 255, (v >>> 16) & 255, (v >>> 8) & 255, v & 255].join('.')
