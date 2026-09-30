@@ -1,6 +1,7 @@
 /**
  * 各类常见校验，每个校验器返回 { ok, tip, extra? }
  */
+import { specialForIp } from './ip'
 
 /* ---------------- 手机号 ---------------- */
 const PHONE_PREFIX = /^1[3-9]\d{9}$/
@@ -12,8 +13,9 @@ export function checkPhone(v) {
   if (s.length !== 11) return { ok: false, tip: '长度应为 11 位，当前 ' + s.length + ' 位' }
   if (s[0] !== '1') return { ok: false, tip: '应以 1 开头' }
   if (!PHONE_PREFIX.test(s)) return { ok: false, tip: '号段不存在或不是常见号段' }
-  const carrier = { 3: '联通/电信', 4: '移动/联通', 5: '移动/联通/电信', 6: '联通/移动', 7: '移动/联通/电信', 8: '移动/联通', 9: '移动/联通' }[s[1]] || '未知'
-  return { ok: true, tip: '格式正确', extra: { 号段: s.slice(0, 3), 运营商: carrier } }
+  // 只报号段，不报运营商。号段↔运营商要一张按三位号段维护的表，而且工信部分配会变；
+  // 离线凭第二位猜会把 138 报成「联通/电信」这类错话直接印在界面上。
+  return { ok: true, tip: '格式正确', extra: { 号段: s.slice(0, 3) } }
 }
 
 /* ---------------- 身份证（18 位） ---------------- */
@@ -37,22 +39,23 @@ export function checkIdCard(v) {
   const year = Number(s.slice(6, 10))
   const month = Number(s.slice(10, 12))
   const day = Number(s.slice(12, 14))
-  const nowYear = new Date().getFullYear()
-  if (year < 1900 || year > nowYear) return { ok: false, tip: '出生年份不合理' }
+  if (year < 1900) return { ok: false, tip: '出生年份不合理' }
   if (month < 1 || month > 12) return { ok: false, tip: '出生月份不合理' }
   const maxDay = new Date(year, month, 0).getDate()
   if (day < 1 || day > maxDay) return { ok: false, tip: '出生日期不合理' }
 
   const seq = Number(s.slice(14, 17))
   const gender = seq % 2 === 1 ? '男' : '女'
-  const age = (() => {
-    const b = new Date(year, month - 1, day)
-    const n = new Date()
-    let a = n.getFullYear() - b.getFullYear()
-    const m = n.getMonth() - b.getMonth()
-    if (m < 0 || (m === 0 && n.getDate() < b.getDate())) a--
-    return a
-  })()
+  const b = new Date(year, month - 1, day)
+  // 原来只卡「年份不超过今年」，于是今年 12 月这种还没到的日子照样通过，
+  // 下面算出来的年龄是负数，界面上印着「-1 岁」。按整天比，今天出生算 0 岁。
+  const n = new Date()
+  const todayStart = new Date(n.getFullYear(), n.getMonth(), n.getDate())
+  if (b.getTime() > todayStart.getTime()) return { ok: false, tip: '出生日期还在未来' }
+
+  let age = n.getFullYear() - b.getFullYear()
+  const dm = n.getMonth() - b.getMonth()
+  if (dm < 0 || (dm === 0 && n.getDate() < b.getDate())) age--
 
   return {
     ok: true,
@@ -80,8 +83,6 @@ const BIN_MAP = [
   ['622600', '民生银行'], ['622615', '民生银行'],
   ['622521', '浦发银行'], ['622500', '浦发银行'],
   ['622908', '兴业银行'], ['622909', '兴业银行'],
-  ['622588', '招商银行'],
-  ['622260', '交通银行'],
   ['622422', '光大银行'], ['620535', '光大银行'],
   ['622188', '邮储银行'], ['955100', '邮储银行'],
   ['622126', '银联'], ['620000', '银联'],
@@ -133,13 +134,26 @@ export function checkBankCard(v) {
 
 /* ---------------- 其他 ---------------- */
 
+/** 域名标签：字母数字开头、字母数字结尾，连字符只能夹在中间，最后一段只许字母。
+ *  邮箱和网址共用这一条——原来两边各写一遍，`-abc.com` 这种两边都能过。 */
+function isDomain(s) {
+  return /^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/.test(s)
+}
+
 export function checkEmail(v) {
   const s = String(v).trim()
   if (!s) return { ok: false, tip: '请输入邮箱' }
-  const re = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/
-  if (!re.test(s)) return { ok: false, tip: '格式不正确' }
   if (s.length > 254) return { ok: false, tip: '过长' }
-  return { ok: true, tip: '格式正确', extra: { 用户名: s.split('@')[0], 域名: s.split('@')[1] } }
+  const at = s.lastIndexOf('@')
+  if (at <= 0) return { ok: false, tip: '格式不正确' }
+  const local = s.slice(0, at)
+  const domain = s.slice(at + 1)
+  if (!/^[A-Za-z0-9._%+-]+$/.test(local)) return { ok: false, tip: '用户名只能含字母、数字和 . _ % + -' }
+  if (local.length > 64) return { ok: false, tip: '用户名最长 64 个字符，当前 ' + local.length + ' 个' }
+  // 点必须夹在字符中间：首尾的点、连续的点都不是合法用户名，真实邮件系统会退信
+  if (/^\./.test(local) || /\.$/.test(local) || /\.\./.test(local)) return { ok: false, tip: '用户名里的点不能在首尾或连续' }
+  if (!isDomain(domain)) return { ok: false, tip: '域名格式不正确' }
+  return { ok: true, tip: '格式正确', extra: { 用户名: local, 域名: domain } }
 }
 
 export function checkUrl(v) {
@@ -150,17 +164,24 @@ export function checkUrl(v) {
   const m = s.match(re)
   if (!m) return { ok: false, tip: '格式不正确' }
   const host = m[1]
+  // 端口原来只按「有冒号有数字」放过，:0 和 :99999 都印成格式正确
+  if (m[2]) {
+    const p = m[2].slice(1)
+    const n = Number(p)
+    if (p.length > 5 || n < 1 || n > 65535) return { ok: false, tip: '端口应在 1-65535 之间，当前 ' + n }
+  }
   const isIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(host)
   if (isIp) {
     const parts = host.split('.').map(Number)
     if (parts.some((p) => p > 255)) return { ok: false, tip: 'IP 段超出 255' }
-  } else if (!/^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(host) && host !== 'localhost') {
+  } else if (host !== 'localhost' && !isDomain(host)) {
     return { ok: false, tip: '域名格式不正确' }
   }
+  // 协议一定存在：上面已经要求整串以 http(s):// 开头
   return {
     ok: true,
     tip: '格式正确',
-    extra: { 协议: m[2 - 1] ? s.slice(0, s.indexOf('://')) : '', 主机: host, 端口: m[2] || '默认', 路径: m[3] || '/' },
+    extra: { 协议: s.slice(0, s.indexOf('://')), 主机: host, 端口: m[2] || '默认', 路径: m[3] || '/' },
   }
 }
 
@@ -175,16 +196,10 @@ export function checkIPv4(v) {
     if (n > 255) return { ok: false, tip: '第 ' + (i + 1) + ' 段超出 255' }
     if (parts[i].length > 1 && parts[i][0] === '0') return { ok: false, tip: '第 ' + (i + 1) + ' 段不应有前导 0' }
   }
-  const n = parts.map(Number)
-  let type = '公网地址'
-  if (n[0] === 10) type = '私有地址 (A 类)'
-  else if (n[0] === 172 && n[1] >= 16 && n[1] <= 31) type = '私有地址 (B 类)'
-  else if (n[0] === 192 && n[1] === 168) type = '私有地址 (C 类)'
-  else if (n[0] === 127) type = '回环地址'
-  else if (n[0] === 169 && n[1] === 254) type = '链路本地地址'
-  else if (n[0] >= 224 && n[0] <= 239) type = '组播地址'
-  else if (n[0] >= 240) type = '保留地址'
-  return { ok: true, tip: '格式正确', extra: { 类型: type } }
+  // 网段分类只在 ip.js 那张表里维护；这里原来自己抄了一份首位判断，
+  // 于是 0.0.0.0 和 100.64.x.x 这类都会被报成「公网地址」。
+  const sp = specialForIp(s)
+  return { ok: true, tip: '格式正确', extra: { 类型: sp ? sp.name : '公网地址' } }
 }
 
 export function checkMac(v) {
@@ -246,12 +261,19 @@ export function checkUSCC(v) {
   }
 }
 
+/* 末位可以是挂/学/警：挂车、教练车、警车都是 7 位号牌。
+   原来新能源那条里就写着这三个字，普通牌却不收，界面把真车牌判成「格式不正确」。 */
+const PLATE_NORMAL = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼][A-HJ-NP-Z][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警]$/
+const PLATE_NEW_ENERGY = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼][A-HJ-NP-Z](([DF][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警]?)|([A-HJ-NP-Z0-9]{5}[DF]))$/
+const PLATE_TAIL = { 学: '教练车', 警: '警车', 挂: '挂车' }
+
 export function checkPlate(v) {
   const s = String(v).trim().toUpperCase().replace(/\s/g, '')
-  const normal = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼][A-HJ-NP-Z][A-HJ-NP-Z0-9]{5}$/
-  const newEnergy = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼][A-HJ-NP-Z](([DF][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警]?)|([A-HJ-NP-Z0-9]{5}[DF]))$/
-  if (newEnergy.test(s)) return { ok: true, tip: '新能源号牌格式正确', extra: { 类型: '新能源' } }
-  if (normal.test(s)) return { ok: true, tip: '格式正确', extra: { 类型: '普通号牌' } }
+  if (PLATE_NEW_ENERGY.test(s)) return { ok: true, tip: '新能源号牌格式正确', extra: { 类型: '新能源' } }
+  if (PLATE_NORMAL.test(s)) {
+    const kind = PLATE_TAIL[s[6]]
+    return { ok: true, tip: '格式正确', extra: { 类型: kind ? kind + '号牌' : '普通号牌' } }
+  }
   if (s.length !== 7) return { ok: false, tip: '普通号牌应为 7 位，新能源为 8 位' }
   return { ok: false, tip: '格式不正确' }
 }
@@ -266,6 +288,10 @@ export function checkPostcode(v) {
 export function checkChineseName(v) {
   const s = String(v).trim()
   if (!/^[\u4e00-\u9fa5·]{2,15}$/.test(s)) return { ok: false, tip: '应为 2-15 位中文，可含间隔号' }
+  // 间隔号只用来在中文名里断词（买买提·阿吾江），出现在首尾或连着两个都不是姓名写法
+  if (s.startsWith('·') || s.endsWith('·') || s.includes('··')) {
+    return { ok: false, tip: '间隔号不能在首尾或连续' }
+  }
   const extra = { 字数: [...s].length }
   if (['赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈', '褚', '卫', '蒋', '沈', '韩', '杨'].indexOf(s[0]) > -1) {
     extra.常见姓氏 = '是'

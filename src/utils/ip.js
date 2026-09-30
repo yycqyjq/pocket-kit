@@ -65,6 +65,25 @@ function matchSpecial(netInt, prefix) {
   return null
 }
 
+/** 单个地址属于哪个保留/特殊段，命中多条时取前缀最长（最具体）的那条。
+ *  跟上面 matchSpecial 不是一回事：那个判「整个网段被特殊段完整包住」，
+ *  这个只问一个地址落在哪儿。校验台用它，免得自己再抄一份网段表。 */
+export function specialForIp(ip) {
+  const n = ipToInt(ip)
+  let best = null
+  let bestPrefix = -1
+  for (const s of SPECIAL) {
+    const [base, p] = s.cidr.split('/')
+    const pre = Number(p)
+    const m = maskFromPrefix(pre)
+    if (((n & m) >>> 0) === ((ipToInt(base) & m) >>> 0) && pre > bestPrefix) {
+      best = s
+      bestPrefix = pre
+    }
+  }
+  return best
+}
+
 function ipClass(firstOctet) {
   if (firstOctet === 0) return '保留'
   if (firstOctet < 127) return 'A 类'
