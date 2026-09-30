@@ -10,7 +10,8 @@
     "check:docs": "node scripts/check-docs.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "node scripts/selftest/run-all.mjs"
+    "test": "node scripts/selftest/run-all.mjs",
+    "verify": "npm run lint && npm run check:docs && npm test"
   },
   "dependencies": {
     "@dcloudio/uni-app": "3.0.0-5020620260917001",

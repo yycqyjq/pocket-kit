@@ -67,7 +67,7 @@ npm run build:app          # 产出 dist/build/app
 ### GitHub Actions（自动到资源为止，不出 APK）
 
 `.github/workflows/android.yml`：push 到 `main`、提 PR 或手动触发时跑
-`npm ci → npm test → build:h5 → build:app`，最后把 `dist/build/app` 传成 artifact。
+`npm ci → lint → check:docs → test → build:h5 → build:app`，最后把 `dist/build/app` 传成 artifact。
 
 APK 那一步不在里面，也不是漏写：DCloud 的云打包没有可供 CI 调用的接口，
 离线打包 SDK 又要登录下载且不许再分发。要让 CI 直接出 APK，得先把离线 SDK 私有托管
@@ -79,6 +79,7 @@ APK 那一步不在里面，也不是漏写：DCloud 的云打包没有可供 CI
 | 命令 | 干什么 |
 | --- | --- |
 | `npm test` | 全量自查：自动发现 `scripts/selftest/**/*.test.mjs` 逐套运行；条码与二维码拿 zbarimg / magick 当外部判官，缺判官的套件会 SKIP 并在汇总里点名 |
+| `npm run verify` | 收尾一条跑齐：`lint` → `check:docs` → `test`，与 CI 的三道门禁同序。CI 那三步一个都没少，这条只是让本地不用记顺序。**注意 Node 版本要跟 `.nvmrc` 一致**（CI 读同一份）——判据里有拿 Node 自带实现当判官的（ICU、`node:punycode`），版本不一致会出现本地绿、CI 红 |
 | `npm run check:docs` | README 工具表 ↔ 注册表 ↔ manifest 三方对撞，件数漂移当场报错；顺带查两件事——全仓库零引用的导出（lint 的 `no-unused-vars` 只看得见「本文件内没用到」，看不见「没人 import」），以及每个 util 有没有被某个自查用例直接装载（新增模块必须带用例，欠账清单只许缩短） |
 | `npm run lint` | ESLint 静态检查（配置见 `eslint.config.mjs`）。**只卡正确性、不卡排版**；首次接入时那 112 处存量（`no-unused-vars` 43、`no-useless-assignment` 33、`vue/no-side-effects-in-computed-properties` 17、`preserve-caught-error` 11、`no-useless-escape` 8）已于 2026-09-29/09-30 逐条清零，五条全部升为 error——现在 lint 是 0 error / 0 warning，往里塞同类问题当场就红，`npm run lint:fix` 可自动修其中一部分 |
 | `node scripts/screenshot.mjs` | 构建后整批重拍界面截图，写到 `.agent/docs/screenshots/`（先起 `python3 -m http.server 4173 --directory dist/build/h5`）。依赖 devDependencies 里的 `playwright-core`，浏览器内核要自己拉一次，见上一节说明 |

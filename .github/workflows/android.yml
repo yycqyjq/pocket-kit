@@ -22,12 +22,17 @@ jobs:
   app-resources:
     name: 自查 + 出 App 资源
     runs-on: ubuntu-latest
+    # 卡住的任务不该白烧到 runner 自己的 6 小时上限
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
+      # Node 版本只有一份来源：仓库根的 .nvmrc。本地 `nvm use` 读它，这里也读它——
+      # 两边不一致是会咬人的：punycode 那轮的判据就跟 ICU 版本绑，CI 用 24、本地手跑用 22，
+      # 同一套断言一边绿一边红。
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       # 条码与二维码自查的第三方判官（读回原文才算真验证）。装了就得装上，
@@ -43,8 +48,9 @@ jobs:
         run: npm ci
 
       # 静态检查放在最前面：它最便宜，错了就没必要再花时间构建。
-      # 配置口径见 eslint.config.mjs —— 只卡正确性、不卡排版；存量未清的问题降为
-      # warning 不计入退出码，所以这一步是绿的，作用在于「防新增」。
+      # 口径见 eslint.config.mjs —— 只卡正确性、不卡排版；首次接入时按 warn 放行的
+      # 那 112 处存量已于 2026-09-29/09-30 逐条清零并升为 error，所以这一步现在是真门禁：
+      # 有任何 error 当场红，绿的意思就是「零 error 零 warning」。
       - name: 静态检查（ESLint）
         run: npm run lint
 
