@@ -1,8 +1,13 @@
 /** punycode.js 的自查。判据全部独立于被测模块：
- *  一是手抄的 RFC 3492 冻结向量 19 条——每个 Unicode 标签的 xn-- 写法先跟 Node 自带的 ICU
+ *  一是手抄的 RFC 3492 冻结向量 19 条——每个 Unicode 标签的 xn-- 写法先跟 Node 内置那份纯 JS
+ *      RFC 3492 实现（node:punycode 2.1.0，跟本模块、跟 ICU 都没血缘，也不随 ICU 版本变）
  *      交叉确认过再抄在这儿，编解码两头各钉一遍，模块以后偷偷改口径这里当场红；
- *  二是 node:url 的 domainToASCII / domainToUnicode——Node 自带的 UTS#46 整域名实现，
- *      不是项目依赖，16 条「两边都该收」的域名两个字段对撞；随机语料再钉一条更强的：
+ *  二是 node:url 的 domainToASCII / domainToUnicode——Node 自带的 UTS#46 整域名实现，不是项目依赖。
+ *      它只当「有没有换成第三个名字」的判官，不当「收不收」的判官：同一串 ICU 78.2 判非法、
+ *      78.3 却原样放过（'xn--a'、'xn--ib9b'、'١٢٣' 都在这批，CI 那台 Node 24 就是被这条
+ *      版本差撞红的），所以「两边都收时答案一字不差」保持硬，
+ *      「ICU 收不收」一律改钉成：要么整个拒、要么原样放过，不许折成第三个名字；
+ *      16 条「两边都该收」的域名两个字段对撞；随机语料再钉一条更强的：
  *      两个都收的时候答案必须一模一样（除第三段写明的那两类口径差）；
  *  三是由定义就该成立的闭合：编码过的标签解回原样、解出来的再编回同一串、
  *      convert 幂等（把「可读形式」或「Punycode 形式」那两行喂回去结果不动）、
@@ -56,6 +61,17 @@ function pThrows(fn, re, m) {
   }
 }
 
+/* 第二实现判官：Node 内置那份纯 JS RFC 3492 实现（作者与本模块无关，也不读 ICU 的字符表，
+   所以它对「这一段数据解出来是什么」的回答不随 ICU 版本变）。它挂着 DEP0040 但仍在；
+   哪天真被删掉，这里必须红——判官没了只剩「跟自己比」，那不是自查。 */
+let REF = null
+try {
+  REF = (await import('node:punycode')).default
+} catch (e) {
+  fail++
+  console.log('FAIL 独立判官 node:punycode 加载不了：' + e.message)
+}
+
 function lcg(seed) {
   let s = seed >>> 0
   return () => {
@@ -87,9 +103,13 @@ const VECTORS = [
   ['١٢٣', 'xn--9hbcd'],
 ]
 for (const [u, a] of VECTORS) {
-  // 抄本先跟这台 Node 的 ICU 对一遍：对不上就是向量本身或者 ICU 变了，得先说清
-  is(ICU_A(u), a, '冻结向量 ' + u + ' 的 ICU 交叉确认')
   const payload = a.slice(4)
+  // 抄本先跟第二实现（node:punycode）对一遍：编、解各钉一次，它跟本模块无血缘
+  is(REF && REF.encode(u), payload, '第二实现编码交叉确认 ' + u)
+  is(REF && REF.decode(payload), u, '第二实现解码交叉确认 ' + a)
+  // ICU 那一头只钉「不许换成第三个名字」：78.2 收「١٢٣」，78.3 直接判非法，收不收不是判据
+  const icu = ICU_A(u)
+  is(icu === a || icu === '', true, 'ICU 对冻结向量 ' + u + ' 要么同结论要么整个拒：' + JSON.stringify(icu))
   is(M.punycodeEncode(u), payload, '编码冻结向量 ' + u)
   is(M.punycodeDecode(payload), u, '解码冻结向量 ' + a)
   is(M.domainToAscii(u).ascii, a, '整域编码 ' + u)
@@ -151,13 +171,29 @@ for (const [d, re, why] of CALIBER) {
 // 反过来：粘进来的地址两端带空白，这里照收，ICU 判非法。剪贴板里出来的地址本来就带空格
 is(M.convert(' 中文.cn ').ascii, 'xn--fiq228c.cn', '口径：两端空白先 trim（ICU 在这儿判非法）')
 
-// ICU 也判非法的那几种 xn-- 写法：两个都拒，拒的是同一批
-for (const d of ['xn--a.com', 'xn--ib9b.com', 'xn--ri7c4agaaa.com', 'xn--zzz-zzz.com', 'xn--.com']) {
-  is(ICU_A(d), '', 'ICU 判非法 ' + d)
-  pThrows(() => M.convert(d), /.*/, '本模块同判非法 ' + d)
+// 这五种 xn-- 写法本模块都拒。拒的理由不拿 ICU 的取舍当尺（78.2 全拒、78.3 全原样放过，
+// CI 那轮就是被这条版本差撞红的），改钉两条跨版本稳的：
+// 第二实现解出来的确实是那一串东西（看不见的控制字符、半个表情、折完只剩 ASCII、带大写、空的），
+// 而 ICU 那一头不许把它换成第三个名字——要么整个拒，要么原样放过。
+const XN_BAD = [
+  ['xn--a.com', '\u0080', /C1 控制符 U\+0080/, '解出来是 U+0080，看不见也不是字符'],
+  ['xn--ib9b.com', '\ud800', /半个表情符号/, '解出来是孤立代理，连一个字符都算不上'],
+  ['xn--ri7c4agaaa.com', 'ｆｕｗｗｗｗ', /全是 ASCII/, '折完是 fuwwww，纯 ASCII 的标签不该带 xn--'],
+  ['xn--zzz-zzz.com', 'z\u1F49zz', /还带着大写/, '解出来是 zὉzz，U+1F49 是带变音的大写字母'],
+  ['xn--.com', '', /后面没有内容/, 'xn-- 后面是空的'],
+]
+for (const [d, dec, re, why] of XN_BAD) {
+  const payload = d.slice(4, d.indexOf('.'))
+  is(REF && REF.decode(payload), dec, '第二实现在 ' + d + ' 上解出同一串')
+  const icu = ICU_A(d)
+  is(icu === '' || icu === d, true, 'ICU 对 ' + d + ' 要么拒要么原样放过，不许换成别的名字：' + JSON.stringify(icu))
+  pThrows(() => M.convert(d), re, '本模块拒 ' + d + ' —— ' + why)
 }
-// 这两条不是分歧而是各自口径，钉住是为了它哪天偷偷变了能响
-is(M.domainToAscii('ẞ.de').ascii, 'xn--zca.de', '口径：大写 ẞ 按小写折成 ß（Node 的 ICU 做全折叠成 ss）')
+// 大写 ẞ：本模块按 JS toLowerCase 折成 ß。ICU 这一头自己就在两个答案之间跳过（78.2 全折叠成
+// ss，78.3 折成 ß），所以判据只钉自己那个值，ICU 那边钉「必须是这两个之一，不许有第三种」
+is(M.domainToAscii('ẞ.de').ascii, 'xn--zca.de', '口径：大写 ẞ 按小写折成 ß')
+const icuSs = ICU_A('ẞ.de')
+is(icuSs === 'ss.de' || icuSs === 'xn--zca.de' || icuSs === '', true, 'ICU 对 ẞ.de 只可能是 ss 或 ß 那两种历史答案：' + JSON.stringify(icuSs))
 is(M.domainToAscii('ß.de').ascii, ICU_A('ß.de'), '口径：ß 本身跟 ICU 同结论')
 is(M.convert('１２３').ascii, '123', '口径：纯数字整串不换写成 IPv4 简写，只折完照印')
 is(M.convert('１２３').notes.some((n) => n.includes('NFKC')), true, '纯数字那串也得说清折了什么')
