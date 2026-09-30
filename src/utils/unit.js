@@ -21,9 +21,11 @@ export const UNIT_GROUPS = [
       { key: 'mi', name: '英里', factor: 1609.344 },
       { key: 'nmi', name: '海里', factor: 1852 },
       { key: 'li', name: '里', factor: 500 },
-      { key: 'zhang', name: '丈', factor: 3.3333333 },
-      { key: 'chi', name: '尺', factor: 0.3333333 },
-      { key: 'cun', name: '寸', factor: 0.0333333 },
+      // 市制这一串必须是 10/3 这类精确表达式：写成 3.3333333 这种截断小数，
+      // 1 丈 → 尺 会在界面上印出 10.000001，1 尺 → 寸 印出 10.000009
+      { key: 'zhang', name: '丈', factor: 10 / 3 },
+      { key: 'chi', name: '尺', factor: 1 / 3 },
+      { key: 'cun', name: '寸', factor: 1 / 30 },
     ],
   },
   {
@@ -36,7 +38,8 @@ export const UNIT_GROUPS = [
       { key: 'm2', name: '平方米', factor: 1 },
       { key: 'km2', name: '平方千米', factor: 1000000 },
       { key: 'ha', name: '公顷', factor: 10000 },
-      { key: 'mu', name: '亩', factor: 666.6667 },
+      // 1 公顷 = 15 亩是定义，666.6667 会让界面上「1 公顷 = 14.999999 亩」
+      { key: 'mu', name: '亩', factor: 2000 / 3 },
       { key: 'ft2', name: '平方英尺', factor: 0.09290304 },
       { key: 'in2', name: '平方英寸', factor: 0.00064516 },
       { key: 'yd2', name: '平方码', factor: 0.83612736 },
@@ -56,7 +59,9 @@ export const UNIT_GROUPS = [
       { key: 'gal_uk', name: '英制加仑', factor: 4.54609 },
       { key: 'qt', name: '夸脱(美)', factor: 0.946352946 },
       { key: 'pt', name: '品脱(美)', factor: 0.473176473 },
-      { key: 'floz', name: '液盎司(美)', factor: 0.0295735296 },
+      // 1 加仑 = 128 液盎司是定义；写成 0.0295735296 时 1 加仑只有 127.99999977 液盎司，
+      // 界面留 6 位小数会四舍五入回 128，看不出来，但值本身就偏离定义了
+      { key: 'floz', name: '液盎司(美)', factor: 3.785411784 / 128 },
       { key: 'cup', name: '杯(美,240ml)', factor: 0.24 },
       { key: 'ft3', name: '立方英尺', factor: 28.316846592 },
       { key: 'in3', name: '立方英寸', factor: 0.016387064 },
@@ -83,10 +88,12 @@ export const UNIT_GROUPS = [
   {
     id: 'data',
     name: '数据',
-    base: 'b',
+    base: 'bit',
     units: [
       { key: 'bit', name: '比特', factor: 1 },
       { key: 'B', name: '字节', factor: 8 },
+      // 大写 KB/MB/GB 按日常口径走 1024 进制，所以与下面的 KiB/MiB/GiB 同值；
+      // 十进制的那两档单独列在表尾并写明 10ⁿ，别混
       { key: 'KB', name: 'KB', factor: 8 * 1024 },
       { key: 'MB', name: 'MB', factor: 8 * 1024 * 1024 },
       { key: 'GB', name: 'GB', factor: 8 * 1024 * 1024 * 1024 },
@@ -105,9 +112,11 @@ export const UNIT_GROUPS = [
     base: 'mps',
     units: [
       { key: 'mps', name: '米/秒', factor: 1 },
-      { key: 'kmh', name: '千米/时', factor: 0.277777778 },
+      // 千米/时与节都由定义得出：1 km/h = 1000/3600 m/s，1 节 = 1 海里/时 = 1852/3600。
+      // 旧的 0.277777778 / 0.514444444 在界面的 6 位小数下看不出差别，漂在第 9 位
+      { key: 'kmh', name: '千米/时', factor: 1000 / 3600 },
       { key: 'mph', name: '英里/时', factor: 0.44704 },
-      { key: 'kn', name: '节', factor: 0.514444444 },
+      { key: 'kn', name: '节', factor: 1852 / 3600 },
       { key: 'ftps', name: '英尺/秒', factor: 0.3048 },
       { key: 'mach', name: '马赫(约)', factor: 340.3 },
     ],
@@ -185,7 +194,7 @@ export const UNIT_GROUPS = [
   },
 ]
 
-/** 温度换算：先转摄氏度再转目标 */
+/** 温度换算：先转摄氏度再转目标。键已由 convertUnit 对着本类别的单位表验过，这里不再兜底 */
 function tempToC(v, from) {
   switch (from) {
     case 'c':
@@ -196,8 +205,6 @@ function tempToC(v, from) {
       return v - 273.15
     case 'r':
       return (v - 491.67) / 1.8
-    default:
-      return v
   }
 }
 
@@ -211,11 +218,13 @@ function cToTemp(c, to) {
       return c + 273.15
     case 'r':
       return (c + 273.15) * 1.8
-    default:
-      return c
   }
 }
 
+/**
+ * 下面两个是「渲染用」的宽松查表：界面上拉框总得有东西可画，找不到就退回第一项。
+ * 别拿它们参与算术——类别或单位写错时退回首项等于换个类别算，答案照样是错的。
+ */
 export function getGroup(id) {
   return UNIT_GROUPS.find((g) => g.id === id) || UNIT_GROUPS[0]
 }
@@ -224,23 +233,33 @@ export function getUnit(group, key) {
   return group.units.find((u) => u.key === key) || group.units[0]
 }
 
+function needGroup(id) {
+  const g = UNIT_GROUPS.find((x) => x.id === id)
+  if (!g) throw new Error('没有这个单位类别：' + id)
+  return g
+}
+
+function needUnit(g, key) {
+  const u = g.units.find((x) => x.key === key)
+  if (!u) throw new Error('「' + g.name + '」类别里没有这个单位：' + key)
+  return u
+}
+
 /** 核心换算，返回数值 */
 export function convertUnit(value, groupId, fromKey, toKey) {
-  const g = getGroup(groupId)
+  const g = needGroup(groupId)
   const v = Number(value)
   if (!isFinite(v)) throw new Error('请输入有效数字')
-  if (g.special) {
-    if (fromKey === toKey) return v
-    return cToTemp(tempToC(v, fromKey), toKey)
-  }
-  const f = getUnit(g, fromKey)
-  const t = getUnit(g, toKey)
+  const f = needUnit(g, fromKey)
+  const t = needUnit(g, toKey)
+  if (g.special) return fromKey === toKey ? v : cToTemp(tempToC(v, fromKey), toKey)
   return (v * f.factor) / t.factor
 }
 
 /** 一次性换算到该类别下所有单位 */
 export function convertToAll(value, groupId, fromKey) {
-  const g = getGroup(groupId)
+  const g = needGroup(groupId)
+  needUnit(g, fromKey)
   const v = Number(value)
   if (!isFinite(v)) return []
   return g.units.map((u) => ({
