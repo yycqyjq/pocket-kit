@@ -1,7 +1,7 @@
 /**
  * 各类常见校验，每个校验器返回 { ok, tip, extra? }
  */
-import { specialForIp } from './ip'
+import { specialForIp, parseIpv4 } from './ip'
 
 /* ---------------- 手机号 ---------------- */
 const PHONE_PREFIX = /^1[3-9]\d{9}$/
@@ -170,10 +170,11 @@ export function checkUrl(v) {
     const n = Number(p)
     if (p.length > 5 || n < 1 || n > 65535) return { ok: false, tip: '端口应在 1-65535 之间，当前 ' + n }
   }
-  const isIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(host)
-  if (isIp) {
-    const parts = host.split('.').map(Number)
-    if (parts.some((p) => p > 255)) return { ok: false, tip: 'IP 段超出 255' }
+  const looksLikeIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(host)
+  if (looksLikeIp) {
+    // 主机写成 IP 时按 ip.js 那一份四段判据走（含前导 0），别再各判各的
+    const r = parseIpv4(host)
+    if (!r.ok) return r
   } else if (host !== 'localhost' && !isDomain(host)) {
     return { ok: false, tip: '域名格式不正确' }
   }
@@ -188,15 +189,11 @@ export function checkUrl(v) {
 export function checkIPv4(v) {
   const s = String(v).trim()
   if (!s) return { ok: false, tip: '请输入 IP' }
-  const parts = s.split('.')
-  if (parts.length !== 4) return { ok: false, tip: '应为 4 段，当前 ' + parts.length + ' 段' }
-  for (let i = 0; i < 4; i++) {
-    if (!/^\d{1,3}$/.test(parts[i])) return { ok: false, tip: '第 ' + (i + 1) + ' 段不是数字' }
-    const n = Number(parts[i])
-    if (n > 255) return { ok: false, tip: '第 ' + (i + 1) + ' 段超出 255' }
-    if (parts[i].length > 1 && parts[i][0] === '0') return { ok: false, tip: '第 ' + (i + 1) + ' 段不应有前导 0' }
-  }
-  // 网段分类只在 ip.js 那张表里维护；这里原来自己抄了一份首位判断，
+  // 四段的判据（含前导 0）只在 ip.js 里有一份。原来这里另抄一遍，于是 010.1.1.1
+  // 在校验台判不合法、在 IP 计算器被悄悄算成 10.1.1.1。
+  const r = parseIpv4(s)
+  if (!r.ok) return r
+  // 网段分类同样只在 ip.js 那张表里维护；这里原来自己抄了一份首位判断，
   // 于是 0.0.0.0 和 100.64.x.x 这类都会被报成「公网地址」。
   const sp = specialForIp(s)
   return { ok: true, tip: '格式正确', extra: { 类型: sp ? sp.name : '公网地址' } }

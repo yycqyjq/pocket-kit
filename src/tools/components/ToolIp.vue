@@ -21,7 +21,7 @@
         <PkRow label="最后一个可用" :value="info.lastHost" mono />
         <PkRow label="子网掩码" :value="info.mask + '  /' + info.prefix" mono />
         <PkRow label="反掩码" :value="info.wildcard" mono />
-        <PkRow label="总地址数" :value="info.size + '（含网络号和广播号）'" :copy="false" />
+        <PkRow label="总地址数" :value="sizeNote" :copy="false" />
       </PkCard>
 
       <PkCard title="你输入的是" accent="#4A6FA5">
@@ -102,6 +102,17 @@ const parsed = computed(() => {
 })
 const info = computed(() => parsed.value.info)
 const error = computed(() => parsed.value.error)
+
+/** /31 与 /32 没有网络号、广播号这两个 reserved 地址，原来不分前缀一律写「含网络号
+ *  和广播号」，于是 /31 这页同时印着「2 个可用地址」和「总共 2 个，含网络号和广播号」，
+ *  两句互相打脸。 */
+const sizeNote = computed(() => {
+  const i = info.value
+  if (!i) return ''
+  if (i.prefix === 32) return i.size + '（单个地址，就是它自己）'
+  if (i.prefix === 31) return i.size + '（点对点链路，两个地址都能配主机）'
+  return i.size + '（含网络号和广播号）'
+})
 
 const splitOptions = computed(() => {
   if (!info.value) return []
