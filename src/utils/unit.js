@@ -147,7 +147,9 @@ export const UNIT_GROUPS = [
       { key: 'bar', name: '巴', factor: 100000 },
       { key: 'mbar', name: '毫巴', factor: 100 },
       { key: 'atm', name: '标准大气压', factor: 101325 },
-      { key: 'mmhg', name: '毫米汞柱', factor: 133.322387415 },
+      // 毫米汞柱走「1 标准大气压 = 760 毫米汞柱」这条定义。另一档 133.322387415 是按水银
+      // 密度 ρgh 算的（13595.1 × 9.80665 × 0.001），它跟大气压不闭合，界面上会印成 759.999892
+      { key: 'mmhg', name: '毫米汞柱', factor: 101325 / 760 },
       { key: 'psi', name: '磅/平方英寸', factor: 6894.757293168 },
       { key: 'kgfcm2', name: '公斤力/平方厘米', factor: 98066.5 },
     ],
@@ -222,15 +224,11 @@ function cToTemp(c, to) {
 }
 
 /**
- * 下面两个是「渲染用」的宽松查表：界面上拉框总得有东西可画，找不到就退回第一项。
- * 别拿它们参与算术——类别或单位写错时退回首项等于换个类别算，答案照样是错的。
+ * 「渲染用」的宽松查表：界面上拉框总得有东西可画，找不到就退回第一项。
+ * 别拿它参与算术——类别写错时退回首项等于换个类别算，答案照样是错的（那条路走 needGroup）。
  */
 export function getGroup(id) {
   return UNIT_GROUPS.find((g) => g.id === id) || UNIT_GROUPS[0]
-}
-
-export function getUnit(group, key) {
-  return group.units.find((u) => u.key === key) || group.units[0]
 }
 
 function needGroup(id) {

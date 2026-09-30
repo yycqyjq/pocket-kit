@@ -176,8 +176,9 @@ const G = U.UNIT_GROUPS
   is(c(1, 'pressure', 'kgfcm2', 'pa'), 98066.5, '1 公斤力/平方厘米 = 98066.5 帕（定义）')
   is(c(1, 'pressure', 'psi', 'pa'), 6894.757293168, '1 磅/平方英寸 = 6894.757293168 帕（定义）')
   close(c(1, 'pressure', 'psi', 'kpa'), 6.894757293168, 1e-12, '同一条除以 1000 有二进制余数，断言只看定义那一档')
-  close(c(1, 'pressure', 'atm', 'mmhg'), 759.9998917, 1e-6, '毫米汞柱用的是 ISO 约定值 133.322387415，1 大气压本就不是整 760')
-  is(fmt(1, 'pressure', 'atm', 'mmhg'), '759.999892', '按现状钉住：印 759.999892 而不是 760')
+  is(c(1, 'pressure', 'atm', 'mmhg'), 760, '1 标准大气压 = 760 毫米汞柱（定义闭合）')
+  is(c(1, 'pressure', 'mmhg', 'pa'), 101325 / 760, '毫米汞柱的因子就是大气压除以 760')
+  is(fmt(1, 'pressure', 'atm', 'mmhg'), '760', '界面上 1 大气压 印整 760；换成水银 ρgh 那档 133.322387415 就印 759.999892')
   is(c(1, 'energy', 'kj', 'j'), 1000, '1 千焦 = 1000 焦')
   is(c(1, 'energy', 'kcal', 'cal'), 1000, '1 千卡 = 1000 卡')
   is(c(1, 'energy', 'cal', 'j'), 4.184, '1 卡（热化学）= 4.184 焦（定义）')
@@ -239,7 +240,6 @@ const G = U.UNIT_GROUPS
   throwsWith([1, 'nope', 'bit', 'B'], /没有这个单位类别/, '类别完全不存在')
   // 渲染用的宽松查表要保持兜底（界面拉框永远有东西可画），但只有它能兜
   is(U.getGroup('nope').id, 'length', 'getGroup 是渲染兜底，不参与算术')
-  is(U.getUnit(U.getGroup('mass'), 'nope').key, 'mg', 'getUnit 同上')
   is(U.getGroup('angle').name, '角度', 'getGroup 命中时给真的')
 }
 
