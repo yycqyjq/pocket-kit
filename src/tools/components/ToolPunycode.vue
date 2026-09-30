@@ -24,10 +24,11 @@
           <text class="pair__copy" @tap="copyText(result.ascii)">复制</text>
         </view>
         <PkRow label="方向" :value="result.direction" :copy="false" stack />
+        <PkRow v-for="(t, i) in result.notes" :key="'n' + i" label="备注" :value="t" :copy="false" stack />
       </PkCard>
 
       <PkCard title="逐标签拆解" accent="#4A6FA5">
-        <view v-for="(l, i) in result.asciiLabels" :key="'a' + i" class="label">
+        <view v-for="(l, i) in result.labels" :key="'a' + i" class="label">
           <text class="label__in">{{ l.input }}</text>
           <text class="label__arrow">→</text>
           <text class="label__out">{{ l.output }}</text>
@@ -49,16 +50,20 @@
       </PkCard>
 
       <PkCard title="规范限制" accent="#8A6D3B">
-        <PkRow label="单标签" value="最长 63 个字符（按 Punycode 形式算）" :copy="false" stack />
-        <PkRow label="整个域名" value="最长 253 个字符" :copy="false" stack />
+        <PkRow label="单标签" value="最长 63 个字符（按 Punycode 形式算），超了本页报错" :copy="false" stack />
+        <PkRow label="整个域名" value="最长 253 个字符，同样报错，不会给你一个存不进 DNS 的结果" :copy="false" stack />
         <PkRow label="为什么" value="DNS 的底层协议里，一个标签就是一个「长度字节 + 内容」，长度字节只有 1 字节" :copy="false" stack />
-        <PkRow label="Emoji 域名" value="技术上能注册，但 emoji 不是合法的国际化域名字符，浏览器会拒绝" :copy="false" stack />
+        <PkRow label="全角字符" value="先按 NFKC 折成基本形式再转（跟浏览器、注册局同一条尺），折了会在备注里说清了哪一串折成哪一串——「ａｐｐｌｅ．ｃｏｍ」折完就是 apple.com" :copy="false" stack />
+        <PkRow label="大小写" value="DNS 本来就不区分大小写，整串先折成小写再转；xn-- 那一段必须全小写才对得上，所以带大写的 xn-- 一样算错" :copy="false" stack />
+        <PkRow label="只剩数字" value="「１２３」这种折完只剩数字和点的，不是一段域名。浏览器会把它按 IPv4 简写换算成别的地址，那件事「URL 拆解」那一页说了" :copy="false" stack />
+        <PkRow label="Emoji" value="按算法能编出 xn--，能不能真注册、别人那边怎么显示，本页不答——它只做编码转换" :copy="false" stack />
       </PkCard>
 
       <PkCard title="哪些域名能转" accent="#6B5B95">
-        <PkRow label="能" value="中文、日文、韩文、德文变音、俄文等非 ASCII 字符组成的标签" :copy="false" stack />
-        <PkRow label="不能" value="含空格、下划线开头结尾、超过 63 字符、纯 emoji 的标签" :copy="false" stack />
-        <PkRow label="注意" value="本工具做的是「编码转换」，不校验是否为合法的 TLD" :copy="false" stack />
+        <PkRow label="能" value="中文、日文、韩文、德文变音、俄文等非 ASCII 字符组成的标签；下划线开头（_dmarc、_smtp._tcp 这类服务记录名）" :copy="false" stack />
+        <PkRow label="不能" value="有空格或控制字符、零宽字符、下划线不在开头（或者跟中文混在同一个标签里）、连字符在开头结尾、第 3、4 位都是连字符、空标签（连续两个点）、编码后超 63 或整域名超 253" :copy="false" stack />
+        <PkRow label="还要能对上" value="写了 xn-- 的标签必须能解回去、解出来再编回来得是同一串；解出来全是 ASCII 的（xn--a 那种）也算错" :copy="false" stack />
+        <PkRow label="注意" value="本页做的是「编码转换」：不查 TLD 是否真存在，也没有注册局那张「哪些字符允许进域名」的表，同形异义那些判定更不做" :copy="false" stack />
       </PkCard>
     </template>
 

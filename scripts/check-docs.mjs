@@ -93,7 +93,7 @@ const UNTESTED = [
   'braille', 'classic', 'cleanescape', 'codefmt', 'color', 'cron', 'dataconv', 'date',
   'datefmt', 'devref', 'diff', 'entity', 'extract', 'garbled', 'health',
   'hexdump', 'httpdump', 'json2ts', 'lorem', 'naming', 'normalize',
-  'percent', 'perm', 'punycode', 'qp', 'radix', 'regexlib', 'sqlfmt', 'table',
+  'percent', 'perm', 'qp', 'radix', 'regexlib', 'sqlfmt', 'table',
   'text', 'unicode', 'uuidinfo', 'wordfreq',
 ]
 
