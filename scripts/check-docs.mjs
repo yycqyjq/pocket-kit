@@ -92,7 +92,7 @@ const PLATFORM_UNTESTED = ['clipboard', 'image', 'storage', 'sys', 'theme']
 const UNTESTED = [
   'braille', 'classic', 'cleanescape', 'codefmt', 'color', 'cron', 'dataconv', 'date',
   'datefmt', 'devref', 'diff', 'entity', 'extract', 'garbled', 'health',
-  'hexdump', 'httpdump', 'ipv6', 'json2ts', 'lorem', 'naming', 'normalize',
+  'hexdump', 'httpdump', 'json2ts', 'lorem', 'naming', 'normalize',
   'percent', 'perm', 'punycode', 'qp', 'radix', 'regexlib', 'sqlfmt', 'table',
   'text', 'unicode', 'url', 'uuidinfo', 'wordfreq',
 ]

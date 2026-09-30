@@ -25,6 +25,7 @@
       <PkCard title="规范化结果" accent="var(--pk-accent)">
         <PkRow label="压缩写法" :value="info.compressed" mono />
         <PkRow label="完整写法" :value="info.full" mono />
+        <PkRow v-if="info.prefix !== null" label="前缀长度" :value="'/' + info.prefix" :copy="false" />
         <PkRow label="分组数" :value="info.groupCount + ' 组'" :copy="false" />
       </PkCard>
 
