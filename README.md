@@ -76,6 +76,25 @@ APK 那一步不在里面，也不是漏写：DCloud 的云打包没有可供 CI
 （私有仓库或 Actions artifact）并把 keystore 放进 Secrets，或者把自建 runner 挂在
 装了 HBuilderX 的 Mac 上；细节在本地文档 `.agent/docs/打包安卓.md` 的「路线 C」。
 
+要拿打包好的 App 资源，不用本地再构建一遍，每次运行的 artifact 就是：
+
+- 名字是 `pocket-kit-app-<这次提交的完整 sha>`，`zip` 压完 755 KB（本地 `du` 出来的 2.6M 是解压后的尺寸），
+  保留 14 天，过期条目会标 `expired` 就下不动了。
+- 网页：Actions → 选那次运行 → 页面底部 Artifacts 里点名字直接下。
+- 命令行：下载接口匿名请求返 **401**——仓库是公开的，但 artifact 不给匿名下，得带身份。
+  run id 就是运行页面 URL 末尾那串数字；一次运行只有这一个 artifact，所以直接把它的
+  下载地址抓出来（token 要有 Actions 读权限：fine-grained 勾 `Actions`，classic 用 `repo`）：
+
+  ```bash
+  URL=$(curl -s -H "Authorization: Bearer $TOKEN" \
+    https://api.github.com/repos/yycqyjq/pocket-kit/actions/runs/<run_id>/artifacts \
+    | grep -o 'https://api.github.com/[^"]*/actions/artifacts/[0-9]*/zip')
+  curl -L -H "Authorization: Bearer $TOKEN" -o pocket-kit-app.zip "$URL"
+  ```
+
+  别用 `grep -o '"id": [0-9]*'` 去抠 id——同一段 JSON 里 `workflow_run` 自己也带一个 `id`，
+  抓到的可能是 run id 而不是 artifact id。
+
 ### 开发脚本（本地）
 
 | 命令 | 干什么 |
