@@ -200,9 +200,13 @@ function parseUrl(input) {
 
   if (out.port !== '') {
     if (!/^\d+$/.test(out.port)) return { ok: false, error: '「' + out.port + '」不是端口号，冒号后面写数字，例如 :8080' }
+    // 位数上限跟校验台的 checkUrl 同一把尺：超过 5 位一律拦，别让 Number 丢精度。
+    // 而且位数先于范围、报错点名原文：000080 超的是位数，原来却印「当前 80」——
+    // 既改写了用户写的那串，报的理由（范围）也跟真实理由（位数）不是一回事。
+    // 三段判据与 checkUrl 逐字同一句话，两页不许各说各的。
+    if (out.port.length > 5) return { ok: false, error: '端口最多 5 位数字，你写的是 ' + out.port }
     const n = Number(out.port)
-    // 位数上限跟校验台的 checkUrl 同一把尺：超过 5 位一律拦，别让 Number 丢精度
-    if (out.port.length > 5 || n < 1 || n > 65535) return { ok: false, error: '端口应在 1-65535 之间，当前 ' + n }
+    if (n < 1 || n > 65535) return { ok: false, error: '端口应在 1-65535 之间，当前 ' + out.port }
   }
   out.portExplicit = out.port !== ''
   out.portIsDefault = out.portExplicit && Number(out.port) === Number(DEFAULT_PORTS[out.schemeLower] || -1)

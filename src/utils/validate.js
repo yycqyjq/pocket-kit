@@ -160,15 +160,25 @@ export function checkUrl(v) {
   const s = String(v).trim()
   if (!s) return { ok: false, tip: '请输入网址' }
   if (!/^https?:\/\//i.test(s)) return { ok: false, tip: '建议以 http:// 或 https:// 开头' }
-  const re = /^https?:\/\/([^\s/:?#]+)(:\d+)?([^\s?#]*)(\?[^\s#]*)?(#\S*)?$/i
+  // 主机位允许方括号 IPv6：原来 [^\s/:?#]+ 在第一个冒号就停，整截 [: 一路漏到路径上
+  const re = /^https?:\/\/(\[[^\]]*\]|[^\s/:?#]+)(:[^\s/?#]*)?([^\s?#]*)(\?[^\s#]*)?(#\S*)?$/i
   const m = s.match(re)
   if (!m) return { ok: false, tip: '格式不正确' }
   const host = m[1]
-  // 端口原来只按「有冒号有数字」放过，:0 和 :99999 都印成格式正确
-  if (m[2]) {
-    const p = m[2].slice(1)
-    const n = Number(p)
-    if (p.length > 5 || n < 1 || n > 65535) return { ok: false, tip: '端口应在 1-65535 之间，当前 ' + n }
+  // 端口原来只按「有冒号有数字」放过：:0 与 :99999 印成格式正确；而 :abc 连冒号带字母
+  // 整段不匹配、全落进路径，校验台印「格式正确」，拆解页同一串却在抛「不是端口号」——两页结论相反。
+  // 现在冒号一旦出现就只许是端口：先看是不是数字，再看位数，最后才看范围，
+  // 报错点名用户写的原文（000080 不许印成 80），三段判据与 url.js 逐字同一句话。
+  if (m[2] !== undefined) {
+    const raw = m[2].slice(1)
+    // 空端口（a.com:/x）两页都按「没写端口」收，只是别把那个冒号漏进路径
+    if (raw !== '') {
+      if (!/^\d+$/.test(raw)) return { ok: false, tip: '「' + raw + '」不是端口号，冒号后面写数字，例如 :8080' }
+      // 位数先于范围：5 位以上连 Number 都不可靠，别拿换算后的数去报错
+      if (raw.length > 5) return { ok: false, tip: '端口最多 5 位数字，你写的是 ' + raw }
+      const n = Number(raw)
+      if (n < 1 || n > 65535) return { ok: false, tip: '端口应在 1-65535 之间，当前 ' + raw }
+    }
   }
   if (looksLikeIpv4(host)) {
     // 主机写成 IP 时按 ip.js 那一份四段判据走（含前导 0），别再各判各的
@@ -181,7 +191,7 @@ export function checkUrl(v) {
   return {
     ok: true,
     tip: '格式正确',
-    extra: { 协议: s.slice(0, s.indexOf('://')), 主机: host, 端口: m[2] || '默认', 路径: m[3] || '/' },
+    extra: { 协议: s.slice(0, s.indexOf('://')), 主机: host, 端口: m[2] && m[2].length > 1 ? m[2] : '默认', 路径: m[3] || '/' },
   }
 }
 
