@@ -87,15 +87,15 @@ codeFiles.forEach((f, i) => {
    from './x.mjs'）。整词命中不算覆盖——注释里提一句模块名太容易，那会把没测的说成测过。
    豁免只给「不跑在 uni.* / DOM 上就没法验」的平台边界模块；两张清单都写死在这里：
    新增模块必须带用例，付了账必须从欠账清单里划掉，欠账清单里不许出现已不存在的模块。
-   2026-09-30 立这条时实测：模块 78 个，直接装载 31 个，平台豁免 5 个，欠账 42 个。 */
-const PLATFORM_UNTESTED = ['clipboard', 'image', 'storage', 'sys', 'theme']
-const UNTESTED = [
-  'braille', 'classic', 'cleanescape', 'codefmt', 'color', 'cron', 'dataconv', 'date',
-  'datefmt', 'devref', 'diff', 'entity', 'extract', 'garbled', 'health',
-  'hexdump', 'httpdump', 'json2ts', 'lorem', 'naming', 'normalize',
-  'percent', 'perm', 'qp', 'radix', 'regexlib', 'sqlfmt', 'table',
-  'text', 'unicode', 'uuidinfo', 'wordfreq',
-]
+   2026-09-30 立这条时实测：模块 78 个，直接装载 31 个，平台豁免 5 个，欠账 42 个。
+   2026-10-01 付掉 10 个（ip/ipv6/url/validate/punycode/…）。
+   2026-10-02 付清：余下 32 个一次补齐，欠账清单清空——空数组留着当台账，
+   新增模块若忘了带用例，会走 undeclared 那条当场报红，别再靠人记。
+   同日平台豁免也清零：clipboard/image/storage/sys/theme 改用「给 uni.* 打桩」直测本体
+   （桩替掉平台 API、内存 Map 替掉 Storage），豁免清单里没有豁免了；
+   DOM/真机专属路径（canvas、plus.*、剪贴板与震动马达本身）在各测试文件头声明不覆盖。 */
+const PLATFORM_UNTESTED = []
+const UNTESTED = []
 
 const utilNames = codeFiles
   .filter((f) => f.startsWith('src/utils/') && f.endsWith('.js'))
