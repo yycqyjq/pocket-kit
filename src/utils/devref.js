@@ -25,7 +25,7 @@ export const HTTP_STATUS = [
   { code: 408, name: 'Request Timeout', group: '4xx 客户端错误', note: '客户端迟迟没把请求发完' },
   { code: 409, name: 'Conflict', group: '4xx 客户端错误', note: '状态冲突，例如并发更新、唯一键重复' },
   { code: 410, name: 'Gone', group: '4xx 客户端错误', note: '资源曾经存在，现在永久删除了' },
-  { code: 413, name: 'Payload Too Large', group: '4xx 客户端错误', note: '请求体过大，通常是上传超限' },
+  { code: 413, name: 'Content Too Large', group: '4xx 客户端错误', note: '请求体过大，通常是上传超限（RFC 9110 现名，旧规范 RFC 7231 里叫 Payload Too Large）' },
   { code: 415, name: 'Unsupported Media Type', group: '4xx 客户端错误', note: 'Content-Type 不是服务端认识的格式' },
   { code: 418, name: "I'm a teapot", group: '4xx 客户端错误', note: '愚人节玩笑（HTCPCP 协议），有些框架真的实现了' },
   { code: 422, name: 'Unprocessable Entity', group: '4xx 客户端错误', note: '格式对但字段校验不通过，表单报错常用' },

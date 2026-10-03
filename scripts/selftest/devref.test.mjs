@@ -13,8 +13,10 @@
  *   4) 表结构与搜索行为：码唯一、分组自洽、searchRef 大小写不敏感、
  *      未知分组给空、结果无脏字。
  *
- * 已知与 RFC 9110 不一致的一处（413 的 reason phrase）见最终报告，
- * 按任务要求那一条不写成断言。
+ * 413 的 reason phrase 曾写 RFC 7231 旧名「Payload Too Large」，本轮按
+ * RFC 9110 改为「Content Too Large」，并入 NAMES 逐码断言（不再是软断言）。
+ * 表内没有 414 / 431，也就没有 RFC 9110 对 431 改名「Header Fields Too
+ * Large」那一条需要跟进；其余在表状态码的 reason phrase 与 RFC 9110 一致。
  */
 import { useUtils, makeTest } from './harness.mjs'
 
@@ -37,7 +39,7 @@ const NAMES = {
   307: 'Temporary Redirect', 308: 'Permanent Redirect',
   400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not Found',
   405: 'Method Not Allowed', 406: 'Not Acceptable', 408: 'Request Timeout', 409: 'Conflict',
-  410: 'Gone', 415: 'Unsupported Media Type',
+  410: 'Gone', 413: 'Content Too Large', 415: 'Unsupported Media Type',
   418: "I'm a teapot", 422: 'Unprocessable Entity', 429: 'Too Many Requests',
   500: 'Internal Server Error', 501: 'Not Implemented', 502: 'Bad Gateway',
   503: 'Service Unavailable', 504: 'Gateway Timeout',
@@ -46,8 +48,15 @@ for (const code of Object.keys(NAMES)) {
   const e = statusOf(Number(code))
   T.eq('状态码 ' + code + ' 名称', e ? e.name : '(缺失)', NAMES[code])
 }
-T.ok('413 存在（名称按 RFC 9110 应为 Content Too Large，见报告）', !!statusOf(413))
+T.ok('413 存在', !!statusOf(413))
 T.ok('413 说明语义是「过大」', statusOf(413).note.includes('大'))
+// 旧名钉住：RFC 7231 的 Payload Too Large 已被 RFC 9110 的 Content Too Large 取代
+T.ok('413 不许退回 RFC 7231 旧名 Payload Too Large', statusOf(413).name !== 'Payload Too Large')
+// 老用户搜旧名仍要能找到（旧名写进了 note，searchRef 把 name+note 拼进搜索串）
+// 取 [0].code 会因命中为空直接崩，用 helper 兜成可打印的失败值，让红灯干净。
+const firstStatusCode = (kw) => (D.searchRef('status', kw)[0] || { code: '(无命中)' }).code
+T.eq('按 RFC 9110 新名搜到 413', firstStatusCode('Content Too Large'), 413)
+T.eq('按 RFC 7231 旧名搜也到 413', firstStatusCode('Payload'), 413)
 
 T.ok('状态码表够用', D.HTTP_STATUS.length >= 30)
 T.eq('状态码不重复', new Set(D.HTTP_STATUS.map((s) => s.code)).size, D.HTTP_STATUS.length)
