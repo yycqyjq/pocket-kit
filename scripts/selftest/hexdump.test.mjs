@@ -40,6 +40,11 @@ T.eq('字节计数', H.hexToText('414243').bytes, 3)
 T.eq('丢弃奇数位并计数', H.hexToText('41424').dropped, 1)
 T.eq('奇数位丢末位后仍是 AB', H.hexToText('41424').text, 'AB')
 T.eq('偶数位不丢', H.hexToText('4142').dropped, 0)
+// 只剩一个十六进制字符：全丢光，text 空、bytes 0，但 dropped 仍要说 1
+// （界面就是靠它吭声的，不许在这里也变哑）
+T.eq('单字符全丢：text 空', H.hexToText('4').text, '')
+T.eq('单字符全丢：bytes 0', H.hexToText('4').bytes, 0)
+T.eq('单字符全丢：dropped 仍报 1', H.hexToText('4').dropped, 1)
 T.eq('与 Buffer 反解一致', H.hexToText(bufHexLower('随身匣')).text, '随身匣')
 
 /* ---------- 3. 往返闭合 ---------- */

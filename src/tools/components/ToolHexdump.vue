@@ -29,11 +29,19 @@
       <PkRow label="原因" :value="error" color="var(--pk-danger)" :copy="false" stack />
     </PkCard>
 
-    <PkCard v-if="output" title="结果" accent="var(--pk-accent)">
+    <PkCard v-if="output || dropped" title="结果" accent="var(--pk-accent)">
       <template #extra>
         <text class="mini-act" @tap="copyText(output)">复制</text>
       </template>
       <PkRow label="字节数" :value="bytes + ' 字节'" :copy="false" />
+      <PkRow
+        v-if="dropped"
+        label="半字节丢弃"
+        :value="'末尾 ' + dropped + ' 个十六进制字符凑不成完整字节，已丢弃'"
+        color="var(--pk-warn)"
+        :copy="false"
+        stack
+      />
       <PkOutput :value="output" mono />
     </PkCard>
 
@@ -77,6 +85,7 @@ const input = ref(HEX_SAMPLE)
 const output = ref('')
 const error = ref('')
 const bytes = ref(0)
+const dropped = ref(0)
 const upper = ref(false)
 const prefix = ref(false)
 const dump = ref('')
@@ -85,6 +94,7 @@ function run() {
   error.value = ''
   output.value = ''
   bytes.value = 0
+  dropped.value = 0
   try {
     if (dir.value === 'enc') {
       const r = textToHex(input.value, { sep: ' ', upper: upper.value, prefix: prefix.value })
@@ -94,12 +104,18 @@ function run() {
       const r = hexToText(input.value)
       output.value = r.text
       bytes.value = r.bytes
+      // 奇数位输入丢掉的半个字节必须在页面上吭声（P3：模块早返回了
+      // dropped 字段，界面一直只取 .text/.bytes，用户看见「AB 2 字节」
+      // 不知道末尾那个字符被扔了）
+      dropped.value = r.dropped || 0
     }
     if (dir.value === 'enc') {
       const d = hexdump(input.value)
       dump.value = d.text
-    } else {
-      // 解码方向：把还原出来的内容再转一次转储，方便比对
+    } else if (output.value) {
+      // 解码方向：把还原出来的内容再转一次转储，方便比对。
+      // 全丢光（只剩一个孤立字符）时没有可转储的内容，跳过而不是抛错——
+      // 丢弃提示已经说明发生了什么。
       const d = hexdump(output.value)
       dump.value = d.text
     }

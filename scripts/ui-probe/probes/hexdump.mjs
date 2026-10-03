@@ -34,6 +34,16 @@ export default {
     { desc: '带 0x 前缀的十六进制也能还原成 ABC', act: [[TA(0), '0x41 0x42 0x43'], BTN('转换')],
       expect: ['ABC', '3 字节'], forbid: ['undefined', 'NaN'] },
 
+    { desc: '奇数位 41424：还原 AB、2 字节，页面必须吭声丢掉了末尾半个字节（P3）',
+      act: [[TA(0), '41424'], BTN('转换')],
+      expect: ['AB', '2 字节', '末尾 1 个十六进制字符凑不成完整字节'],
+      forbid: ['undefined', 'NaN'] },
+
+    { desc: '只剩 4 一个字符：全丢光也要吭声，不许误报「没有可转储的内容」',
+      act: [[TA(0), '4'], BTN('转换')],
+      expect: ['0 字节', '末尾 1 个十六进制字符凑不成完整字节'],
+      forbid: ['没有可转储的内容', 'undefined', 'NaN'] },
+
     { desc: '非法输入 zz：报没有找到十六进制内容', act: [[TA(0), 'zz'], BTN('转换')],
       expect: ['没有找到十六进制内容'], forbid: ['undefined', 'NaN'] },
 
