@@ -7,12 +7,22 @@
 const MAX_CELLS = 2000000 // DP 表格上限（约 2M 格）
 
 /**
+ * 按行切分。空串是 0 行——''.split 得 [''] 会被记成「有一行空内容」，
+ * 与 diffChars 的 [...''] 口径（空=0 段）也不一致（同一模块两把尺）。
+ * 但 'a\n' 结尾换行拆出的空行是真实存在的最后一行，保留。
+ */
+function splitLines(s) {
+  if (s === '') return []
+  return s.split(/\r\n|\r|\n/)
+}
+
+/**
  * @returns {{ rows: Array, stats: object }}
  *   rows: [{ type:'same'|'del'|'add', text, aNo, bNo }]
  */
 export function diffLines(aText, bText) {
-  const a = String(aText).split(/\r\n|\r|\n/)
-  const b = String(bText).split(/\r\n|\r|\n/)
+  const a = splitLines(String(aText))
+  const b = splitLines(String(bText))
 
   // 1. 公共前缀
   let head = 0
@@ -50,7 +60,7 @@ export function diffLines(aText, bText) {
     else if (r.type === 'del') del++
     else add++
   }
-  const total = Math.max(a.length, b.length) || 1
+  const total = Math.max(a.length, b.length)
   return {
     rows,
     stats: {
@@ -59,7 +69,8 @@ export function diffLines(aText, bText) {
       same,
       del,
       add,
-      similarity: Math.round((same / total) * 1000) / 10,
+      // 两段都空 = 同一段文本，相似度 100（不能再拿 0/0 或 0/1 算）
+      similarity: total === 0 ? 100 : Math.round((same / total) * 1000) / 10,
       truncated: aMid.length * bMid.length > MAX_CELLS,
     },
   }

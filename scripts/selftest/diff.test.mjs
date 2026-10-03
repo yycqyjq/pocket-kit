@@ -47,10 +47,40 @@ T.eq('中间替换 same', mid.stats.same, 4)
 T.eq('中间替换 similarity（手算 80）', mid.stats.similarity, 80)
 
 T.eq('空 vs 空 similarity 100', D.diffLines('', '').stats.similarity, 100)
-T.eq('空 vs 空只有一行 same', D.diffLines('', '').rows.length, 1)
 T.eq('CRLF 与 LF 视为同行', D.diffLines('a\r\nb', 'a\nb').stats.similarity, 100)
 T.eq('CRLF 归一 same 2', D.diffLines('a\r\nb', 'a\nb').stats.same, 2)
 T.calc('null/undefined 不抛', () => D.diffLines(null, undefined).stats.aLines, 1)
+
+/* ---------- 1b. 空串口径：空 = 0 行，不许有幽灵行（本轮修的 bug） ---------- */
+{
+  // diffLines('x','') 曾返回 [del 'x', add '']——'' 被 split 成 [''] 记 1 行，
+  // 凭空多出一条「加了个空行」。正确口径：整段为空就是 0 行（diffChars 的
+  // [...''] 就是这个口径，同一模块两半不许各拿一把尺）。
+  // 注意区分：'a\n' 结尾换行拆出的那个空行是真实存在的第 2 行，不受此规则影响。
+  const e1 = D.diffLines('x', '')
+  T.eq('有 vs 空：只有 del，没有幽灵 add', e1.rows.map((r) => r.type + ':' + r.text), ['del:x'])
+  T.eq('有 vs 空：bLines 0', e1.stats.bLines, 0)
+  T.eq('有 vs 空：add 0', e1.stats.add, 0)
+  const e2 = D.diffLines('', 'x')
+  T.eq('空 vs 有：只有 add，没有幽灵 del', e2.rows.map((r) => r.type + ':' + r.text), ['add:x'])
+  T.eq('空 vs 有：aLines 0', e2.stats.aLines, 0)
+  T.eq('空 vs 有：del 0', e2.stats.del, 0)
+  const e0 = D.diffLines('', '')
+  T.eq('空 vs 空：一行都没有', e0.rows.length, 0)
+  T.eq('空 vs 空：aLines 0', e0.stats.aLines, 0)
+  T.eq('空 vs 空：bLines 0', e0.stats.bLines, 0)
+  T.eq('空 vs 空：similarity 仍是 100（同一段文本）', e0.stats.similarity, 100)
+  // 重构性质在空输入下也得闭合
+  T.eq('空 vs 空重构回空 a', e0.rows.filter((r) => r.type !== 'add').map((r) => r.text).join('\n'), '')
+  T.eq('空 vs 空重构回空 b', e0.rows.filter((r) => r.type !== 'del').map((r) => r.text).join('\n'), '')
+  // 多行 vs 空：整段删掉，不该混进 same 幽灵行
+  const e3 = D.diffLines('a\nb\n', '')
+  T.eq('三行 vs 空：全 del 无幽灵', e3.rows.map((r) => r.type), ['del', 'del', 'del'])
+  T.eq('三行 vs 空：same 0', e3.stats.same, 0)
+  // 结尾换行的空行是真实行（第 2 行），口径不许被牵连改掉
+  T.eq('结尾换行仍算 2 行', D.diffLines('a\n', 'a').stats.aLines, 2)
+  T.eq('空 vs 有 对称：交换后 add 变 del', D.diffLines('x', '').stats.del, D.diffLines('', 'x').stats.add)
+}
 
 /* ---------- 2. 重构性质 + 对称 ---------- */
 const pairs = [
