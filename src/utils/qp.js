@@ -23,9 +23,12 @@ export function encodeQP(text, opt) {
   const bytes = utf8Bytes(text)
   const parts = []
 
-  for (const b of bytes) {
+  for (let i = 0; i < bytes.length; i++) {
+    const b = bytes[i]
     if (b === 0x0d || b === 0x0a) {
+      // CRLF 是一个行结束符（RFC 2045 自己就用 CRLF 分行），推两次会凭空多一行
       parts.push({ type: 'newline' })
+      if (b === 0x0d && bytes[i + 1] === 0x0a) i++
       continue
     }
     if (b === 0x20 || b === 0x09) {
@@ -42,6 +45,7 @@ export function encodeQP(text, opt) {
 
   const lines = []
   let cur = ''
+  let lastWasNewline = false
   const flushLine = () => {
     // 行尾的空格必须转义
     cur = cur.replace(/ $/, '=20').replace(/\t$/, '=09')
@@ -52,6 +56,7 @@ export function encodeQP(text, opt) {
   for (const p of parts) {
     if (p.type === 'newline') {
       flushLine()
+      lastWasNewline = true
       continue
     }
     const piece = p.ch
@@ -60,12 +65,17 @@ export function encodeQP(text, opt) {
       cur += '='
       lines.push(cur)
       cur = ''
-    } else if (!o.softBreak && cur.length + piece.length > o.maxLine) {
-      flushLine()
     }
+    // softBreak:false 就一个字不折（P2 修复）：QP 里除了软换行没有第二种
+    // 合法折行机制，硬插的换行解码器无从分辨，会被当成正文换行混进结果——
+    // 80 个字符往返回来变 81，永远闭不上。
     cur += piece
+    lastWasNewline = false
   }
   if (cur !== '' || !lines.length) flushLine()
+  else if (lastWasNewline) lines.push('')
+  // 正文以换行结尾时补一个空行，让 join 后仍留得下那个结尾换行。
+  // 以前 'line\n' 编出来是 'line'——结尾换行整个被吞，也是往返不闭合的一种。
 
   return {
     text: lines.join('\r\n'),

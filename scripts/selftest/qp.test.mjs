@@ -46,10 +46,13 @@ T.ok('每行 ≤ 76', lines.every((l) => l.length <= 76))
 T.eq('第一行 75 字符 + 软换行 =', lines[0], 'a'.repeat(75) + '=')
 T.eq('解码拼回 80 个 a', Q.decodeQP(long).text, 'a'.repeat(80))
 const noSoft = Q.encodeQP('a'.repeat(80), { softBreak: false }).text
-T.ok('关闭软换行也 ≤ 76', noSoft.split('\r\n').every((l) => l.length <= 76))
-T.eq('关闭软换行后两行', noSoft.split('\r\n').length, 2)
-/* 注：softBreak=false 时实现用硬换行折行，而解码会把该换行当成正文换行，
-   往返无法闭合——这是实现的问题，按规则不在此断言，记入报告。 */
+// 旧的两条断言（「关闭软换行后两行」「也 ≤76」）钉的是「关掉软换行就硬折一行」——
+// 硬折行插进的换行，解码器无从分辨，会混进正文：80 个字符回来变 81，往返永远不闭合。
+// QP 里除了软换行没有第二种合法折行机制，所以关掉软换行的正确语义是「不折行」：
+// 长行照原样出去。判据来自往返闭合这条性质本身 + Python quopri 对照（软换行是唯一折行）。
+T.eq('关闭软换行：80 个 a 就是一整行', noSoft, 'a'.repeat(80))
+T.eq('关闭软换行往返闭合', Q.decodeQP(noSoft).text, 'a'.repeat(80))
+/* 注：softBreak=false 硬折行不闭合是本轮（P2）修的 bug，上面两条就是修后口径。 */
 T.ok('maxLine 可调', Q.encodeQP('a'.repeat(10), { maxLine: 5 }).text.split('\r\n').length > 1)
 
 /* ---------- 5. 换行与往返 ---------- */
@@ -59,6 +62,22 @@ T.eq('软换行还原', Q.decodeQP('abc=\ndef').text, 'abcdef')
 T.eq('CRLF 软换行还原', Q.decodeQP('abc=\r\ndef').text, 'abcdef')
 T.eq('裸 CR 被丢弃', Q.decodeQP('a\r\nb').text, 'a\nb')
 T.eq('裸 LF 保留', Q.decodeQP('a\nb').text, 'a\nb')
+
+/* ---------- 5b. CRLF 不许翻倍（P2 之一） ---------- */
+{
+  // 本轮修的 bug：编码按字节推 parts，CR 和 LF 各推一个 newline，
+  // 'a\r\nb' 编成 a\r\n\r\nb，解码回来 a\n\nb——正文凭空多一行。
+  // 判据：CRLF 是一个换行（RFC 2045 的行结束符就是 CRLF，与 Python quopri 对照一致）；
+  // 归一口径 = CR/CRLF 都编成单个换行，解码统一还给 LF（与既有「裸 CR 被丢弃」同方向）。
+  T.eq('CRLF 编码成一个换行而不是两个', Q.encodeQP('a\r\nb').text, 'a\r\nb')
+  T.eq('CRLF 往返归一成 LF', Q.decodeQP(Q.encodeQP('a\r\nb').text).text, 'a\nb')
+  T.eq('单 CR 也归一成 LF 往返', Q.decodeQP(Q.encodeQP('a\rb').text).text, 'a\nb')
+  T.eq('两个 LF 仍是两行（不许误伤）', Q.decodeQP(Q.encodeQP('a\n\nb').text).text, 'a\n\nb')
+  T.eq('CRLF 夹中文行', Q.decodeQP(Q.encodeQP('行1\r\n行2\r\n行3').text).text, '行1\n行2\n行3')
+  // 顺带查出的第三种不闭合：'line\n' 编出来是 'line'——结尾换行整个被吞
+  T.eq('结尾换行不被吞', Q.encodeQP('line\n').text, 'line\r\n')
+  T.eq('结尾换行往返', Q.decodeQP(Q.encodeQP('line\n').text).text, 'line\n')
+}
 
 /* ---------- 6. 综合往返 ---------- */
 for (const s of ['', 'Hello, World!', '中文 abc 123 = +', 'a=b', '你好\n世界', '😀 emoji']) {
