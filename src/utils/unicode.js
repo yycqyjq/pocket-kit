@@ -57,6 +57,29 @@ function utf8Bytes(cp) {
 
 const hex = (n, pad) => n.toString(16).toUpperCase().padStart(pad, '0')
 
+/**
+ * 可疑判据（analyze 的 suspect 与 summarize 的 suspects 共用一把尺，P2 修复）。
+ * 界面卡标题是「可疑不可见字符」，说明讲「零宽空格、双向控制符这类肉眼看不见…
+ * 伪装文件名和域名」——换行与制表是文本的正常结构，多行粘贴每次报警纯属噪声，
+ * 所以 0x0A/0x09 不算可疑；其余控制符（\r、\x01…）和不可见表照旧算。
+ */
+function isSuspectCp(cp) {
+  if (INVISIBLE[cp]) return true
+  if (cp < 0x20 && cp !== 0x0a && cp !== 0x09) return true
+  return false
+}
+
+/**
+ * 百分号编码的单码点口径（analyze 的 urlEncoded 与 escapeAll('url') 共用一把尺，P2 修复）。
+ * 以 encodeURIComponent（Web 标准）为准：unreserved 字符 A-Za-z0-9-_.~ 不编码，
+ * 其余按 UTF-8 字节写 %XX。以前 analyze 逐字节全编码，'A' 给出 %41，
+ * 和转义卡的 escapeAll 对不上。
+ */
+function urlEncodeCp(ch, cp) {
+  if (/[A-Za-z0-9\-_.~]/.test(ch)) return ch
+  return utf8Bytes(cp).map((b) => '%' + hex(b, 2)).join('')
+}
+
 /** 逐字符分析 */
 export function analyze(text) {
   const s = String(text)
@@ -91,9 +114,9 @@ function analyzeChars(chars) {
       jsEscape: cp > 0xffff
         ? '\\u{' + cp.toString(16) + '}'
         : '\\u' + hex(cp, 4),
-      urlEncoded: bytes.map((b) => '%' + hex(b, 2)).join(''),
-      suspect: !!INVISIBLE[cp] || cp < 0x20,
-      suspectNote: INVISIBLE[cp] || (cp < 0x20 ? '控制字符，粘进代码里会出问题' : ''),
+      urlEncoded: urlEncodeCp(ch, cp),
+      suspect: isSuspectCp(cp),
+      suspectNote: INVISIBLE[cp] || (isSuspectCp(cp) ? '控制字符，粘进代码里会出问题' : ''),
     }
   })
 }
@@ -111,7 +134,7 @@ export function summarize(text) {
     const cp = ch.codePointAt(0)
     const k = classify(cp)
     kinds[k] = (kinds[k] || 0) + 1
-    if (INVISIBLE[cp] || cp < 0x20 && cp !== 0x0a && cp !== 0x09) suspects++
+    if (isSuspectCp(cp)) suspects++
     if (cp >= 0x1f300 && cp <= 0x1faff) emoji++
     maxBytes = Math.max(maxBytes, utf8Bytes(cp).length)
   })
@@ -145,8 +168,7 @@ export function escapeAll(text, style) {
     } else if (style === 'html') {
       out += cp < 0x80 ? ch : '&#' + cp + ';'
     } else if (style === 'url') {
-      if (/[A-Za-z0-9\-_.~]/.test(ch)) out += ch
-      else out += utf8Bytes(cp).map((b) => '%' + hex(b, 2)).join('')
+      out += urlEncodeCp(ch, cp)
     } else {
       out += ch
     }

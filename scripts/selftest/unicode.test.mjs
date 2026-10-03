@@ -74,6 +74,44 @@ T.eq('换行不算可疑', U.summarize('\n').suspects, 0)
 T.eq('制表符不算可疑', U.summarize('\t').suspects, 0)
 T.eq('零宽空格计入可疑', U.summarize('a\u200b').suspects, 1)
 
+/* ---------- 3b. 同模块一把尺（本轮修的 P2） ---------- */
+{
+  // 曾经的分歧：summarize('hello\nworld').suspects=0，但逐条 filter(suspect) 得 1——
+  // 页面上「可疑不可见字符」总数与「发现不可见字符」明细卡各说各话；
+  // analyze('A').urlEncoded='%41'，而 escapeAll('A','url')='A'（后者与
+  // encodeURIComponent 一致）——同一张表里「URL 编码」列与转义卡互不相认。
+  // 定夺依据：
+  //   url：以 encodeURIComponent（Web 标准、外部裁判）为准，unreserved 不该被编码；
+  //   suspect：界面卡标题就是「可疑不可见字符」，说明是「零宽空格、双向控制符这类
+  //   肉眼看不见…伪装文件名和域名」——换行/制表是文本的正常结构，每次多行粘贴都
+  //   报警纯属噪声，所以 \n\t 不算可疑（与 summarize 旧口径一致）；逐条尺向它对齐。
+  const isSuspect = (t) => U.analyze(t).list[0].suspect
+
+  // 聚合 = 明细（UI 的 suspectChars 就是 list.filter(c=>c.suspect)，两边必须对上）
+  for (const s of ['hello\nworld', 'a\tb', 'a\u200bb', '\n\n\n', '随身匣', 'a\u0001b', 'x\uFEFF', '\r\n']) {
+    T.eq('suspects = list 里 suspect 条数：' + JSON.stringify(s), U.summarize(s).suspects, U.analyze(s).list.filter((x) => x.suspect).length)
+  }
+  // 换行/制表不算可疑（两把尺同口径）
+  T.eq('逐条尺：换行不算可疑', isSuspect('\n'), false)
+  T.eq('逐条尺：制表不算可疑', isSuspect('\t'), false)
+  T.eq('汇总尺：多行粘贴不报警', U.summarize('line1\nline2\nline3').suspects, 0)
+  // 真不可见仍要抓到，一条都不能漏
+  T.eq('零宽空格仍可疑', isSuspect('\u200b'), true)
+  T.eq('BOM 仍可疑', isSuspect('\uFEFF'), true)
+  T.eq('软连字符仍可疑', isSuspect('\u00ad'), true)
+  T.eq('控制符 \x01 仍可疑', isSuspect('\u0001'), true)
+  T.eq('DEL 7f 两边都说不可疑', [isSuspect('\u007f'), U.summarize('\u007f').suspects], [false, 0])
+  // suspectNote 与 suspect 同步：不算可疑就不许再挂「粘进代码里会出问题」的吓人说明
+  T.eq('换行的可疑说明留空', U.analyze('\n').list[0].suspectNote, '')
+  T.eq('制表的可疑说明留空', U.analyze('\t').list[0].suspectNote, '')
+  T.eq('换行仍按控制符归类（kind 不改口径）', U.analyze('\n').list[0].kind, '控制符')
+
+  // urlEncoded 与 escapeAll('url')、encodeURIComponent 三者同尺
+  for (const s of ['A', 'z', '0', '-', '_', '~', 'aZ0-_.~', '中', ' ', '😀', 'a b', '中文 test']) {
+    T.eq('url 同尺：' + JSON.stringify(s), [U.analyze(s).list.map((x) => x.urlEncoded).join(''), U.escapeAll(s, 'url')], [encodeURIComponent(s), encodeURIComponent(s)])
+  }
+}
+
 /* ---------- 4. 转义：url 与 encodeURIComponent 同口径 ---------- */
 T.eq('unicode 转义 CJK', U.escapeAll('中A', 'unicode'), '\\u4E2DA')
 T.eq('unicode 转义非 BMP', U.escapeAll('😀', 'unicode'), '\\u{1f600}')
