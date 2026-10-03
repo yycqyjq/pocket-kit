@@ -102,7 +102,13 @@ export const PATTERNS = [
   {
     key: 'mention',
     name: '@ 提及',
-    re: /@[A-Za-z0-9_\u4e00-\u9fff-]{1,30}/g,
+    // 左边界（本轮 P2 修复）：邮箱/网址的 @ 前面必然是邮件字符（\w . @ % + -），
+    // 出现这些就说明那个 @ 是「本地部分@域名」的一环，不是提及——
+    // 原正则没这条，hi@example.com 被截成 @example。空格、中文、标点、行首
+    // 都允许当边界（「感谢@小明」紧贴汉字是真提及，中文习惯不能砍掉）。
+    // 兼容老 WebView 不用后行断言（见文件顶部注释）：边界字符用非捕获组消费，
+    // 真正的命中放捕获组，extract() 里带捕获组的模式上报 m[1] 并回退 lastIndex。
+    re: /(?:^|[^\w.@%+-])(@[A-Za-z0-9_\u4e00-\u9fff-]{1,30})/g,
     note: '社交平台的 @ 提及',
   },
 ]
@@ -127,7 +133,8 @@ export function extract(text, opt) {
     let m
     let guard = 0
     while ((m = re.exec(s)) !== null && guard++ < 5000) {
-      const v = m[0].trim()
+      // 模式带捕获组时，命中取捕获的那段（如 mention 用非捕获边界消费掉前一个字符）
+      const v = (m[1] !== undefined ? m[1] : m[0]).trim()
       if (!v) continue
       const key = o.dedupe ? v.toLowerCase() : v + '@' + m.index
       if (seen.has(key)) continue
