@@ -1,6 +1,6 @@
 {
   "name": "pocket-kit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "随身匣 — 基于 uni-app + Vue 3 的离线工具箱应用（只出 Android，H5 用于开发预览）",
   "scripts": {
     "dev:app": "uni -p app",
