@@ -81,8 +81,35 @@ export function score(text) {
 }
 
 /**
+ * 输入里有没有「字节被错解」的证据。
+ *
+ * 修 P1：score() 给汉字 +6、可打印 ASCII 只 +1，于是纯英文按 UTF-16LE 两两配对
+ * 凑出一串 CJK 码点（'Th' → U+6854 桔）反而比原样分高，best() 把
+ * 「The quick brown fox…」推荐成乱码正文；café 走 reverse-gbk 得 caf茅 同理——
+ * 分数只能回答「这段文本像不像中文」，回答不了「你是不是真有乱码」。
+ *
+ * 所以推荐资格不看分数，看输入本身：真乱码（UTF-8 字节被当 Latin-1 显示）必含
+ * C1 控制区（0x80-0x9F，UTF-8 续字节的后半段）；真 UTF-16 乱码必含 NUL
+ * （ASCII 的 UTF-16LE 字节对是 61 00）；只剩几个高字节的西欧原文（café 的 é）
+ * 不算——占比过半才算「整串都是字节的呈现」。
+ * 无证据时候选照旧全部列出（用户能点开看），只是不占推荐位。
+ */
+function hasGarbleEvidence(s) {
+  const arr = [...String(s)]
+  if (!arr.length) return false
+  let high = 0
+  for (const ch of arr) {
+    const cp = ch.codePointAt(0)
+    if (cp === 0) return true
+    if (cp >= 0x80 && cp <= 0x9f) return true
+    if (cp >= 0xa0 && cp <= 0xff) high++
+  }
+  return high / arr.length >= 0.5
+}
+
+/**
  * 生成候选恢复结果
- * @returns {Array<{label, text, score, note, from, strong}>}
+ * @returns {Array<{label, text, score, note, from, strong, eligible}>}
  */
 export function recoverCandidates(input) {
   const s = String(input)
@@ -125,23 +152,32 @@ export function recoverCandidates(input) {
     if (g) push('UTF-8 字节被当成 GBK 显示的样子', g, '常见于后端按 GBK 读 UTF-8 文件', 'reverse-gbk')
   }
 
-  // 排序：
+  // 排序与推荐位（P1 修复的核心）：
   // 1) UTF-8 解码且没有替换字符的候选优先——UTF-8 的字节结构是自校验的，
   //    四个字节正好能按 UTF-8 解通，基本就说明原始字节就是 UTF-8。
   //    （GBK 把 4 字节解成 2 个冷僻汉字的假结果，靠「类型加分」赢不过它，
   //     所以要用这条硬规则压住。）
-  // 2) 其余按文本得分降序。
+  // 2) 推荐位只给「有资格」的候选：原样永远有资格（乱码恢复不了就该说实话），
+  //    strong 有资格（自校验），其余前向解码要「解得干净 + 输入有乱码证据」。
+  //    reverse 系（把你的 UTF-8 字节反着演示一遍）永远不占推荐位——它是演示不是恢复。
+  // 3) 同资格内按得分降序；没资格的候选仍然列出，只是排在后面、不带推荐标。
+  const evidence = hasGarbleEvidence(s)
   out.forEach((x) => {
-    x.strong = x.from === 'utf-8' && x.text.indexOf('\uFFFD') < 0 && x.text.trim() !== ''
+    const clean = x.text.indexOf('\uFFFD') < 0 && x.text.trim() !== ''
+    x.strong = x.from === 'utf-8' && clean
+    const forward = x.from === '' || (x.from !== 'reverse' && x.from !== 'reverse-gbk')
+    x.eligible = x.from === '' || x.strong || (forward && clean && evidence)
   })
   out.sort((a, b) => {
+    if (a.eligible !== b.eligible) return a.eligible ? -1 : 1
     if (a.strong !== b.strong) return a.strong ? -1 : 1
     return b.score - a.score
   })
 
   out.forEach((x, i) => {
     x.rank = i + 1
-    x.isBest = i === 0 && x.label !== '原样（未处理）'
+    // 原样永远在候选里且永远合格，所以第一条必然合格——推荐位就是它
+    x.isBest = i === 0 && x.eligible
   })
   return out
 }

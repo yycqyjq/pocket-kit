@@ -81,6 +81,33 @@ const latin1 = (s) => [...new TextEncoder().encode(s)].map((b) => String.fromCha
   T.ok('双重乱码走的是多轮 UTF-8 候选', M.recoverCandidates(twice).some((x) => x.label.indexOf('连续解') === 0))
 }
 
+/* ---------- 4b. 正常文本不许被「恢复」（P1：纯英文被判成 UTF-16LE 乱码） ---------- */
+{
+  // 本轮修的 bug：score() 给汉字 +6、可打印 ASCII 只 +1，纯英文按 UTF-16LE 两两配对
+  // 凑出一串 CJK 码点（'Th' → U+6854 桔），2.86 分压过原样的 1.0 分，best() 把
+  // 「The quick brown fox…」推荐成乱码正文。café → caf茅（reverse-gbk）同理：
+  // 演示用候选占了推荐位。修法是按「输入里有没有乱码证据」决定推荐资格——
+  // 证据 = 含 C1 控制区/NUL（字节错解的典型特征）或高字节占比过半；
+  // 其余候选照旧全部列出，用户可以点开看，只是不再被推荐。
+  const normalTexts = [
+    'The quick brown fox jumps over the lazy dog', 'hello world', 'test 123',
+    'ab', 'abc', 'café', 'naïve résumé', 'Ångström', 'über', 'São Paulo',
+    'Price: $100 (USD)', 'console.log(1)',
+  ]
+  for (const s of normalTexts) {
+    const b = M.best(s)
+    T.eq('正常文本 ' + JSON.stringify(s) + ' 推荐的是原样', b.label, '原样（未处理）')
+    T.eq('正常文本 ' + JSON.stringify(s) + ' 文本不变', b.text, s)
+  }
+  T.ok('英文串里 UTF-16LE 候选仍在（可见、不推荐）',
+    M.recoverCandidates('hello world').some((x) => x.from === 'utf-16le' && !x.isBest))
+  // 真 UTF-16LE 乱码长什么样：ASCII 文本的 UTF-16LE 字节对里必带 NUL——这仍该恢复并推荐
+  const nul = 'a\x00b\x00c\x00'
+  const t16 = M.best(nul)
+  T.eq('UTF-16LE 正文（带 NUL）仍被恢复', t16.text, 'abc')
+  T.ok('推荐的就是 utf-16le 候选', t16.from === 'utf-16le')
+}
+
 /* ---------- 5. 候选结构：排序、去重、界面契约 ---------- */
 {
   const list = M.recoverCandidates(latin1('随身匣'))
