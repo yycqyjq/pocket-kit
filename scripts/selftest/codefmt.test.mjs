@@ -171,7 +171,12 @@ T.ok('HTML 压缩再排版结构不变', same(htmlTokens(M.HTML_SAMPLE), htmlTok
 
 /* ---------------- 3. HTML：边界与反例 ---------------- */
 T.throws('HTML 空串报错', () => M.formatHtml(''), /内容/)
-// 注意：formatHtml 对「纯空白」不抛错（见最终报告，按任务要求不作为通过断言）
+// 纯空白与空串同口径（本轮修的 P3）：以前 formatHtml('   ') 静默返回空、
+// formatCss('   ') 抛「内容是空的」——同模块两把尺。判据是「空」的定义：
+// 没有可排版的内容就是空，空白不算内容。
+T.throws('HTML 纯空白报错（与 CSS 同口径）', () => M.formatHtml('   '), /内容/)
+T.throws('HTML 空白加换行报错', () => M.formatHtml('\n\t '), /内容/)
+T.throws('HTML 压缩模式纯空白也报错', () => M.formatHtml('  ', { minify: true }), /内容/)
 T.throws('CSS 空串报错', () => M.formatCss(''), /内容/)
 T.throws('CSS 纯空白报错', () => M.formatCss('  \t '), /内容/)
 
@@ -205,6 +210,30 @@ T.eq('CSS 去注释后语义不变（压缩）', cssCanon(M.formatCss(cssCmt, { 
 const cssStr = '.a{content:"a  b";color:red}'
 T.ok('CSS 字符串内空格被保留（排版）', M.formatCss(cssStr).text.includes('"a  b"'))
 T.ok('CSS 字符串内空格被保留（压缩）', M.formatCss(cssStr, { minify: true }).text.includes('"a  b"'))
+
+// 字符串里带 {}:;,> 的——压缩末尾那道 /\s*([{}:;,>])\s*/g 全串清扫曾把
+// content:"x : y" 里的冒号两侧空格吃掉变成 "x:y"，改了字符串的字面语义。
+// 判据用外部裁判 cssCanon（它把字符串当原子 token）+ 字面串必须逐字节还在。
+{
+  const STR_PUNCT = [
+    '.a{content:"x : y"}',
+    '.a{content:attr("a > b")}',
+    '.a{background:url("a;b.png")}',
+    '.a{grid-template:"a b" / "c d"}',
+    '.a{content:";"}',
+    '.a{content:";}"}',
+    ".a{font-family:'A, B'}",
+  ]
+  for (const src of STR_PUNCT) {
+    const lit = /["'][^"']*["']/.exec(src)[0] // 抓出字符串字面（含内部标点与空格）
+    const min = M.formatCss(src, { minify: true }).text
+    T.eq('压缩不改字符串字面 ' + JSON.stringify(src), min.includes(lit), true)
+    T.eq('压缩语义不变（外部裁判） ' + JSON.stringify(src), cssCanon(min), cssCanon(src))
+  }
+  // 结构字符周围的空格该照旧压掉（别把修复做成「整个清扫都不动了」）
+  T.eq('压缩仍去掉冒号外的空格', M.formatCss('.a { color : red }', { minify: true }).text, '.a{color:red}')
+  T.eq('压缩仍去掉大括号旁的空格', M.formatCss('.a  >  .b { margin : 0 }', { minify: true }).text, '.a>.b{margin:0}')
+}
 
 /* ---------------- 6. CSS：幂等与缩进 ---------------- */
 T.eq('CSS 排版幂等', M.formatCss(cssPretty).text, cssPretty)

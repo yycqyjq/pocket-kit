@@ -121,7 +121,12 @@ export function formatCss(src, opt) {
       const needSpace = out !== '' && !/[{};:,>([]$/.test(out) && !/^[,:)>\]]/.test(t.v) && prev !== ' '
       out += (needSpace ? ' ' : '') + t.v
     })
-    return { text: out.replace(/\s*([{}:;,>])\s*/g, '$1').replace(/;}/g, '}'), size: out.length }
+    // 以前这里还有一道全串清扫 /\s*([{}:;,>])\s*/g 加 /;}/g——它对整段文本
+    // 生效，字符串字面量也被扫到：content:"x : y" 被改成 "x:y"、";}" 被改成 "}"，
+    // 改了内容语义。逐 token 拼装时结构字符周围本来就不会留空格（needSpace
+    // 两头的判断、{ 与 } 分支各自处理），清扫是重复劳动，唯一的实际效果
+    // 就是误伤字符串——整行删掉。
+    return { text: out, size: out.length }
   }
 
   const lines = []
@@ -228,7 +233,10 @@ function tokenizeHtml(src) {
 export function formatHtml(src, opt) {
   const o = Object.assign({ indent: 2, minify: false }, opt || {})
   const tokens = tokenizeHtml(src)
-  if (!tokens.length) throw new Error('内容是空的')
+  // 空口径与 formatCss 对齐（P3 修复）：CSS 那边纯空白切不出 token 所以抛错，
+  // HTML 的切词器会把整段空白当成一个文本 token 留下来、静默排出个空结果——
+  // 同模块两把尺。「没有可排版的内容」就是空，空白不算内容。
+  if (!String(src).trim()) throw new Error('内容是空的')
   const pad = ' '.repeat(o.indent)
 
   if (o.minify) {
