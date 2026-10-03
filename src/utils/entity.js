@@ -50,11 +50,24 @@ const CHAR_TO_NAME = (() => {
 
 /**
  * 编码
+ *
+ * 三种 scope 的分界线只看「非 ASCII 怎么办」——五个必须转义的字符（& < > 以及
+ * quotes 打开时的两个引号）在任何 scope 下都转，ASCII 其余字符在任何 scope 下都原样：
+ *   basic   非 ASCII 原样保留（界面「只转义 5 个」那档，中文/é/© 都不动）
+ *   named   有命名实体的用名字（© → &copy;），没有的退回十进制数字
+ *   numeric 非 ASCII 一律十进制数字（中 → &#20013;）
+ *
  * @param {string} str
- * @param {object} opt { scope: 'basic' | 'named' | 'numeric', quotes: boolean, keepAscii: boolean }
+ * @param {object} [opt] { scope: 'basic' | 'named' | 'numeric', quotes: boolean }
+ * @returns {string}
+ * @throws {Error} scope 写错时抛中文错，不静默退回 numeric
  */
 export function encodeEntities(str, opt) {
-  const o = Object.assign({ scope: 'basic', quotes: true, keepAscii: true }, opt || {})
+  const o = Object.assign({ scope: 'basic', quotes: true }, opt || {})
+  if (o.scope === undefined || o.scope === null) o.scope = 'basic'
+  if (o.scope !== 'basic' && o.scope !== 'named' && o.scope !== 'numeric') {
+    throw new Error('未知的转义范围：' + JSON.stringify(o.scope) + '（可选 basic / named / numeric）')
+  }
   const s = String(str)
   let out = ''
 
@@ -82,22 +95,20 @@ export function encodeEntities(str, opt) {
       continue
     }
 
-    const isAscii = cp < 128
-    if (isAscii && o.keepAscii) {
+    // 到这里剩下的 ASCII 只是普通正文，三种 scope 都原样
+    if (cp < 128) {
       out += ch
       continue
     }
-    if (!isAscii) {
-      if (o.scope === 'named' && CHAR_TO_NAME[ch]) {
-        out += '&' + CHAR_TO_NAME[ch] + ';'
-      } else if (o.scope === 'named' && cp >= 0x20 && cp <= 0x7e) {
-        out += ch
-      } else {
-        out += '&#' + cp + ';'
-      }
+    if (o.scope === 'basic') {
+      out += ch
       continue
     }
-    out += ch
+    if (o.scope === 'named' && CHAR_TO_NAME[ch]) {
+      out += '&' + CHAR_TO_NAME[ch] + ';'
+      continue
+    }
+    out += '&#' + cp + ';'
   }
   return out
 }

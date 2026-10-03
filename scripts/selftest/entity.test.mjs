@@ -13,7 +13,9 @@
  *   5) 跨模块同口径 + 界面契约：&amp; &lt; &gt; &quot; 的解码与 text.stripHtml 结论一致；
  *      NAMED_ENTITIES / NEED_ESCAPE 的字段能被模板直接印（不为空、无 undefined）。
  */
-import { useUtils, makeTest } from './harness.mjs'
+import fs from 'node:fs'
+import path from 'node:path'
+import { useUtils, makeTest, utilsDir } from './harness.mjs'
 
 const E = await useUtils('entity')
 const TX = await useUtils('text')
@@ -53,7 +55,61 @@ const T = makeTest('entity')
   T.eq('named：没名字的中文退回数字实体', E.encodeEntities('中', { scope: 'named' }), '&#20013;')
   T.eq('numeric：中 → &#20013;', E.encodeEntities('中', { scope: 'numeric' }), '&#20013;')
   T.eq('numeric：© → &#169;', E.encodeEntities('©', { scope: 'numeric' }), '&#169;')
-  T.eq('emoji 一律数字实体', E.encodeEntities('😀'), '&#128512;')
+  // 这条原本是 `emoji 一律数字实体`、不带 scope（走默认 basic），钉的正是本轮要修的
+  // 「basic 把非 ASCII 全转数字」。按界面文案 basic 只动那五个字符，emoji 该原样——
+  // 所以它得显式写 scope 才成立；默认口径另立一条钉在下面。
+  T.eq('numeric：emoji 一律数字实体', E.encodeEntities('😀', { scope: 'numeric' }), '&#128512;')
+  T.eq('named：没名字的 emoji 退回数字实体', E.encodeEntities('😀', { scope: 'named' }), '&#128512;')
+}
+
+/* ---------- 2b. basic 口径：文案说「中文原样保留」，实现就得真保留（P1） ---------- */
+{
+  // 本轮修的 bug：组件里 scope==='basic' 的说明印的是
+  //   「只处理 & < > " ' 五个必须转义的字符，中文原样保留——日常最常用」，
+  //   实现却把所有非 ASCII 一律转成数字实体：basic 的输出与 numeric 逐字节相同。
+  //   页面上同一张卡左边是编码结果、下一行是这句说明，自相矛盾；README 的
+  //   「只转义 5 个」也跟着错。判据来自文案（不是抄实现），组件里的「实践建议」
+  //   「HTML 正文里中文直接写就好」是第二处独立佐证。
+  const BASIC_KEEP = [
+    ['你好', '你好'],
+    ['中文 & <tag>', '中文 &amp; &lt;tag&gt;'],
+    ['价格 ¥100', '价格 ¥100'],
+    ['café résumé', 'café résumé'],
+    ['©®™ 保留', '©®™ 保留'],
+    ['α β γ', 'α β γ'],
+    ['😀 emoji', '😀 emoji'],
+    ['全角：　（）', '全角：　（）'],
+  ]
+  for (const [src, want] of BASIC_KEEP) {
+    T.eq('basic 只转义 5 个：' + JSON.stringify(src), E.encodeEntities(src), want)
+    T.eq('basic 显式传 scope 同结果：' + JSON.stringify(src), E.encodeEntities(src, { scope: 'basic' }), want)
+  }
+  // quotes:false 时连那五个里的引号都不动
+  T.eq('basic + quotes:false', E.encodeEntities('中文 "q" & <x>', { quotes: false }), '中文 "q" &amp; &lt;x&gt;')
+  // 三档必须互不相同——basic 曾与 numeric 逐字节相同，就是本轮的 bug
+  const s1 = E.encodeEntities('© 中', { scope: 'basic' })
+  const s2 = E.encodeEntities('© 中', { scope: 'named' })
+  const s3 = E.encodeEntities('© 中', { scope: 'numeric' })
+  T.ok('basic 与 numeric 不再是同一串（' + s1 + ' / ' + s3 + '）', s1 !== s3)
+  T.ok('named 与 numeric 不同串（' + s2 + ' / ' + s3 + '）', s2 !== s3)
+  T.ok('named 与 basic 不同串', s2 !== s1)
+
+  // 未知 scope 不许静默走 numeric：拼错一个字母就「看着对、其实全变数字」最难查
+  T.throws('未知 scope 抛错', () => E.encodeEntities('中', { scope: 'hex' }))
+  // 不传参 / 传空对象 / 显式 basic 三种调法同口径（默认值没动）
+  T.eq('默认与显式 basic 同串', E.encodeEntities('© 中'), s1)
+  T.eq('空对象与显式 basic 同串', E.encodeEntities('© 中', {}), s1)
+
+  // keepAscii 是个「写在 JSDoc 里但完全不生效」的假选项：!isAscii 分支里那句
+  //   `else if (o.scope === 'named' && cp >= 0x20 && cp <= 0x7e) out += ch`
+  // 在 !isAscii（cp>=128）之下永不可能命中，是死代码。全仓库也没有第二个调用方传它。
+  // 所以这轮的处理是删掉，而不是给它补一套没人在界面上要的行为。对整份源码取证：
+  // 既不许留在契约里，也不许留在实现里——「文档有、实现无」和「死代码」一起清零。
+  const srcText = fs.readFileSync(path.join(utilsDir(), 'entity.js'), 'utf8')
+  T.ok('keepAscii 假选项整份清零', srcText.indexOf('keepAscii') < 0)
+  T.ok('死代码 `cp >= 0x20 && cp <= 0x7e` 一并清掉', srcText.indexOf('0x20') < 0)
+  // 传了未知参数也不许改变输出（口径只能由 scope / quotes 两个真开关决定）
+  T.eq('未知参数不改变 basic 输出', E.encodeEntities('© 中', { keepAscii: false, foo: 1 }), s1)
 }
 
 /* ---------- 3. 往返：decode(encode(s)) === s ---------- */
