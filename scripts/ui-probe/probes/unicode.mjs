@@ -8,7 +8,7 @@
  *     输入 A中：明细 A 行 URL 是 A（不是旧版的 %41），转义卡 %E4%B8%ADA；
  *   零宽空格（U+200B）这种真不可见照样要被抓出来，修换行不许修没零宽。
  */
-import { TA, SEG, MINI } from '../harness.mjs'
+import { TA, SEG } from '../harness.mjs'
 
 export default {
   name: 'unicode',
@@ -26,7 +26,7 @@ export default {
       forbid: ['发现不可见字符', 'undefined', 'NaN'] },
 
     { desc: '零宽空格仍被抓出：总数 1、明细列 U+200B',
-      act: [[TA(0), 'a​b']],
+      act: [[TA(0), 'a\u200bb']],
       expect: ['可疑不可见字符 1 个', '#2', 'U+200B'],
       forbid: ['undefined', 'NaN'] },
 
